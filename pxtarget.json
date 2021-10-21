@@ -21,7 +21,7 @@
         "libs/broadcast"
     ],
     "simulator": {
-        "autoRun": true,
+        "autoRun": false,
         "autoRunLight": false,
         "aspectRatio": 0.5,
         "parts": false,
@@ -77,8 +77,7 @@
         "pauseUntilBlock": {
             "category": "loops"
         },
-        "bannedCategories": [
-        ]
+        "bannedCategories": []
     },
     "compileService": {
         "buildEngine": "dockermake",
@@ -119,8 +118,7 @@
         ],
         "highContrast": true,
         "lightToc": true,
-        "docMenu": [
-            {
+        "docMenu": [{
                 "name": "Support",
                 "path": "https://forum.makecode.com/"
             },
