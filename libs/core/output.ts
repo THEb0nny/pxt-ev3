@@ -695,14 +695,16 @@ namespace motors {
 
     //% fixedInstances
     export class SynchedMotorPair extends MotorBase {
+        private _large: boolean;
 
-        constructor(ports: Output) {
+        constructor(ports: Output, large: boolean) {
             super(ports, () => this.__init());
+            this._large = large;
             this.markUsed();
         }
 
         markUsed() {
-            motors.__motorUsed(this._port, true);
+            motors.__motorUsed(this._port, this._large);
         }
 
         private __init() {
@@ -825,16 +827,28 @@ namespace motors {
     }
 
     //% whenUsed fixedInstance block="large motors B+C" jres=icons.portBC
-    export const largeBC = new SynchedMotorPair(Output.BC);
+    export const largeBC = new SynchedMotorPair(Output.BC, true);
 
     //% whenUsed fixedInstance block="large motors A+D" jres=icons.portAD
-    export const largeAD = new SynchedMotorPair(Output.AD);
+    export const largeAD = new SynchedMotorPair(Output.AD, true);
 
     //% whenUsed fixedInstance block="large motors A+B" jres=icons.portAB
-    export const largeAB = new SynchedMotorPair(Output.AB);
+    export const largeAB = new SynchedMotorPair(Output.AB, true);
 
     //% whenUsed fixedInstance block="large motors C+D" jres=icons.portCD
-    export const largeCD = new SynchedMotorPair(Output.CD);
+    export const largeCD = new SynchedMotorPair(Output.CD, true);
+
+    //% whenUsed fixedInstance block="medium motors B+C" jres=icons.portBC
+    export const mediumBC = new SynchedMotorPair(Output.BC, false);
+
+    //% whenUsed fixedInstance block="medium motors A+D" jres=icons.portAD
+    export const mediumAD = new SynchedMotorPair(Output.AD, false);
+
+    //% whenUsed fixedInstance block="medium motors A+B" jres=icons.portAB
+    export const mediumAB = new SynchedMotorPair(Output.AB, false);
+
+    //% whenUsed fixedInstance block="medium motors C+D" jres=icons.portCD
+    export const mediumCD = new SynchedMotorPair(Output.CD, false);
 
     function reset(out: Output) {
         writePWM(mkCmd(out, DAL.opOutputReset, 0))
