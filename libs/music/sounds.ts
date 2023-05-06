@@ -260,6 +260,20 @@ namespace music {
     const soundsLimit = 1;
 
     /**
+     * Play a sound and wait until it finishes
+     * @param sound the sound to play
+     */
+    //% blockId=music_play_sound_effect_until_done block="play sound effect %sound=music_sound_picker|until done"
+    //% weight=98 blockGap=8
+    //% help=music/play-sound-effect-until-done
+    export function playSoundEffectUntilDone(sound: Sound) {
+        if (!sound || numSoundsPlaying >= soundsLimit) return;
+        numSoundsPlaying++;
+        sound.play();
+        numSoundsPlaying--;
+    }
+
+    /**
      * A sound
      * @param sound the sound
      */
@@ -271,48 +285,12 @@ namespace music {
     }
 
     /**
-     * Play a sound effect from a sound expression string.
-     * @param sound the sound expression string
-     * @param mode the play mode, play until done or in the background
-     */
-    //% blockId=soundExpression_playSoundEffect
-    //% block="play sound $sound $mode"
-    //% sound.shadow=soundExpression_createSoundEffect
-    //% weight=100 help=music/play-sound-effect
-    //% blockGap=8
-    //% group="micro:bit (V2)"
-    export function playSoundEffectExt(sound: string, mode: SoundExpressionPlayMode) {
-        if (mode === SoundExpressionPlayMode.InBackground) {
-            new SoundExpression(sound).play();
-        }
-        else {
-            new SoundExpression(sound).playUntilDone();
-        }
-    }
-
-    /**
-     * Play a sound and wait until it finishes
-     * @param sound the sound to play
-     */
-    //% blockId=music_play_sound_effect_until_done block="play sound effect %sound=music_sound_picker|until done"
-    //% weight=98 blockGap=8
-    //% help=music/play-sound-effect-until-done
-    //% deprecated=true
-    export function playSoundEffectUntilDone(sound: Sound) {
-        if (!sound || numSoundsPlaying >= soundsLimit) return;
-        numSoundsPlaying++;
-        sound.play();
-        numSoundsPlaying--;
-    }
-
-    /**
      * Start playing a sound and don't wait for it to finish.
      * @param sound the sound to play
      */
     //% blockId=music_play_sound_effect block="play sound effect %sound=music_sound_picker"
     //% weight=99 blockGap=8
     //% help=music/play-sound-effect
-    //% deprecated=true
     export function playSoundEffect(sound: Sound) {
         if (!sound || numSoundsPlaying >= soundsLimit) return;
         numSoundsPlaying++;
