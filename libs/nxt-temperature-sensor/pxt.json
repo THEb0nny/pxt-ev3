@@ -1,0 +1,15 @@
+{
+    "name": "nxt-temperature-sensor",
+    "description": "NXT Temperature Sensor support - beta",
+    "files": [
+        "README.md",
+        "temperature.ts"
+    ],
+    "testFiles": [
+        "test.ts"
+    ],
+    "public": true,
+    "dependencies": {
+        "core": "file:../core"
+    }
+}
