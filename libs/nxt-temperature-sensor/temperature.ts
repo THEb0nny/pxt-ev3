@@ -11,7 +11,8 @@ namespace sensors {
     export class NXTTemperatureSensor extends internal.IICSensor {
 
         // https://github.com/mindboards/ev3sources-xtended/blob/master/ev3sources/lms2012/lms2012/Linux_AM1808/sys/settings/typedata.rcf
-
+        // https://github.com/ev3dev/lego-linux-drivers/blob/ev3dev-buster/sensors/nxt_i2c_sensor_defs.c
+        
         constructor(port: number) {
             super(port);
             this.setMode(NXTTempSensorMode.Celsius);
@@ -22,8 +23,8 @@ namespace sensors {
         }
 
         _IICId() {
-           return 'LEGO';
-        //    return 'LEGOTemp.';
+        //    return 'LEGO';
+           return 'LEGOTemp.';
         }
 
         _query() {
