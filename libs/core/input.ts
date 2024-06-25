@@ -252,7 +252,7 @@ namespace sensors.internal {
             } else if (newConn == DAL.CONN_NXT_IIC) {
                 sensorInfo.devType = DAL.DEVICE_TYPE_IIC_UNKNOWN;
                 sensorInfo.iicid = readIICID(sensorInfo.port);
-                control.dmesg(`new IIC connection at port ${sensorInfo.port} with ID ${sensorInfo.iicid.length}`);
+                control.dmesg(`new IIC connection at port ${sensorInfo.port} with ID ${sensorInfo.iicid} ${sensorInfo.iicid.length}`);
             } else if (newConn == DAL.CONN_NXT_DUMB) {
                 sensorInfo.devType = inDcm[sensorInfo.port];
                 control.dmesg(`new NXT DUMB connection at port ${sensorInfo.port} dev type ${sensorInfo.devType}`);
@@ -281,6 +281,7 @@ namespace sensors.internal {
         control.dmesg(`UPDATE SENSOR STATUS`);
         for (const sensorInfo of sensorInfos.filter(si => !si.sensor)) {
             if (sensorInfo.devType == DAL.DEVICE_TYPE_IIC_UNKNOWN) {
+                console.log(`sensorInfo.iicid: ${sensorInfo.iicid}`);
                 sensorInfo.sensor = sensorInfo.sensors.filter(s => s._IICId() == sensorInfo.iicid)[0];
                 if (!sensorInfo.sensor) {
                     control.dmesg(`sensor not found for iicid=${sensorInfo.iicid} at port ${sensorInfo.port}`);
