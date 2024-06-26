@@ -7,6 +7,8 @@ const enum NXTTempSensorMode {
 
 namespace sensors {
 
+    const MODE_SWITCH_DELAY = 100;
+
     //% fixedInstances
     export class NXTTemperatureSensor extends internal.IICSensor {
 
@@ -22,9 +24,35 @@ namespace sensors {
             return DAL.DEVICE_TYPE_NXT_TEMPERATURE;
         }
 
+        setMode(m: NXTTempSensorMode) {
+            this._setMode(m);
+        }
+
+        _setMode(m: number) {
+            let v = m | 0;
+            this.mode = v;
+            if (!this.isActive()) return;
+            if (this.realmode != this.mode) {
+                this.realmode = v;
+                if (m == NXTTempSensorMode.Celsius) {
+                    this.transaction(1, [76, NXTTempSensorMode.Celsius], 0);
+                } else if (m == NXTTempSensorMode.Fahrenheit) {
+                    this.transaction(1, [76, NXTTempSensorMode.Fahrenheit], 0);
+                }
+                pause(MODE_SWITCH_DELAY);
+            }
+        }
+
+        /**
+         * Gets the current temp mode
+         */
+        tempMode() {
+            return <NXTTempSensorMode>this.mode;
+        }
+
         _IICId() {
-        //    return 'LEGO';
-           return 'LEGOTemp.';
+            // return 'LEGO';
+            return 'LEGOTemp.';
         }
 
         _query() {
@@ -45,17 +73,6 @@ namespace sensors {
             }
             return [this._query()[0].toString()];
             
-        }
-
-        setMode(m: number) {
-            this._setMode(m);
-        }
-
-        /**
-         * Gets the current temp mode
-         */
-        tempMode() {
-            return <NXTTempSensorMode>this.mode;
         }
 
         /**
