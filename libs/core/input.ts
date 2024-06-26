@@ -252,7 +252,7 @@ namespace sensors.internal {
             } else if (newConn == DAL.CONN_NXT_IIC) {
                 sensorInfo.devType = DAL.DEVICE_TYPE_IIC_UNKNOWN;
                 sensorInfo.iicid = readIICID(sensorInfo.port);
-                control.dmesg(`new IIC connection at port ${sensorInfo.port} with ID ${sensorInfo.iicid} ${sensorInfo.iicid.length}`);
+                control.dmesg(`new IIC connection at port ${sensorInfo.port} with id ${sensorInfo.iicid} iicid.length ${sensorInfo.iicid.length}`);
             } else if (newConn == DAL.CONN_NXT_DUMB) {
                 sensorInfo.devType = inDcm[sensorInfo.port];
                 control.dmesg(`new NXT DUMB connection at port ${sensorInfo.port} dev type ${sensorInfo.devType}`);
@@ -281,6 +281,15 @@ namespace sensors.internal {
         control.dmesg(`UPDATE SENSOR STATUS`);
         for (const sensorInfo of sensorInfos.filter(si => !si.sensor)) {
             if (sensorInfo.devType == DAL.DEVICE_TYPE_IIC_UNKNOWN) {
+                console.log(`sensorInfo.iicid: ${sensorInfo.iicid}`);
+                sensorInfo.sensor = sensorInfo.sensors.filter(s => s._IICId() == sensorInfo.iicid)[0];
+                if (!sensorInfo.sensor) {
+                    control.dmesg(`sensor not found for iicid=${sensorInfo.iicid} at port ${sensorInfo.port}`);
+                } else {
+                    control.dmesg(`sensor connected iicid=${sensorInfo.iicid} at port ${sensorInfo.port}`);
+                    sensorInfo.sensor._activated();
+                }
+            } else if (sensorInfo.devType == DAL.DEVICE_TYPE_NXT_IIC) {
                 console.log(`sensorInfo.iicid: ${sensorInfo.iicid}`);
                 sensorInfo.sensor = sensorInfo.sensors.filter(s => s._IICId() == sensorInfo.iicid)[0];
                 if (!sensorInfo.sensor) {
@@ -512,6 +521,10 @@ namespace sensors.internal {
         IICMM.ioctl(IO.IIC_READ_TYPE_INFO, buf);
         const manufacturer = bufferToString(buf.slice(IICStr.Manufacturer, 8));
         const sensorType = bufferToString(buf.slice(IICStr.SensorType, 8));
+        control.dmesg(`manufacturer: ${manufacturer}`);
+        control.dmesg(`sensorType: ${sensorType}`);
+        let name = sensorType.concat(manufacturer);
+        control.dmesg(`manufacturer + sensorType: ${name}`);
         return manufacturer + sensorType;
     }
 
