@@ -523,8 +523,7 @@ namespace sensors.internal {
         const sensorType = bufferToString(buf.slice(IICStr.SensorType, 8));
         control.dmesg(`manufacturer: ${manufacturer}`);
         control.dmesg(`sensorType: ${sensorType}`);
-        let name = sensorType.concat(manufacturer);
-        control.dmesg(`manufacturer + sensorType: ${name}`);
+        control.dmesg(`manufacturer + sensorType: ${manufacturer + sensorType}`);
         return manufacturer + sensorType;
     }
 
