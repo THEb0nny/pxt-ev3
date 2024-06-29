@@ -51,7 +51,6 @@ namespace sensors {
         }
 
         _IICId() {
-            // return 'LEGO';
             return 'LEGOTemp.';
         }
 
