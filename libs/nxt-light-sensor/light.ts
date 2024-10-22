@@ -195,6 +195,7 @@ namespace sensors {
          */
         //%
         reflectetLight() {
+            if (!this.isActive()) return 0;
             let reflectedVal = Math.map(this.readValue(), this.darkReflectedLight, this.brightReflectedLight, 0, 100);
             reflectedVal = Math.round(Math.constrain(reflectedVal, 0, 100));
             return reflectedVal;
@@ -205,6 +206,7 @@ namespace sensors {
          */
         //%
         ambientLight() {
+            if (!this.isActive()) return 0;
             let ambientVal = Math.map(this.readValue(), this.darkAmbientLight, this.brightAmbientLight, 0, 100);
             ambientVal = Math.round(Math.constrain(ambientVal, 0, 100));
             return ambientVal;
