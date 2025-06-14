@@ -1,7 +1,5 @@
 /// <reference path="../node_modules/pxt-core/localtypings/pxtblockly.d.ts"/>
 
-import { BlockSvg } from "blockly";
-
 const Blockly = pxt.blocks.requireBlockly();
 
 export interface FieldBrickButtonsOptions {
@@ -161,7 +159,7 @@ export class FieldBrickButtons extends Blockly.FieldDropdown {
         content.removeAttribute('aria-activedescendant');
         (content as HTMLElement).style.width = '';
         // Update color (deselect) on dropdown hide
-        let source = this.sourceBlock_ as BlockSvg;
+        let source = this.sourceBlock_ as any;
         if (source?.isShadow()) {
             source.setColour(this.savedPrimary_);
         } else if (this.borderRect_) {
