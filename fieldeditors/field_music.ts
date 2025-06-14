@@ -1,7 +1,5 @@
 /// <reference path="../node_modules/pxt-core/localtypings/pxtblockly.d.ts"/>
 
-import { BlockSvg } from "blockly";
-
 const pxtblockly = pxt.blocks.requirePxtBlockly()
 const Blockly = pxt.blocks.requireBlockly();
 
@@ -46,7 +44,8 @@ export class FieldMusic extends pxtblockly.FieldImages {
      * Create a dropdown menu under the text.
      * @private
      */
-    public showEditor_() {
+    public showEditor_(e?: Event) {
+        this.setOpeningPointerCoords(e);
         // If there is an existing drop-down we own, this is a request to hide the drop-down.
         if (Blockly.DropDownDiv.hideIfOwner(this)) {
             return;
@@ -76,7 +75,7 @@ export class FieldMusic extends pxtblockly.FieldImages {
         // Accessibility properties
         categoriesDiv.setAttribute('role', 'menu');
         categoriesDiv.setAttribute('aria-haspopup', 'true');
-        categoriesDiv.style.backgroundColor = (this.sourceBlock_ as BlockSvg).getColourTertiary();
+        categoriesDiv.style.backgroundColor = (this.sourceBlock_ as any).getColourTertiary();
         categoriesDiv.className = 'blocklyMusicFieldCategories';
 
         this.refreshCategories(categoriesDiv, categories);
@@ -90,7 +89,7 @@ export class FieldMusic extends pxtblockly.FieldImages {
         dropdownDiv.appendChild(categoriesDiv);
         dropdownDiv.appendChild(contentDiv);
 
-        Blockly.DropDownDiv.setColour(this.sourceBlock_.getColour(), (this.sourceBlock_ as BlockSvg).getColourTertiary());
+        Blockly.DropDownDiv.setColour(this.sourceBlock_.getColour(), (this.sourceBlock_ as any).getColourTertiary());
         
         // Position based on the field position.
         Blockly.DropDownDiv.showPositionedByField(this, this.onHide_.bind(this));
@@ -101,7 +100,7 @@ export class FieldMusic extends pxtblockly.FieldImages {
         if (source?.isShadow()) {
             source.setColour(source.getColourTertiary());
         } else if (this.borderRect_) {
-            this.borderRect_.setAttribute('fill', (this.sourceBlock_ as BlockSvg).getColourTertiary());
+            this.borderRect_.setAttribute('fill', (this.sourceBlock_ as any).getColourTertiary());
         }
     }
 
@@ -187,11 +186,11 @@ export class FieldMusic extends pxtblockly.FieldImages {
             let backgroundColor = this.savedPrimary_ || this.sourceBlock_.getColour();
             if (value == this.getValue()) {
                 // This icon is selected, show it in a different colour
-                backgroundColor = (this.sourceBlock_ as BlockSvg).getColourTertiary();
+                backgroundColor = (this.sourceBlock_ as any).getColourTertiary();
                 button.setAttribute('aria-selected', 'true');
             }
             button.style.backgroundColor = backgroundColor;
-            button.style.borderColor = (this.sourceBlock_ as BlockSvg).getColourTertiary();
+            button.style.borderColor = (this.sourceBlock_ as any).getColourTertiary();
             button.addEventListener("click", (event) => this.buttonClick_(event));
             button.addEventListener("mouseup", (event) => this.buttonClick_(event));
             // These are applied manually instead of using the :hover pseudoclass
@@ -243,7 +242,7 @@ export class FieldMusic extends pxtblockly.FieldImages {
         (Blockly.DropDownDiv.getContentDiv() as HTMLElement).style.maxHeight = '';
         this.stopSounds();
         // Update color (deselect) on dropdown hide
-        let source = this.sourceBlock_ as BlockSvg;
+        let source = this.sourceBlock_ as any;
         if (source?.isShadow()) {
             source.setColour(this.savedPrimary_);
         } else if (this.borderRect_) {
@@ -288,6 +287,18 @@ export class FieldMusic extends pxtblockly.FieldImages {
 
         this.stopSounds();
     }
+
+    /**
+     * Callback for when a button is clicked inside the drop-down.
+     * Should be bound to the FieldIconMenu.
+     * @param {Event} e DOM event for the click/touch
+     * @private
+     */
+    private buttonClick_ = function (e: any) {
+        let value = e.target.getAttribute('data-value');
+        this.setValue(value);
+        Blockly.DropDownDiv.hide();
+    };
 
     /**
      * Callback for when a button is hovered over inside the drop-down.
