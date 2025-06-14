@@ -1,7 +1,5 @@
 /// <reference path="../node_modules/pxt-core/localtypings/pxtblockly.d.ts"/>
 
-import { BlockSvg } from "blockly";
-
 const pxtblockly = pxt.blocks.requirePxtBlockly()
 const Blockly = pxt.blocks.requireBlockly();
 
@@ -115,23 +113,29 @@ export class FieldMotors extends pxtblockly.FieldImages {
      * Create a dropdown menu under the text.
      * @private
      */
-    public showEditor_() {
+    public showEditor_(e?: Event) {
+        this.setOpeningPointerCoords(e);
         // If there is an existing drop-down we own, this is a request to hide the drop-down.
         if (Blockly.DropDownDiv.hideIfOwner(this)) {
             return;
         }
-        let sourceBlock = this.sourceBlock_ as BlockSvg;
+        let sourceBlock = this.sourceBlock_ as any;
         // If there is an existing drop-down someone else owns, hide it immediately and clear it.
         Blockly.DropDownDiv.hideWithoutAnimation();
         Blockly.DropDownDiv.clearContent();
         // Populate the drop-down with the icons for this field.
         let dropdownDiv = Blockly.DropDownDiv.getContentDiv();
         let contentDiv = document.createElement('div');
+        dropdownDiv.style.overflowY = 'auto'; // Return scroll otherwise the items won't fit
         // Accessibility properties
         contentDiv.setAttribute('role', 'menu');
         contentDiv.setAttribute('aria-haspopup', 'true');
+        contentDiv.setAttribute('class', 'blocklyMenu blocklyImageMenu');
+        this.addPointerListener(dropdownDiv);
+        this.addKeyDownHandler(contentDiv)
         const options = this.getOptions();
-        //if (this.shouldSort_) options.sort();
+        // if (this.shouldSort_) options.sort();
+        let row = this.createRow();
         for (let i = 0; i < options.length; i++) {
             const content = (options[i] as any)[0]; // Human-readable text or image.
             const value = (options[i] as any)[1]; // Language-neutral value.
@@ -145,10 +149,14 @@ export class FieldMotors extends pxtblockly.FieldImages {
                 contentDiv.appendChild(placeholder);
                 continue;
             }
-            let button = document.createElement('button');
+            const buttonContainer = document.createElement('div');
+            buttonContainer.setAttribute('class', 'blocklyDropDownButtonContainer');
+            let button = document.createElement('div');
             button.setAttribute('id', ':' + i); // For aria-activedescendant
             button.setAttribute('role', 'menuitem');
+            button.setAttribute('aria-selected', 'false');
             button.setAttribute('class', 'blocklyDropDownButton');
+            button.style.height = '100%';
             button.title = content.alt;
             if ((this as any).columns_) {
                 button.style.width = (((this as any).width_ / (this as any).columns_) - 8) + 'px';
@@ -162,17 +170,27 @@ export class FieldMotors extends pxtblockly.FieldImages {
                 // This icon is selected, show it in a different colour
                 backgroundColor = sourceBlock.getColourTertiary();
                 button.setAttribute('aria-selected', 'true');
+                this.activeDescendantIndex = i;
+                contentDiv.setAttribute('aria-activedescendant', button.id);
+                button.setAttribute('class', `blocklyDropDownButton ${this.openingPointerCoords ? "blocklyDropDownButtonHover" : "blocklyDropDownButtonFocus"}`);
             }
             button.style.backgroundColor = backgroundColor;
             button.style.borderColor = sourceBlock.getColourTertiary();
-            button.addEventListener("click", (event) => this.buttonClick_(event));
-            button.addEventListener("mouseover", () => {
-                button.setAttribute('class', 'blocklyDropDownButton blocklyDropDownButtonHover');
-                contentDiv.setAttribute('aria-activedescendant', button.id);
+            Blockly.browserEvents.bind(button, 'click', this, () => this.buttonClickAndClose_(value));
+            Blockly.browserEvents.bind(button, 'pointermove', this, () => {
+                if (this.pointerMoveTriggeredByUser()) {
+                    this.gridItems.forEach(button => button.setAttribute('class', 'blocklyDropDownButton'));
+                    this.activeDescendantIndex = i;
+                    button.setAttribute('class', 'blocklyDropDownButton blocklyDropDownButtonHover');
+                    contentDiv.setAttribute('aria-activedescendant', button.id);
+                }
             });
-            button.addEventListener("mouseout", () => {
-                button.setAttribute('class', 'blocklyDropDownButton');
-                contentDiv.removeAttribute('aria-activedescendant');
+            Blockly.browserEvents.bind(button, 'pointerout', this, () => {
+                if (this.pointerOutTriggeredByUser()) {
+                    button.setAttribute('class', 'blocklyDropDownButton');
+                    contentDiv.removeAttribute('aria-activedescendant');
+                    this.activeDescendantIndex = undefined;
+                }
             });
             let buttonImg = document.createElement('img');
             buttonImg.src = content.src;
@@ -189,19 +207,30 @@ export class FieldMotors extends pxtblockly.FieldImages {
                 buttonText.style.whiteSpace = 'inherit';
                 buttonText.style.width = 'auto';
                 buttonText.style.padding = '0 10px';
+                buttonText.style.marginBottom = '4px';
                 button.appendChild(buttonText);
             }
-            contentDiv.appendChild(button);
+            this.gridItems.push(button);
+            buttonContainer.appendChild(button);
+            row.append(buttonContainer)
+            row.style.display = 'flex';
+            if (row.childElementCount === this.columns_) {
+                contentDiv.appendChild(row);
+                row = this.createRow();
+            }
+        }
+        if (row.childElementCount) {
+            contentDiv.appendChild(row);
         }
         contentDiv.style.width = (this as any).width_ + 'px';
-        contentDiv.style.display = 'flex';
-        contentDiv.style.alignItems = 'stretch';
         dropdownDiv.appendChild(contentDiv);
 
         Blockly.DropDownDiv.setColour(sourceBlock.getColour(), sourceBlock.getColourTertiary());
 
         // Position based on the field position.
         Blockly.DropDownDiv.showPositionedByField(this, this.onHideCallback.bind(this));
+
+        contentDiv.focus();
 
         // Update colour to look selected.
         this.savedPrimary_ = sourceBlock?.getColour();
