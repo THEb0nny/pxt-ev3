@@ -130,12 +130,12 @@ export class FieldBrickButtons extends Blockly.FieldDropdown {
         Blockly.DropDownDiv.showPositionedByField(this, this.onHide_.bind(this));
 
         // Update colour to look selected.
-        let source = this.sourceBlock_ as BlockSvg;
+        let source = this.sourceBlock_ as any;
         this.savedPrimary_ = source?.getColour();
         if (source?.isShadow()) {
             source.setColour(source.getColourTertiary());
         } else if (this.borderRect_) {
-            this.borderRect_.setAttribute('fill', (this.sourceBlock_ as BlockSvg).getColourTertiary());
+            this.borderRect_.setAttribute('fill', (this.sourceBlock_ as any).getColourTertiary());
         }
     }
 
