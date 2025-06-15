@@ -58,8 +58,8 @@ export class FieldMusic extends pxtblockly.FieldImages {
         // Populate the drop-down with the icons for this field.
         let dropdownDiv = Blockly.DropDownDiv.getContentDiv() as HTMLElement;
         let contentDiv = document.createElement('div');
-        dropdownDiv.style.overflowY = 'auto'; // Return scroll otherwise the items won't fit
         // Accessibility properties
+        dropdownDiv.setAttribute('class', 'blocklyDropDownMusicContent');
         contentDiv.setAttribute('role', 'menu');
         contentDiv.setAttribute('aria-haspopup', 'true');
         contentDiv.setAttribute('class', 'blocklyMusicFieldOptions');

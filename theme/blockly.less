@@ -28,6 +28,7 @@
     ry: 0 !important;
 }
 
+/* Field editor */
 .blocklyMotorsFieldOptions .blocklyDropDownButton, .blocklyMusicFieldOptions .blocklyDropDownButton {
     height: 100%;
 }
@@ -44,7 +45,11 @@
     font-size: 13px;
 }
 
-/* Field editor */
+.blocklyDropDownMusicContent {
+    max-height: 450px;
+    overflow-y: auto;
+}
+
 .blocklyMotorsFieldOptions div[role="row"], .blocklyMusicFieldOptions div[role="row"] {
     display: flex;
 }
