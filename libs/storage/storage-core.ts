@@ -1,4 +1,4 @@
-export enum Separators {
+enum Separators {
     //% block="comma"
     Comma,
     //% block="semicolon"
