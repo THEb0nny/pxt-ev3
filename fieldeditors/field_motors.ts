@@ -126,13 +126,13 @@ export class FieldMotors extends pxtblockly.FieldImages {
         // Populate the drop-down with the icons for this field.
         let dropdownDiv = Blockly.DropDownDiv.getContentDiv();
         let contentDiv = document.createElement('div');
-        dropdownDiv.style.overflowY = 'auto'; // Return scroll otherwise the items won't fit
         // Accessibility properties
+        dropdownDiv.setAttribute('class', 'blocklyDropDownMotorsContent');
         contentDiv.setAttribute('role', 'menu');
         contentDiv.setAttribute('aria-haspopup', 'true');
-        contentDiv.setAttribute('class', 'blocklyMenu blocklyImageMenu');
+        contentDiv.setAttribute('class', 'blocklyMotorsFieldOptions');
         this.addPointerListener(dropdownDiv);
-        this.addKeyDownHandler(contentDiv)
+        this.addKeyDownHandler(contentDiv);
         const options = this.getOptions();
         // if (this.shouldSort_) options.sort();
         let row = this.createRow();
@@ -156,7 +156,6 @@ export class FieldMotors extends pxtblockly.FieldImages {
             button.setAttribute('role', 'menuitem');
             button.setAttribute('aria-selected', 'false');
             button.setAttribute('class', 'blocklyDropDownButton');
-            button.style.height = '100%';
             button.title = content.alt;
             if ((this as any).columns_) {
                 button.style.width = (((this as any).width_ / (this as any).columns_) - 8) + 'px';
@@ -199,21 +198,15 @@ export class FieldMotors extends pxtblockly.FieldImages {
             // Store a data attribute on all possible click targets so we can match it to the icon.
             button.setAttribute('data-value', value);
             buttonImg.setAttribute('data-value', value);
-            buttonImg.style.height = 'auto';
             button.appendChild(buttonImg);
             if (this.addLabel_) {
                 const buttonText = this.createTextNode_(content.alt);
                 buttonText.setAttribute('data-value', value);
-                buttonText.style.whiteSpace = 'inherit';
-                buttonText.style.width = 'auto';
-                buttonText.style.padding = '0 10px';
-                buttonText.style.marginBottom = '4px';
                 button.appendChild(buttonText);
             }
             this.gridItems.push(button);
             buttonContainer.appendChild(button);
-            row.append(buttonContainer)
-            row.style.display = 'flex';
+            row.append(buttonContainer);
             if (row.childElementCount === this.columns_) {
                 contentDiv.appendChild(row);
                 row = this.createRow();
