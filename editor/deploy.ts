@@ -24,6 +24,7 @@ enum ParityType {
     "mark",
     "space"
 }
+
 declare interface SerialOptions {
     baudRate?: number;
     databits?: number;
@@ -35,8 +36,10 @@ declare interface SerialOptions {
     xoff?: boolean;
     xany?: boolean;
 }
+
 type SerialPortInfo = pxt.Map<string>;
 type SerialPortRequestOptions = any;
+
 declare class SerialPort {
     open(options?: SerialOptions): Promise<void>;
     close(): void;
@@ -44,6 +47,7 @@ declare class SerialPort {
     readonly writable: any;
     //getInfo(): SerialPortInfo;
 }
+
 declare interface Serial extends EventTarget {
     onconnect: any;
     ondisconnect: any;
@@ -61,7 +65,7 @@ class WebSerialPackageIO implements pxt.packetio.PacketIO {
     private _writer: any;
 
     constructor(private port: SerialPort, private options: SerialOptions) {
-        console.log(`serial: new io`)
+        console.log(`serial: New io`)
     }
 
     bufferSize(buffer: Uint8Array) {
@@ -126,7 +130,7 @@ class WebSerialPackageIO implements pxt.packetio.PacketIO {
                 }
                 return io;
             } catch (e) {
-                console.log(`connection error`, e)
+                console.log(`Connection error`, e)
             }
         }
         throw new Error("could not open serial port");
@@ -138,7 +142,8 @@ class WebSerialPackageIO implements pxt.packetio.PacketIO {
     }
 
     private openAsync() {
-        console.log(`serial: opening port`)
+        console.log(`serial: Opening port`);
+        // this.io.onConnectionChanged();
         if (!!this._reader) return Promise.resolve();
         this._reader = undefined;
         this._writer = undefined;

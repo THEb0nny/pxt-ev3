@@ -111,16 +111,8 @@ export class Ev3Wrapper {
     }
 
     dumpInputCmd(buf : Uint8Array) {
-        log(`Reply size: ${HF2.read16(buf, 0)}`);
-        log(`Message counter: ${HF2.read16(buf, 2)}`);
-        log(`Reply type: ${buf[4]}`);
-        switch (buf[5]) {
-            case 0x03:
-                log("System command: System command reply OK");
-                break;
-            case 0x05:
-                log("System command: System command reply ERROR");
-                break;
+        log(`Reply size: ${HF2.read16(buf, 0)}, Message counter: ${HF2.read16(buf, 2)}, Reply type: ${buf[4]} (${buf[4] === 0x03 ? "System command reply OK" : buf[4] === 0x05 ? "System command reply ERROR" : "Unknown"})`);
+        switch (buf[6]) {
             case 0x00:
                 log("Reply Status SUCCESS");
                 break;
@@ -164,16 +156,8 @@ export class Ev3Wrapper {
     }
 
     dumpOutputCmd(buf: Uint8Array) {
-        log(`Command size: ${HF2.read16(buf, 0)}`);
-        log(`Message counter: ${HF2.read16(buf, 2)}`);
-        log(`Command type: ${buf[4]}`);
+        log(`Command size: ${HF2.read16(buf, 0)}, Message counter: ${HF2.read16(buf, 2)}, Command type: ${buf[4]} (${buf[4] === 0x01 ? "System command, reply required" : buf[4] === 0x81 ? "System command, reply not required" : "Unknown"})`);
         switch (buf[5]) {
-            case 0x01:
-                log("System command, reply required");
-                break;
-            case 0x81:
-                log("System command, reply not require");
-                break;
             case 0x92:
                 log("System command: Begin file download");
                 break;
@@ -246,7 +230,7 @@ export class Ev3Wrapper {
     }
 
     flashAsync(path: string, file: Uint8Array) {
-        log(`write ${file.length} bytes to ${path}`)
+        log(`Write ${file.length} bytes to ${path}`)
 
         let handle = -1
 
@@ -388,13 +372,13 @@ export class Ev3Wrapper {
     reconnectAsync(first = false): Promise<void> {
         this.resetState()
         if (first) return this.initAsync()
-        log(`reconnect`);
+        log(`Reconnect`);
         return this.io.reconnectAsync()
             .then(() => this.initAsync())
     }
 
     disconnectAsync() {
-        log(`disconnect`);
+        log(`Disconnect`);
         return this.io.disconnectAsync()
     }
 }
