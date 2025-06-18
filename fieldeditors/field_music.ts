@@ -262,7 +262,7 @@ export class FieldMusic extends pxtblockly.FieldImages {
 
     protected createTextNode_(content: string) {
         const category = this.parseCategory(content);
-        let text = content.substr(content.indexOf(' ') + 1);
+        let text = content.slice(content.indexOf(' ') + 1);
         
         const textSpan = document.createElement('span');
         textSpan.setAttribute('class', 'blocklyDropdownText');
@@ -271,7 +271,7 @@ export class FieldMusic extends pxtblockly.FieldImages {
     }
 
     private parseCategory(content: string) {
-        return content.substr(0, content.indexOf(' '));
+        return content.slice(0, content.indexOf(' '));
     }
 
     private setSelectedCategory(value: string) {
