@@ -195,28 +195,8 @@ export class FieldMusic extends pxtblockly.FieldImages {
             button.style.backgroundColor = backgroundColor;
             button.style.borderColor = sourceBlock.getColourTertiary();
             Blockly.browserEvents.bind(button, 'click', this, () => this.buttonClickAndClose_(value));
-            // These are applied manually instead of using the :hover pseudoclass
-            // because Android has a bad long press "helper" menu and green highlight
-            // that we must prevent with ontouchstart preventDefault
-            let that = this;
-            // Blockly.browserEvents.bind(button, 'mousedown', button, function (e) {
-            //     this.setAttribute('class', 'blocklyDropDownButton blocklyDropDownButtonHover');
-            //     e.preventDefault();
-            // });
-            Blockly.browserEvents.bind(button, 'mouseenter', button, function () {
-                that.buttonEnter_(value);
-            });
-            Blockly.browserEvents.bind(button, 'mouseleave', button, function () {
-                that.buttonLeave_();
-            });
-            // Blockly.browserEvents.bind(button, 'mouseover', button, function () {
-            //     this.setAttribute('class', 'blocklyDropDownButton blocklyDropDownButtonHover');
-            //     contentDiv.setAttribute('aria-activedescendant', this.id);
-            // });
-            // Blockly.browserEvents.bind(button, 'mouseout', button, function () {
-            //     this.setAttribute('class', 'blocklyDropDownButton');
-            //     contentDiv.removeAttribute('aria-activedescendant');
-            // });
+            Blockly.browserEvents.bind(button, 'mouseenter', button, () => this.buttonEnter_(value));
+            Blockly.browserEvents.bind(button, 'mouseleave', button, () => this.buttonLeave_());
             Blockly.browserEvents.bind(button, 'pointermove', this, () => {
                 if (this.pointerMoveTriggeredByUser()) {
                     this.gridItems.forEach(button => button.setAttribute('class', 'blocklyDropDownButton'));
@@ -298,7 +278,7 @@ export class FieldMusic extends pxtblockly.FieldImages {
         this.selectedCategory_ = value;
     }
 
-    protected categoryClick_ = function (e: any) {
+    protected categoryClick_(e: any) {
         let value = e.target.getAttribute('data-value');
         this.setSelectedCategory(value);
 
