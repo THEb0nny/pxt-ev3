@@ -135,12 +135,8 @@ export class FieldMusic extends pxtblockly.FieldImages {
             button.style.padding = "2px 6px";
             button.style.backgroundColor = backgroundColor;
             button.style.borderColor = backgroundColor;
-            button.addEventListener("click", (event) => {
-                this.categoryClick_(event);
-            });
-            button.addEventListener("mouseup", (event) => {
-                this.categoryClick_(event);
-            });
+            Blockly.browserEvents.bind(button, 'click', this, this.categoryClick_);
+            Blockly.browserEvents.bind(button, 'mouseup', this, this.categoryClick_);
 
             const textNode = this.createTextNode_(category);
             textNode.setAttribute('data-value', category);
@@ -199,6 +195,28 @@ export class FieldMusic extends pxtblockly.FieldImages {
             button.style.backgroundColor = backgroundColor;
             button.style.borderColor = sourceBlock.getColourTertiary();
             Blockly.browserEvents.bind(button, 'click', this, () => this.buttonClickAndClose_(value));
+            // These are applied manually instead of using the :hover pseudoclass
+            // because Android has a bad long press "helper" menu and green highlight
+            // that we must prevent with ontouchstart preventDefault
+            let that = this;
+            // Blockly.browserEvents.bind(button, 'mousedown', button, function (e) {
+            //     this.setAttribute('class', 'blocklyDropDownButton blocklyDropDownButtonHover');
+            //     e.preventDefault();
+            // });
+            Blockly.browserEvents.bind(button, 'mouseenter', button, function () {
+                that.buttonEnter_(value);
+            });
+            Blockly.browserEvents.bind(button, 'mouseleave', button, function () {
+                that.buttonLeave_();
+            });
+            // Blockly.browserEvents.bind(button, 'mouseover', button, function () {
+            //     this.setAttribute('class', 'blocklyDropDownButton blocklyDropDownButtonHover');
+            //     contentDiv.setAttribute('aria-activedescendant', this.id);
+            // });
+            // Blockly.browserEvents.bind(button, 'mouseout', button, function () {
+            //     this.setAttribute('class', 'blocklyDropDownButton');
+            //     contentDiv.removeAttribute('aria-activedescendant');
+            // });
             Blockly.browserEvents.bind(button, 'pointermove', this, () => {
                 if (this.pointerMoveTriggeredByUser()) {
                     this.gridItems.forEach(button => button.setAttribute('class', 'blocklyDropDownButton'));
@@ -249,6 +267,19 @@ export class FieldMusic extends pxtblockly.FieldImages {
         }
     }
 
+    protected onHide_() {
+        super.onHide_();
+        (Blockly.DropDownDiv.getContentDiv() as HTMLElement).style.maxHeight = '';
+        this.stopSounds();
+        // Update color (deselect) on dropdown hide
+        let source = this.sourceBlock_ as any;
+        if (source?.isShadow()) {
+            source.setColour(this.savedPrimary_);
+        } else if (this.borderRect_) {
+            this.borderRect_.setAttribute('fill', this.savedPrimary_);
+        }
+    }
+
     protected createTextNode_(content: string) {
         const category = this.parseCategory(content);
         let text = content.substr(content.indexOf(' ') + 1);
@@ -288,18 +319,6 @@ export class FieldMusic extends pxtblockly.FieldImages {
     }
 
     /**
-     * Callback for when a button is clicked inside the drop-down.
-     * Should be bound to the FieldIconMenu.
-     * @param {Event} e DOM event for the click/touch
-     * @private
-     */
-    private buttonClick_ = function (e: any) {
-        let value = e.target.getAttribute('data-value');
-        this.setValue(value);
-        Blockly.DropDownDiv.hide();
-    };
-
-    /**
      * Callback for when a button is hovered over inside the drop-down.
      * Should be bound to the FieldIconMenu.
      * @param {Event} e DOM event for the mouseover
@@ -315,7 +334,7 @@ export class FieldMusic extends pxtblockly.FieldImages {
                 }
                 pxsim.AudioContextManager.playBufferAsync(refBuf as any);
             }
-        }
+        } 
     };
 
     protected buttonLeave_ = function () {
