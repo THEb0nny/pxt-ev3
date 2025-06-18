@@ -45,7 +45,7 @@ declare class SerialPort {
     close(): void;
     readonly readable: any;
     readonly writable: any;
-    //getInfo(): SerialPortInfo;
+    // getInfo(): SerialPortInfo;
 }
 
 declare interface Serial extends EventTarget {
@@ -109,14 +109,14 @@ class WebSerialPackageIO implements pxt.packetio.PacketIO {
     }
 
     static portIos: WebSerialPackageIO[] = [];
+
     static async mkPacketIOAsync(): Promise<pxt.packetio.PacketIO> {
         const serial = (<any>navigator).serial;
         if (serial) {
             try {
-                // const requestOptions: SerialPortRequestOptions = {
-                //     filters: [{ usbVendorId: 0x0694, usbProductId: 0x0005 }],
-                // };
-                const requestOptions: SerialPortRequestOptions = {};
+                const requestOptions: SerialPortRequestOptions = {
+                    // filters: [{ usbVendorId: 0x0694, usbProductId: 0x0005 }],
+                };
                 const port = await serial.requestPort(requestOptions);
 
                 let io = WebSerialPackageIO.portIos.filter(i => i.port == port)[0];
@@ -209,6 +209,7 @@ function hf2Async() {
 
 let useHID = false;
 let useWebSerial = false;
+
 export function initAsync(): Promise<void> {
     if (pxt.U.isNodeJS) {
         // doesn't seem to work ATM
@@ -254,6 +255,7 @@ async function cleanupAsync() {
 }
 
 let initPromise: Promise<Ev3Wrapper>
+
 function initHidAsync() { // needs to run within a click handler
     if (initPromise)
         return initPromise
@@ -281,6 +283,7 @@ const rbfTemplate = `
 4c45474f580000006d000100000000001c000000000000000e000000821b038405018130813e8053
 74617274696e672e2e2e0084006080XX00448581644886488405018130813e80427965210084000a
 `
+
 export function deployCoreAsync(resp: pxtc.CompileResult) {
     let filename = resp.downloadFileBaseName || "pxt"
     filename = filename.replace(/^lego-/, "")
