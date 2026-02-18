@@ -1,71 +1,36 @@
 /* Lots of specificity to override another !important rule */
 
-/* #simulator #editorSidebar .simtoolbar .ui.icon.tiny.buttons .ui.button.play-button.play .icon.play {
-    color: var(--pxt-colors-green-background) !important;
-}
-
-.theme-preview-ev3-light .theme-preview-sim-button {
-    background-color: var(--pxt-neutral-background2) !important;
-} */
-
-#mainmenu {
-    /* Some parts of the app use the same color as a background. This keeps the menu from blending in */
-    border-bottom: 5px solid #00a5c8;
-}
-
-#computertogglesim, #mobiletogglesim, #sidedocstoggle {
-    background: #95a5a6 !important;
-}
-
-.blocklyToolboxDiv, .monacoToolboxDiv {
+/* Blockly Toolbox colors */
+.blocklyToolbox, .monacoToolboxDiv {
     background: var(--pxt-neutral-background1) !important;
     color: var(--pxt-neutral-foreground1) !important;
 }
 
-/* Фон панели панели выбранной категории с блоками */
-.blocklyFlyoutBackground {
+/* .blocklyFlyoutBackground {
     fill: var(--pxt-neutral-background3) !important;
     fill-opacity: .9 !important;
-}
+} */
 
-/* Шапка в расширениях */
-.fullscreen.extensions-browser .common-modal .common-modal-header {
-    background-color: var(--pxt-header-secondary-background) !important;
-}
-
-/* Лейбл бета в расширениях */
-.common-card-label {
-    color: var(--pxt-secondary-foreground);
-    background-color: var(--pxt-secondary-background);
-    border-color: var(--pxt-secondary-accent);
-}
-
-/* Кнопка Понятно в окне загрузки */
+/* Positive button */
 .ui.button.positive {
     background-color: var(--pxt-primary-background) !important;
     color: var(--pxt-primary-foreground) !important;
     border: 1px solid var(--pxt-primary-background) !important;
 }
 
-/* Не работает, кнопка троеточия */
-.ui.button.editortools-btn.hw-button:focus, .ui.button.editortools-btn.hw-button:hover {
+
+/*
+.ui.button.editortools-btn.hw-button:focus,
+.ui.button.editortools-btn.hw-button:hover {
     filter: grayscale(.15) brightness(.85) contrast(1.3) !important;
     background-color: var(--pxt-neutral-background1) !important;
     color: var(--pxt-neutral-foreground1) !important;
 }
+*/
 
-/* Кнопки переключения editortoggle */
-.menubar .ui.menu.fixed .ui.item.editor-menuitem .item.link:hover, .menubar .ui.inverted.menu .link.item:active, .ui.inverted.menu .dropdown.item:hover {
-    background: var(--pxt-neutral-alpha10);
-    color: #000;
-}
 
-/* Кнопка переключения языков JS на Python editortoggle */
-#root:not(.hc) #editordropdown.active {
-    background-color: var(--pxt-neutral-alpha20) !important;
-    color: #000 !important;
-}
-
-.ui.red.ribbon.label {
-    border-color: #760007 !important;
+/* Card label */
+.common-card-label {
+    background-color: var(--pxt-colors-orange-background);
+    border-color: var(--pxt-colors-orange-hover);
 }
