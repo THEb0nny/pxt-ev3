@@ -412,8 +412,11 @@ body.pxt-theme-root .common-button.negative,
 
 /* >= Small Monitor (Small Monitor + Large Monitor + Wide Monitor) */
 @media only screen and (min-width: @computerBreakpoint) {
-    .fullscreensim #boardview {    
+    .fullscreensim .simPanel {
         background: @simulatorBackground data-uri("../docs/static/backgrounds/simulator.png") 0 0 repeat !important;
+    }
+    .fullscreensim #boardview {
+        background: transparent !important;
     }
 }
 
