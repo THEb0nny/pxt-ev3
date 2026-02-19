@@ -34,3 +34,9 @@
     background-color: var(--pxt-colors-orange-background);
     border-color: var(--pxt-colors-orange-hover);
 }
+
+/* Filemenu item hover */
+#simulator .editor-sidebar .filemenu .item:hover,
+    #simulator .editor-sidebar .filemenu .link.item:hover {
+    background: var(--pxt-neutral-alpha5) !important;
+}

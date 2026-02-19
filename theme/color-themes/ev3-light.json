@@ -12,7 +12,7 @@
         "pxt-header-foreground-hover": "#FFFFFF",
         "pxt-header-stencil": "#00a5c8",
         
-        "pxt-header-secondary-background": "#999",
+        "pxt-header-secondary-background": "#999999",
         "pxt-header-secondary-foreground": "#FFFFFF",
 
         "pxt-primary-background": "#1AA5C6",
@@ -21,7 +21,7 @@
         "pxt-primary-foreground-hover": "#FFFFFF",
         "pxt-primary-accent": "#0f97b7",
 
-        "pxt-secondary-background": "#4c4ca6",
+        "pxt-secondary-background": "#ffd417",
         "pxt-secondary-foreground": "#FFFFFF",
         "pxt-secondary-background-hover": "#fccd00",
         "pxt-secondary-foreground-hover": "#FFFFFF",
@@ -72,6 +72,7 @@
 
         "pxt-neutral-base": "rgba(0, 0, 0, 1)",
         "pxt-neutral-alpha0": "rgba(0, 0, 0, 0)",
+        "pxt-neutral-alpha5": "rgba(0, 0, 0, 0.05)",
         "pxt-neutral-alpha10": "rgba(0, 0, 0, 0.1)",
         "pxt-neutral-alpha20": "rgba(0, 0, 0, 0.2)",
         "pxt-neutral-alpha30": "rgba(0, 0, 0, 0.3)",
