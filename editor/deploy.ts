@@ -91,14 +91,14 @@ class WebSerialPackageIO implements pxt.packetio.PacketIO {
                     this.onData(new Uint8Array(buffer));
                     buffer = undefined;
                 } else if (buffer.length > size) {
-                    console.warn(`Received larger bufer then command command: ${buffer.length} recieved but waiting for ${size}`);
+                    console.warn(`Received larger buffer than command command: ${buffer.length} received but waiting for ${size}`);
                     let tmp = buffer.slice(0, size - 1);
                     this.onData(new Uint8Array(tmp));
                     tmp = buffer.slice(size, buffer.length - 1);
                     buffer = tmp;
                     console.debug(`Next buffer size: ${this.bufferSize(buffer)}`);
                 } else {
-                    console.warn(`Incomplete command: ${buffer.length} recieved but waiting for ${size}. Keep waiting...`);
+                    console.warn(`Incomplete command: ${buffer.length} received but waiting for ${size}. Keep waiting...`);
                 }
             }
         }
