@@ -264,6 +264,7 @@
 }
 
 
+
 /*******************************
     Fullscreen simulator
 *******************************/
@@ -271,7 +272,6 @@
 .fullscreensim .menubar .ui.menu {
     border-bottom: 5px solid transparent !important; /* Remove strip */
 }
-
 
 
 
@@ -317,6 +317,41 @@
 #langmodal #availablelocales .langoption .header {
     color: var(--pxt-target-foreground1);
 }
+
+
+
+/*******************************
+    Time machine
+*******************************/
+/* Time machine header */
+.time-machine-header {
+    background-color: var(--pxt-header-secondary-background) !important;
+    color: var(--pxt-header-secondary-foreground) !important;
+    border-bottom: 1px solid var(--pxt-neutral-stencil1) !important;
+    font-size: 1.2rem !important;
+    font-weight: 600 !important;
+}
+/* Time machine header actions buttons */
+.time-machine-header .time-machine-actions .common-button {
+    border-radius: 0 !important;
+}
+/* Menu button min widht unset */
+.time-machine-header .common-button.menu-button {
+    min-width: unset !important;
+}
+/* Menu button font size */
+.time-machine-header .common-button.menu-button .common-button-label {
+    font-size: 20px !important;
+}
+/* Menu button icon size */
+.time-machine-header .common-button.menu-button i.fas {
+    font-size: 24px !important;
+}
+/* Time machine preview overlap when loading div */
+.time-machine-preview>div {
+    background: var(--pxt-target-background1) !important;
+}
+
 
 
 /*******************************
