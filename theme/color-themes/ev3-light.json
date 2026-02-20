@@ -96,7 +96,11 @@
 
         "pxt-colors-orange-background": "#fa7f2a",
         "pxt-colors-orange-foreground": "#FFFFFF",
-        "pxt-colors-orange-hover": "#eb6306"
+        "pxt-colors-orange-hover": "#eb6306",
+
+        "pxt-colors-yellow-background": "#fccd00",
+        "pxt-colors-yellow-foreground": "#FFFFFF",
+        "pxt-colors-yellow-hover": "#FDB80C"
         
     }
 }
