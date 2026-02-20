@@ -335,7 +335,7 @@ body.pxt-theme-root .common-button.neutral,
     border-radius: 0;
 }
 
-// Green or positive button
+/* Green or positive button */
 body.pxt-theme-root .common-button.green,
     body.pxt-theme-root .common-button.positive,
     body.pxt-theme-root .ui.button.green,
@@ -345,7 +345,7 @@ body.pxt-theme-root .common-button.green,
     padding: .78571429em 1.5em;
 }
 
-// Red of negative button
+/* Red of negative button */
 body.pxt-theme-root .common-button.negative,
     body.pxt-theme-root .common-button.red,
     body.pxt-theme-root .ui.button.negative,
@@ -353,6 +353,12 @@ body.pxt-theme-root .common-button.negative,
     border: 0;
     padding: .78571429em 1.5em;
     border-radius: 0;
+}
+
+/* Bluetooth button in download dialog */
+.ui.button.bluetooth {
+    background-color: var(--pxt-colors-blue-background) !important;
+    color: var(--pxt-colors-blue-foreground) !important;
 }
 
 
@@ -456,9 +462,4 @@ body.pxt-theme-root .common-button.negative,
 .blocks-menuitem i.icon.blocks:before {
     font-family: 'legoIcons' !important;
     content: "\f119" !important;
-}
-
-.bluetooth {
-    background-color: --var(--pxt-colors-blue-background) !important;
-    color: var(--pxt-colors-blue-foreground) !important;
 }
