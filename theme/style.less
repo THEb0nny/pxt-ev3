@@ -239,6 +239,24 @@
 
 
 /*******************************
+    Fullscreen simulator
+*******************************/
+/* Menu bar main menu simulator fullscreen */
+.fullscreensim .menubar .ui.menu {
+    border-bottom: 5px solid transparent !important; /* Remove strip */
+}
+
+.fullscreensim .simPanel {
+        background: @simulatorBackground data-uri("../docs/static/backgrounds/simulator.png") 0 0 repeat !important;
+}
+
+.fullscreensim #boardview {
+    background: transparent !important;
+}
+
+
+
+/*******************************
     Filemenu
 *******************************/
 /* Filemenu */
@@ -261,16 +279,6 @@
 .ui.inverted.menu .item:before,
     .ui.vertical.inverted.menu .item:before {
     background: var(--pxt-neutral-alpha10);
-}
-
-
-
-/*******************************
-    Fullscreen simulator
-*******************************/
-/* Menu bar main menu simulator fullscreen */
-.fullscreensim .menubar .ui.menu {
-    border-bottom: 5px solid transparent !important; /* Remove strip */
 }
 
 
@@ -465,12 +473,7 @@ body.pxt-theme-root .common-button.primary,
 
 /* >= Small Monitor (Small Monitor + Large Monitor + Wide Monitor) */
 @media only screen and (min-width: @computerBreakpoint) {
-    .fullscreensim .simPanel {
-        background: @simulatorBackground data-uri("../docs/static/backgrounds/simulator.png") 0 0 repeat !important;
-    }
-    .fullscreensim #boardview {
-        background: transparent !important;
-    }
+    
 }
 
 /* Mobile, Tablet AND thin screen */
