@@ -206,11 +206,18 @@
     Blockly toolbox
 *******************************/
 // blocklyToolbox
-.blocklyToolbox, 
-    .monacoToolboxDiv {
-    padding: .5rem;
+// .blocklyToolbox, 
+//     .monacoToolboxDiv {
+//     padding: .5rem;
+// }
+/* Blockly search area */
+#blocklySearchArea {
+    padding: 0.5rem;
 }
-
+/* Blockly tree row item */
+.coloredToolbox .blocklyTreeRoot div.blocklyTreeRow {
+    padding: 0 0.5rem !important;
+}
 
 
 /*******************************
@@ -243,7 +250,7 @@
 }
 
 .fullscreensim .simPanel {
-        background: @simulatorBackground data-uri("../docs/static/backgrounds/simulator.png") 0 0 repeat !important;
+    background: @simulatorBackground data-uri("../docs/static/backgrounds/simulator.png") 0 0 repeat !important;
 }
 
 .fullscreensim #boardview {
