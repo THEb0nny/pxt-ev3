@@ -46,3 +46,8 @@
 .common-extension-card {
     color: var(--pxt-neutral-base) !important;
 }
+
+/* Blockly trash icon */
+#blocklyTrashIcon {
+    color: var(--pxt-colors-red-background) !important;
+}
