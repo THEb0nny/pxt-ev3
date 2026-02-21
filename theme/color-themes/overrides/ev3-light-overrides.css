@@ -41,3 +41,8 @@
 .common-modal-header, .common-modal-body {
     color: var(--pxt-neutral-base);
 }
+
+/* Common extension card */
+.common-extension-card {
+    color: var(--pxt-neutral-base) !important;
+}
