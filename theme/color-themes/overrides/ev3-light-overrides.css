@@ -1,11 +1,12 @@
 /* Lots of specificity to override another !important rule */
 
-/* Blockly Toolbox colors */
+/* Blockly toolbox colors */
 .blocklyToolbox, .monacoToolboxDiv {
     background: var(--pxt-neutral-background1) !important;
     color: var(--pxt-neutral-foreground1) !important;
 }
 
+/* Blockly flyout background */
 /* .blocklyFlyoutBackground {
     fill: var(--pxt-neutral-background3) !important;
     fill-opacity: .9 !important;
@@ -18,6 +19,11 @@
     border: 1px solid var(--pxt-primary-background) !important;
 }
 
+/* Bluetooth button in download dialog */
+.ui.button.bluetooth {
+    background-color: var(--pxt-colors-blue-background) !important;
+    color: var(--pxt-colors-blue-foreground) !important;
+}
 
 /*
 .ui.button.editortools-btn.hw-button:focus,
