@@ -58,10 +58,12 @@
     background: none !important;
     padding: 11px 1rem;
 }
-
-/* Simulator fullscreen-button size */
-#simulator .editor-sidebar .simtoolbar .fullscreen-button i {
-    font-size: 1.1em;
+/* downloadArea editortools-btn hover, active, focus */
+#downloadArea .ui.button.editortools-btn:hover,
+    #downloadArea .ui.button.editortools-btn:active,
+    #downloadArea .ui.button.editortools-btn:focus {
+    background-color: var(--pxt-neutral-alpha10) !important;
+    color: var(--pxt-neutral-foreground1) !important;
 }
 
 
@@ -237,6 +239,10 @@
 /* Simulator background imgage */
 #simulator .editor-sidebar {
     background: @simulatorBackground data-uri("../docs/static/backgrounds/simulator.png") 0 0 repeat !important;
+}
+/* Simulator fullscreen-button size */
+#simulator .editor-sidebar .simtoolbar .fullscreen-button i {
+    font-size: 1.1em;
 }
 
 
