@@ -178,7 +178,7 @@
             "grid": {
                 "spacing": 40,
                 "length": 2,
-                "colour": "#ddd"
+                "colour": "#C6C6C6"
             }
         },
         "blockColors": {
