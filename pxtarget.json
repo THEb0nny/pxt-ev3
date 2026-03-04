@@ -170,9 +170,14 @@
         "importExtensionFiles": true,
         "allowPackageExtensions": true,
         "addNewTypeScriptFile": true,
+        "enabledFeatures": {
+            "blocksErrorList": {},
+            "aiErrorHelp": {}
+        },
         "experiments": [
             "alwaysGithubItemBlocks",
-            "blocksErrorList"
+            "debugExtensionCode",
+            "forceEnableAiErrorHelp"
         ],
         "blocklyOptions": {
             "grid": {
