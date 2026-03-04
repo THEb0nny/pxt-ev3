@@ -71,11 +71,6 @@
 /*******************************
     Menu bar
 *******************************/
-/* Lego and Microsoft logos separator */
-.menubar .ui.menu .brand:before {
-    border-left: 2px solid var(--pxt-neutral-foreground1);
-}
-
 /* Main menu border bottom line */
 #mainmenu {
     border-bottom: 5px solid var(--pxt-header-stencil);
@@ -413,6 +408,42 @@ body.pxt-theme-root .common-button.negative,
 body.pxt-theme-root .common-button.primary, 
     body.pxt-theme-root .ui.button.primary {
     border-radius: 0;
+}
+
+
+
+/*******************************
+    Fullscreen modal
+*******************************/
+/* Fullscreen modal header header-close */
+.ui.fullscreen.modal>.header .header-close {
+    display: flex;
+    flex-basis: auto;
+    height: 100%;
+    padding: 0;
+}
+
+/* Fullscreen modal header header-help */
+.ui.fullscreen.modal>.header .header-help {
+    flex-basis: auto;
+    height: 100%;
+    padding: 0;
+}
+
+/* Fullscreen modal back-btn and help-btn */
+.ui.fullscreen.modal .ui.button.back-button,
+    .ui.fullscreen.modal .ui.help-button {
+    display: flex;
+    align-items: center;
+    padding: 0 16px !important;
+    margin: 0;
+    text-decoration: none;
+    outline: none;
+}
+
+/* Fullscreen modal back-btn and help-btn icons */
+.ui.fullscreen.modal>.header .header-help .help-button .icon {
+    height: auto;
 }
 
 

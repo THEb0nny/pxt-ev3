@@ -51,3 +51,8 @@
 #blocklyTrashIcon {
     color: var(--pxt-colors-red-background) !important;
 }
+
+/* Lego and Microsoft logos separator */
+.menubar .ui.menu .brand:before {
+    border-left: 2px solid var(--pxt-neutral-alpha40);
+}
