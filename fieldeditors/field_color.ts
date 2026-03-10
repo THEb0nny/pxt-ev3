@@ -48,16 +48,27 @@ export class FieldColorEnum extends pxtblockly.FieldColorNumber {
         }
     }
 
+    rgbToHex(rgb: string) {
+        const result = rgb.match(/\d+/g);
+        if (!result) return rgb;
+        return "#" + result.map(x => parseInt(x).toString(16).padStart(2, "0")).join("");
+    }
+
     showEditor_() {
         super.showEditor_();
         const picker = Blockly.DropDownDiv.getContentDiv().childNodes[0] as HTMLElement;
         if (this.className_ && picker) {
             pxt.BrowserUtils.addClass(picker as HTMLElement, this.className_);
         }
-        const colorCells = document.querySelectorAll('.legoColorPicker td');
+        const colorCells = document.querySelectorAll('.legoColorPicker .blocklyColourSwatch');
         colorCells.forEach((cell) => {
-            const titleName = this.mapColour(cell.getAttribute("title"));
+            const rgbColor = window.getComputedStyle(cell as HTMLElement).backgroundColor;
+            const hexColor = this.rgbToHex(rgbColor);
+            const titleName = this.mapColour(hexColor);
             const index = this.paramsData.findIndex(item => item[1] === titleName);
+            if (index === -1) return;
+            const enumName = this.paramsData[index][1].split(".")[1];
+            cell.classList.add(`legoColor${enumName}`);
             cell.setAttribute("title", this.paramsData[index][0]);
         });
     }
