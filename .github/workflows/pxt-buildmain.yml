@@ -27,6 +27,10 @@ jobs:
           sudo apt-get install xvfb
           sudo npm install -g pxt
           npm install
+      - name: Fix old deps
+        run: |
+            npm install typescript@3.9.10 --save-dev
+            npm install @types/ws@7.4.0 --save-dev
       - name: pxt ci
         run: |
           pxt ci
