@@ -32,7 +32,14 @@ jobs:
         run: |
           npm install typescript@3.9.10 --save-dev
           npm install @types/ws@7.4.0 --save-dev
-      
+          
+      - name: Build pxt-core
+        run: |
+          cd node_modules/pxt-core
+          npm install
+          npm run build
+          cd ../../
+          
       - name: Build static site
         run: pxt staticpkg --githubpages
 
