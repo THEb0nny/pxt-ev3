@@ -37,7 +37,7 @@ jobs:
           git config --global user.name "GitHub Actions"
           
       - name: Build static site
-        run: pxt staticpkg --githubpages
+        run: pxt staticpkg --githubpages --no-ghpages
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
