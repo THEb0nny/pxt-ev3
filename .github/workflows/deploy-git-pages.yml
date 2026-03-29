@@ -34,7 +34,7 @@ jobs:
           npm install @types/ws@7.4.0 --save-dev
       
       - name: Build static site
-        run: pxt staticpkg
+        run: pxt staticpkg --githubpages
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
