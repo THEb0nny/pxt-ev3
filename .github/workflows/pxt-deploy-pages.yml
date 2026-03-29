@@ -37,7 +37,6 @@ jobs:
 
       - name: Build static package
         run: |
-          pxt target .
           pxt staticpkg --githubpages
 
       - name: Add .nojekyll
