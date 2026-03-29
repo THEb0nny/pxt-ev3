@@ -35,6 +35,11 @@ jobs:
           npm install typescript@3.9.10 --save-dev
           npm install @types/ws@7.4.0 --save-dev
 
+      - name: Rewrite docs static paths for GitHub Pages
+        run: |
+          find docs -type f \( -name "*.md" -o -name "*.json" \) \
+            -exec sed -i 's|]\(/docs/static|](/pxt-ev3/docs/static|g' {} +
+
       - name: Build static package
         run: |
           pxt staticpkg --route pxt-ev3
