@@ -2,7 +2,7 @@ name: pxt-deploy-static
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
@@ -24,11 +24,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
 
-      - name: Install
+      - name: Install dependencies
         run: |
-          npm ci
+          npm install
           npm install -g pxt
 
       - name: Build static package
