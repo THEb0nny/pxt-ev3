@@ -31,7 +31,11 @@ jobs:
           npm pkg set devDependencies.typescript="3.9.10"
           npm pkg set devDependencies.@types/ws="7.4.0"
           npm install
-      
+      - name: Setup git identity
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          
       - name: Build static site
         run: pxt staticpkg --githubpages
 
