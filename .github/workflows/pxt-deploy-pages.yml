@@ -37,7 +37,7 @@ jobs:
 
       - name: Build static package
         run: |
-          pxt staticpkg
+          pxt staticpkg --route pxt-ev3
 
       - name: Add .nojekyll
         run: touch built/packaged/.nojekyll
