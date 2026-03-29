@@ -45,6 +45,10 @@ jobs:
           cp -r docs/static/* built/packaged/pxt-ev3/static/ || true
           cp -r static/* built/packaged/pxt-ev3/static/ || true
 
+      - name: Copy docs media
+        run: |
+          find docs -type f \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" \) -exec cp {} built/packaged/pxt-ev3/ \;
+
       - name: Add .nojekyll
         run: touch built/packaged/.nojekyll
 
