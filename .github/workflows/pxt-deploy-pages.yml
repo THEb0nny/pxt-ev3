@@ -37,15 +37,15 @@ jobs:
 
       - name: Build static package
         run: |
-          pxt staticpkg --githubpages
+          pxt staticpkg
 
       - name: Add .nojekyll
-        run: touch built/gh-pages/.nojekyll
+        run: touch built/packaged/.nojekyll
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: built/gh-pages
+          path: built/packaged
 
   deploy:
     needs: build
