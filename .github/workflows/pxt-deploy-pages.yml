@@ -25,17 +25,26 @@ jobs:
         run: |
           npm install -g pxt
           npm install
-
-      - name: Fix old deps
-        run: |
           npm install typescript@3.9.10 --save-dev
           npm install @types/ws@7.4.0 --save-dev
 
-      - name: Setup git auth
+      - name: Build static package
         run: |
+          pxt staticpkg --route pxt-ev3
+
+      - name: Copy docs static assets
+        run: |
+          mkdir -p built/packaged/pxt-ev3/docs/static
+          cp -r docs/static/* built/packaged/pxt-ev3/docs/static/
+
+      - name: Deploy to gh-pages
+        run: |
+          cd built/packaged/pxt-ev3
+          git init
+          git checkout -b gh-pages
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-
-      - name: Build GitHub Pages package
-        run: pxt staticpkg --githubpages
+          git add .
+          git commit -m "Deploy GitHub Pages"
+          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push --force origin gh-pages
