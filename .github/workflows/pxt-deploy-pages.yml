@@ -35,27 +35,22 @@ jobs:
           npm install typescript@3.9.10 --save-dev
           npm install @types/ws@7.4.0 --save-dev
 
-      - name: Build static package
+      - name: Build GitHub Pages package
         run: |
-          pxt staticpkg --route pxt-ev3
+          pxt staticpkg --githubpages
 
-      - name: Fix built docs paths for GitHub Pages
+      - name: Copy docs static assets for tutorial images
         run: |
-          find built/packaged/pxt-ev3 -type f \( -name "*.html" -o -name "*.js" -o -name "*.json" \) \
-            -exec sed -i 's|/docs/static|/pxt-ev3/docs/static|g' {} +
-
-      - name: Copy static assets
-        run: |
-          mkdir -p built/packaged/pxt-ev3/docs/static
-          cp -r docs/static/* built/packaged/pxt-ev3/docs/static/ || true
+          mkdir -p built/gh-pages/docs/static
+          cp -r docs/static/* built/gh-pages/docs/static/ || true
 
       - name: Add .nojekyll
-        run: touch built/packaged/.nojekyll
+        run: touch built/gh-pages/.nojekyll
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: built/packaged/pxt-ev3
+          path: built/gh-pages
 
   deploy:
     needs: build
