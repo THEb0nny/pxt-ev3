@@ -1,4 +1,4 @@
-name: pxt-deploy-gh-pages
+name: pxt-deploy-static
 
 on:
   push:
@@ -14,6 +14,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -29,18 +31,11 @@ jobs:
           npm install typescript@3.9.10 --save-dev
           npm install @types/ws@7.4.0 --save-dev
 
+      - name: Setup git auth
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+
       - name: Build GitHub Pages package
-        run: |
-          pxt staticpkg --githubpages
-
-      - name: Copy docs static assets into gh-pages checkout
-        run: |
-          mkdir -p built/gh-pages/docs/static
-          cp -r docs/static/* built/gh-pages/docs/static/
-
-      - name: Commit static assets
-        run: |
-          cd built/gh-pages
-          git add .
-          git commit -m "Add docs static assets" || echo "No changes"
-          git push
+        run: pxt staticpkg --githubpages
