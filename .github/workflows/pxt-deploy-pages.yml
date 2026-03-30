@@ -34,3 +34,8 @@ jobs:
           git config --global user.name github-actions
           git config --global user.email github-actions@github.com
           pxt staticpkg --githubpages
+
+      - name: Rewrite broken docs asset paths
+        run: |
+          find built/gh-pages -type f \( -name "*.html" -o -name "*.js" \) \
+            -exec sed -i 's|/docs/static/|/pxt-ev3/docs/static/|g' {} +
