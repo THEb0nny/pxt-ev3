@@ -1,4 +1,4 @@
-name: pxt-deploy-static
+name: pxt-deploy-gh-pages
 
 on:
   push:
@@ -29,13 +29,18 @@ jobs:
           npm install typescript@3.9.10 --save-dev
           npm install @types/ws@7.4.0 --save-dev
 
-      - name: Deploy to gh-pages branch
+      - name: Build GitHub Pages package
         run: |
-          git config --global user.name github-actions
-          git config --global user.email github-actions@github.com
           pxt staticpkg --githubpages
 
-      - name: Rewrite broken docs asset paths
+      - name: Copy docs static assets into gh-pages checkout
         run: |
-          find built/gh-pages -type f \( -name "*.html" -o -name "*.js" \) \
-            -exec sed -i 's|/docs/static/|/pxt-ev3/docs/static/|g' {} +
+          mkdir -p built/gh-pages/docs/static
+          cp -r docs/static/* built/gh-pages/docs/static/
+
+      - name: Commit static assets
+        run: |
+          cd built/gh-pages
+          git add .
+          git commit -m "Add docs static assets" || echo "No changes"
+          git push
