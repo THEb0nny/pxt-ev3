@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -39,13 +39,9 @@ jobs:
         run: |
           pxt staticpkg --githubpages
 
-      - name: Copy docs static assets for tutorial images
-        run: |
-          mkdir -p built/gh-pages/docs/static
-          cp -r docs/static/* built/gh-pages/docs/static/ || true
-
       - name: Add .nojekyll
-        run: touch built/gh-pages/.nojekyll
+        run: |
+          touch built/gh-pages/.nojekyll
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
