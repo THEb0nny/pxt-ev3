@@ -7,15 +7,9 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -35,26 +29,8 @@ jobs:
           npm install typescript@3.9.10 --save-dev
           npm install @types/ws@7.4.0 --save-dev
 
-      - name: Build GitHub Pages package
+      - name: Deploy to gh-pages branch
         run: |
+          git config --global user.name github-actions
+          git config --global user.email github-actions@github.com
           pxt staticpkg --githubpages
-
-      - name: Add .nojekyll
-        run: |
-          touch built/gh-pages/.nojekyll
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: built/gh-pages
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
