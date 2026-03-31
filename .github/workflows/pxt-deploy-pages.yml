@@ -28,25 +28,25 @@ jobs:
           npm install typescript@3.9.10 --save-dev
           npm install @types/ws@7.4.0 --save-dev
 
-      - name: Configure git identity
+      - name: Build static package
+        run: |
+          pxt staticpkg --route pxt-ev3 --output built/site
+
+      - name: Rewrite broken static paths
+        run: |
+          find built/site -type f \( -name "*.html" -o -name "*.json" -o -name "*.js" \) \
+            -exec sed -i 's|/docs/static/|/pxt-ev3/docs/static/|g' {} +
+
+      - name: Deploy to gh-pages
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Build GitHub Pages package
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          pxt staticpkg --githubpages
-
-      - name: Rewrite docs static paths inside gh-pages
-        run: |
-          find built/gh-pages -type f \( -name "*.html" -o -name "*.json" -o -name "*.js" \) \
-            -exec sed -i 's|/docs/static/|/pxt-ev3/docs/static/|g' {} +
-
-      - name: Commit rewritten paths
-        run: |
-          cd built/gh-pages
+          git checkout --orphan gh-pages-temp
+          git rm -rf . || true
+          cp -r built/site/* .
+          touch .nojekyll
           git add .
-          git commit -m "Fix docs static paths" || echo "No changes"
-          git push
+          git commit -m "Deploy static site"
+          git branch -M gh-pages
+          git push -f origin gh-pages
