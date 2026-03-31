@@ -45,6 +45,12 @@ jobs:
       - name: Build GitHub Pages package
         run: |
           pxt staticpkg --githubpages
+      
+      - name: Fix generated GitHub Pages paths
+        run: |
+          find built/gh-pages -type f \( -name "*.html" -o -name "*.js" -o -name "*.json" \) \
+            -exec sed -i 's|/docs/static/|/pxt-ev3/docs/static/|g' {} +
+
 
       - name: Add .nojekyll
         run: touch built/gh-pages/.nojekyll
