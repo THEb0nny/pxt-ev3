@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   deploy:
@@ -14,8 +16,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -25,21 +25,35 @@ jobs:
         run: |
           npm install -g pxt
           npm install
+
+      - name: Fix old deps
+        run: |
           npm install typescript@3.9.10 --save-dev
           npm install @types/ws@7.4.0 --save-dev
 
-      - name: Rewrite docs static paths for GitHub Pages
+      # ✅ ВОТ ЭТО КЛЮЧ
+      - name: Patch pxtarget.json for GitHub Pages
         run: |
-          find docs -type f -name "*.md" -print0 | while IFS= read -r -d '' file; do
-            sed -i 's|/docs/static/|/pxt-ev3/docs/static/|g' "$file"
-          done
-
-      - name: Setup git auth
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          node -e "
+            const fs = require('fs');
+            const p = 'pxtarget.json';
+            const data = JSON.parse(fs.readFileSync(p, 'utf8'));
+            data.publicUrl = '/pxt-ev3/';
+            fs.writeFileSync(p, JSON.stringify(data, null, 2));
+          "
 
       - name: Build GitHub Pages package
         run: |
           pxt staticpkg --githubpages
+
+      - name: Add .nojekyll
+        run: touch built/gh-pages/.nojekyll
+
+      - name: Commit and push gh-pages
+        run: |
+          cd built/gh-pages
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "Deploy static site" || echo "No changes"
+          git push
