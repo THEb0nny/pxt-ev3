@@ -28,13 +28,13 @@ jobs:
           npm install typescript@3.9.10 --save-dev
           npm install @types/ws@7.4.0 --save-dev
 
-      - name: Build static package
+      - name: Build GitHub Pages package
         run: |
-          pxt staticpkg --route pxt-ev3 --output built/site
-
-      - name: Rewrite broken static paths
+          pxt staticpkg --route pxt-ev3 --githubpages
+      
+      - name: Rewrite docs paths in generated site
         run: |
-          find built/site -type f \( -name "*.html" -o -name "*.json" -o -name "*.js" \) \
+          find built/gh-pages -type f -name "*.html" \
             -exec sed -i 's|/docs/static/|/pxt-ev3/docs/static/|g' {} +
 
       - name: Deploy to gh-pages
