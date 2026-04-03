@@ -42,10 +42,19 @@ jobs:
         run: |
           pxt staticpkg --route pxt-ev3 --githubpages
       
-      - name: Fix broken docs static links
+      - name: Fix docs asset paths
         run: |
-          find gh-pages -type f \( -name "*.html" -o -name "*.js" \) \
-            -exec sed -i 's|/docs/static/|/pxt-ev3/docs/static/|g' {} +
+          find gh-pages/docs -type f \( -name "*.html" -o -name "*.md" -o -name "*.json" \) \
+            -exec sed -i \
+              -e 's|src="/docs/static/|src="/pxt-ev3/docs/static/|g' \
+              -e 's|href="/docs/static/|href="/pxt-ev3/docs/static/|g' \
+              -e 's|](/docs/static/|](/pxt-ev3/docs/static/|g' \
+              -e 's|"\/docs\/static\/|"/pxt-ev3/docs/static/|g' \
+            {} +
+
+      - name: Debug remaining bad paths
+        run: |
+          grep -R '"/docs/static/' gh-pages/docs | head -50 || true
       
       - name: Push rewritten files
         run: |
