@@ -1,0 +1,75 @@
+CACHE MANIFEST
+
+CACHE:
+/pxt-ev3/semantic.js
+/pxt-ev3/main.js
+/pxt-ev3/pxtapp.js
+/pxt-ev3/typescript.js
+/pxt-ev3/marked/marked.min.js
+/pxt-ev3/highlight.js/highlight.pack.js
+/pxt-ev3/jquery.js
+/pxt-ev3/pxtlib.js
+/pxt-ev3/pxtcompiler.js
+/pxt-ev3/pxtpy.js
+/pxt-ev3/pxtblockly.js
+/pxt-ev3/pxteditor.js
+/pxt-ev3/pxtsim.js
+/pxt-ev3/pxtembed.js
+/pxt-ev3/pxtworker.js
+/pxt-ev3/pxtweb.js
+/pxt-ev3/blockly.css
+/pxt-ev3/semantic.css
+/pxt-ev3/rtlsemantic.css
+
+
+/pxt-ev3/editor.js
+/pxt-ev3/fieldeditors.js
+
+# blockly
+/pxt-ev3/blockly/media/sprites.png
+/pxt-ev3/blockly/media/click.mp3
+/pxt-ev3/blockly/media/disconnect.wav
+/pxt-ev3/blockly/media/delete.mp3
+
+# monaco; keep in sync with webapp/public/index.html
+/pxt-ev3/vs/loader.js
+/pxt-ev3/vs/base/worker/workerMain.js
+/pxt-ev3/vs/basic-languages/bat/bat.js
+/pxt-ev3/vs/basic-languages/cpp/cpp.js
+/pxt-ev3/vs/basic-languages/python/python.js
+/pxt-ev3/vs/basic-languages/typescript/typescript.js
+/pxt-ev3/vs/basic-languages/markdown/markdown.js
+/pxt-ev3/vs/editor/editor.main.css
+/pxt-ev3/vs/editor/editor.main.js
+/pxt-ev3/vs/editor/editor.main.nls.js
+/pxt-ev3/vs/language/json/jsonMode.js
+/pxt-ev3/vs/language/json/jsonWorker.js
+/pxt-ev3/vs/language/typescript/tsMode.js
+/pxt-ev3/vs/language/typescript/tsWorker.js
+
+# charts
+/pxt-ev3/smoothie/smoothie_compressed.js
+/pxt-ev3/images/Bars_black.gif
+
+# gifjs
+/pxt-ev3/gifjs/gif.js
+
+# ai
+/pxt-ev3/ai.0.js
+
+/pxt-ev3/worker.js
+/pxt-ev3/monacoworker.js
+
+# ver Fri Apr 03 2026 21:05:19 GMT+0000 (Coordinated Universal Time)
+
+# target
+/pxt-ev3/docs/static/lego_education_logo.png
+/pxt-ev3/docs/static/icons/android-chrome-192x192.png
+/pxt-ev3/docs/static/Microsoft-logo_rgb_c-gray-square.png
+/pxt-ev3/docs/static/Microsoft-logo_rgb_c-gray.png
+/pxt-ev3/docs/static/hero.png
+
+/pxt-ev3/target.js
+
+NETWORK:
+*
