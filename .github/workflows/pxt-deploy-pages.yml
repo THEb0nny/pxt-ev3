@@ -1,4 +1,4 @@
-name: pxt-deploy-gh-pages
+name: pxt-deploy-static
 
 on:
   push:
@@ -14,25 +14,38 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install deps
+      - name: Install
         run: |
           npm install -g pxt
           npm install
+
+      - name: Fix old deps
+        run: |
           npm install typescript@3.9.10 --save-dev
           npm install @types/ws@7.4.0 --save-dev
+
+      - name: Configure git identity
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Build GitHub Pages package
         run: |
           pxt staticpkg --route pxt-ev3 --githubpages
-      
-      - name: Rewrite docs paths in generated site
+
+      - name: Rewrite broken docs paths
         run: |
           find built/gh-pages -type f -name "*.html" \
-            -exec sed -i 's|/docs/static/|/pxt-ev3/docs/static/|g' {} +\
+            -exec sed -i 's|/docs/static/|/pxt-ev3/docs/static/|g' {} +
+
+      - name: Push rewritten files
+        run: |
+          cd built/gh-pages
+          git add .
+          git commit -m "Fix docs paths" || echo "No changes"
+          git push
