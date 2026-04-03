@@ -41,3 +41,15 @@ jobs:
       - name: Build GitHub Pages package
         run: |
           pxt staticpkg --route pxt-ev3 --githubpages
+      
+      - name: Fix broken docs static links
+        run: |
+          find gh-pages -type f \( -name "*.html" -o -name "*.js" \) \
+            -exec sed -i 's|/docs/static/|/pxt-ev3/docs/static/|g' {} +
+      
+      - name: Push rewritten files
+        run: |
+          cd gh-pages
+          git add .
+          git commit -m "Fix docs static paths" || echo "No changes"
+          git push
