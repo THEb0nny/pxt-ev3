@@ -11,28 +11,28 @@ Here are some fun programs for your @boardname@!
   "description": "Play different sounds based on the color",
   "url":"/maker/sound-of-color",
   "cardType": "example",
-  "imageUrl": "/docs/static/maker/sound-of-color.png"
+  "imageUrl": "/pxt-ev3/docs/static/maker/sound-of-color.png"
 },
 {
   "name": "Security Gadget",
   "description": "Raise the alarm when your brick is lifted!",
   "url":"/maker/security-gadget",
   "cardType": "example",
-  "imageUrl": "/docs/static/maker/security-gadget.png"
+  "imageUrl": "/pxt-ev3/docs/static/maker/security-gadget.png"
 },
 {
   "name": "Movement Detector",
   "description": "Raise the alarm when an movement sneaks in",
   "url":"/maker/movement-detector",
   "cardType": "example",
-  "imageUrl": "/docs/static/maker/movement-detector.png"
+  "imageUrl": "/pxt-ev3/docs/static/maker/movement-detector.png"
 },
 {
   "name": "Puppet",
   "description": "Build an automated puppet",
   "url":"/maker/puppet",
   "cardType": "example",
-  "imageUrl": "/docs/static/maker/puppet.png"
+  "imageUrl": "/pxt-ev3/docs/static/maker/puppet.png"
 }
 ]
 ```

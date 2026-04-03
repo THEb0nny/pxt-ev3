@@ -8,19 +8,19 @@
   "description": "Press the Touch Sensor and run a motor.",
   "cardType": "tutorial",
   "url":"/tutorials/touch-to-run",
-  "imageUrl":"/docs/static/tutorials/touch-to-run.png"
+  "imageUrl":"/pxt-ev3/docs/static/tutorials/touch-to-run.png"
 }, {
   "name": "Sensor Values",
   "description": "Check the value of a Touch Sensor and stop a motor if pressed.",
   "cardType": "tutorial",
   "url":"/tutorials/touch-sensor-values",
-  "imageUrl":"/docs/static/tutorials/touch-sensor-values.png"
+  "imageUrl":"/pxt-ev3/docs/static/tutorials/touch-sensor-values.png"
 }, {
   "name": "Stop At Object",
   "description": "Waits for the sensor to be pressed before continuing the program",
   "cardType": "example",
   "url":"/tutorials/stop-at-object",
-  "imageUrl":"/docs/static/tutorials/pause-until-pressed.png"
+  "imageUrl":"/pxt-ev3/docs/static/tutorials/pause-until-pressed.png"
 }]
 ```
 

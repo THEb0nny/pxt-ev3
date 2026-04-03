@@ -8,7 +8,7 @@
   "description": "Build an security alert using the Infrared Sensor.",
   "cardType": "tutorial",
   "url":"/tutorials/security-alert",
-  "imageUrl":"/docs/static/tutorials/security-alert.png"
+  "imageUrl":"/pxt-ev3/docs/static/tutorials/security-alert.png"
 }]
 ```
 
