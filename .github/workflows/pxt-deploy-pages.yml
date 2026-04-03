@@ -35,18 +35,4 @@ jobs:
       - name: Rewrite docs paths in generated site
         run: |
           find built/gh-pages -type f -name "*.html" \
-            -exec sed -i 's|/docs/static/|/pxt-ev3/docs/static/|g' {} +
-
-      - name: Deploy to gh-pages
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git checkout --orphan gh-pages-temp
-          git rm -rf . || true
-          cp -r built/site/* .
-          touch .nojekyll
-          git add .
-          git commit -m "Deploy static site"
-          git branch -M gh-pages
-          git push -f origin gh-pages
+            -exec sed -i 's|/docs/static/|/pxt-ev3/docs/static/|g' {} +\
