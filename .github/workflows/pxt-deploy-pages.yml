@@ -26,7 +26,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
 
       - name: Install dependencies
         run: |
@@ -46,16 +45,55 @@ jobs:
           const data = JSON.parse(fs.readFileSync(path, 'utf8'));
 
           data.appTheme = data.appTheme || {};
-
           data.appTheme.logoUrl = 'https://theb0nny.github.io/pxt-ev3/';
           data.appTheme.homeUrl = 'https://theb0nny.github.io/pxt-ev3/';
 
-          if (data.appTheme.embedUrl) {
-            data.appTheme.embedUrl = 'https://theb0nny.github.io/pxt-ev3/';
-          }
-          if (data.appTheme.shareUrl) {
-            data.appTheme.shareUrl = 'https://theb0nny.github.io/pxt-ev3/';
-          }
-
           fs.writeFileSync(path, JSON.stringify(data, null, 4) + '\n');
-          
+          NODE
+
+      - name: Show patched appTheme
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const data = JSON.parse(fs.readFileSync('pxtarget.json', 'utf8'));
+          console.log(JSON.stringify(data.appTheme, null, 2));
+          NODE
+
+      - name: Build static package
+        run: |
+          pxt staticpkg --route pxt-ev3
+
+      - name: Fix docs asset paths
+        run: |
+          if [ -d "built/packaged/pxt-ev3/docs" ]; then
+            find built/packaged/pxt-ev3/docs -type f \( -name "*.html" -o -name "*.md" -o -name "*.json" \) \
+              -exec sed -i \
+                -e 's|src="/docs/static/|src="/pxt-ev3/docs/static/|g' \
+                -e 's|href="/docs/static/|href="/pxt-ev3/docs/static/|g' \
+                -e 's|](/docs/static/|](/pxt-ev3/docs/static/|g' \
+                -e 's|"\\/docs\\/static\\/|"/pxt-ev3/docs/static/|g' \
+              {} +
+          fi
+
+      - name: Debug remaining bad paths
+        run: |
+          grep -R '"/docs/static/' built/packaged/pxt-ev3 | head -50 || true
+          grep -R 'href="/docs/' built/packaged/pxt-ev3 | head -50 || true
+          grep -R 'src="/docs/' built/packaged/pxt-ev3 | head -50 || true
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: built/packaged/pxt-ev3
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
