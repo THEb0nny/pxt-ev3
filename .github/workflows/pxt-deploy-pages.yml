@@ -45,49 +45,59 @@ jobs:
           const data = JSON.parse(fs.readFileSync(path, 'utf8'));
 
           data.appTheme = data.appTheme || {};
+          const site = 'https://theb0nny.github.io/pxt-ev3/';
 
-          const base = 'https://theb0nny.github.io/pxt-ev3/';
+          data.appTheme.logoUrl = site;
+          data.appTheme.homeUrl = site;
 
-          data.appTheme.logoUrl = base;
-          data.appTheme.homeUrl = base;
-
-          if ('embedUrl' in data.appTheme) data.appTheme.embedUrl = base;
-          if ('shareUrl' in data.appTheme) data.appTheme.shareUrl = base;
-          if ('organizationUrl' in data.appTheme && data.appTheme.organizationUrl && data.appTheme.organizationUrl.startsWith('/')) {
-            data.appTheme.organizationUrl = base;
-          }
+          if ('embedUrl' in data.appTheme) data.appTheme.embedUrl = site;
+          if ('shareUrl' in data.appTheme) data.appTheme.shareUrl = site;
 
           if (Array.isArray(data.appTheme.docMenu)) {
             data.appTheme.docMenu = data.appTheme.docMenu.map(item => {
-              if (!item) return item;
-              const clone = { ...item };
-
+              if (!item || typeof item !== 'object') return item;
+              const out = { ...item };
               for (const key of ['path', 'url']) {
-                if (typeof clone[key] === 'string' && clone[key].startsWith('/')) {
-                  clone[key] = '/pxt-ev3' + clone[key];
+                if (typeof out[key] === 'string' && out[key].startsWith('/')) {
+                  out[key] = '/pxt-ev3' + out[key];
                 }
               }
-
-              return clone;
+              return out;
             });
           }
 
           fs.writeFileSync(path, JSON.stringify(data, null, 4) + '\n');
           NODE
 
-      - name: Show patched appTheme
+      - name: Patch docs sources before build
         run: |
-          node - <<'NODE'
-          const fs = require('fs');
-          const data = JSON.parse(fs.readFileSync('pxtarget.json', 'utf8'));
-          console.log(JSON.stringify(data.appTheme, null, 2));
-          NODE
+          if [ -d "docs" ]; then
+            find docs -type f \( -name "*.md" -o -name "*.json" \) \
+              -exec sed -i \
+                -e 's|"imageUrl": "/static/|"imageUrl": "/pxt-ev3/static/|g' \
+                -e "s|'imageUrl': '/static/|'imageUrl': '/pxt-ev3/static/|g" \
+                -e 's|"imageUrl": "/docs/static/|"imageUrl": "/pxt-ev3/docs/static/|g' \
+                -e "s|'imageUrl': '/docs/static/|'imageUrl': '/pxt-ev3/docs/static/|g" \
+                -e 's|](/static/|](/pxt-ev3/static/|g' \
+                -e 's|](/docs/static/|](/pxt-ev3/docs/static/|g' \
+                -e 's|src="/static/|src="/pxt-ev3/static/|g' \
+                -e 's|src="/docs/static/|src="/pxt-ev3/docs/static/|g' \
+                -e 's|href="/static/|href="/pxt-ev3/static/|g' \
+                -e 's|href="/docs/static/|href="/pxt-ev3/docs/static/|g' \
+              {} +
+          fi
+
+      - name: Debug source docs imageUrl values
+        run: |
+          echo '--- imageUrl in source docs ---'
+          grep -R '"imageUrl": "/' docs | head -100 || true
+          grep -R "'imageUrl': '/" docs | head -100 || true
 
       - name: Build static package
         run: |
           pxt staticpkg --route pxt-ev3
 
-      - name: Fix GitHub Pages paths
+      - name: Patch built output for GitHub Pages
         run: |
           ROOT="built/packaged/pxt-ev3"
 
@@ -109,23 +119,29 @@ jobs:
               {} +
           fi
 
-      - name: Debug remaining root-relative paths
+      - name: Debug remaining bad paths in build
         run: |
           ROOT="built/packaged/pxt-ev3"
 
-          echo '--- /docs/static leftovers ---'
-          grep -R '"/docs/static/' "$ROOT" | head -50 || true
-          grep -R "'/docs/static/" "$ROOT" | head -50 || true
-          grep -R '](/docs/static/' "$ROOT" | head -50 || true
+          echo '--- leftovers: /docs/static ---'
+          grep -R '"/docs/static/' "$ROOT" | head -100 || true
+          grep -R "'/docs/static/" "$ROOT" | head -100 || true
+          grep -R '](/docs/static/' "$ROOT" | head -100 || true
 
-          echo '--- /static leftovers ---'
-          grep -R '"/static/' "$ROOT" | head -50 || true
-          grep -R "'/static/" "$ROOT" | head -50 || true
-          grep -R '](/static/' "$ROOT" | head -50 || true
+          echo '--- leftovers: /static ---'
+          grep -R '"/static/' "$ROOT" | head -100 || true
+          grep -R "'/static/" "$ROOT" | head -100 || true
+          grep -R '](/static/' "$ROOT" | head -100 || true
 
-          echo '--- /docs leftovers ---'
-          grep -R 'href="/docs/' "$ROOT" | head -50 || true
-          grep -R 'src="/docs/' "$ROOT" | head -50 || true
+          echo '--- leftovers: lessons/tutorial imageUrl ---'
+          grep -R 'firmware.png' "$ROOT" | head -50 || true
+          grep -R 'try.png' "$ROOT" | head -50 || true
+          grep -R 'use.png' "$ROOT" | head -50 || true
+          grep -R 'wake-up.png' "$ROOT" | head -50 || true
+
+      - name: List built static assets
+        run: |
+          find built/packaged/pxt-ev3 -path '*static*' | head -200 || true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
