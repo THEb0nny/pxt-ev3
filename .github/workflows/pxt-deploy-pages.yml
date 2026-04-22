@@ -6,20 +6,29 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
-      - name: Install
+      - name: Install dependencies
         run: |
           npm install -g pxt
           npm install
@@ -29,36 +38,24 @@ jobs:
           npm install typescript@3.9.10 --save-dev
           npm install @types/ws@7.4.0 --save-dev
 
-      - name: Configure git identity
+      - name: Patch pxtarget.json for GitHub Pages
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          node - <<'NODE'
+          const fs = require('fs');
+          const path = 'pxtarget.json';
+          const data = JSON.parse(fs.readFileSync(path, 'utf8'));
 
-      - name: Delete old gh-pages branch
-        run: |
-          git push origin --delete gh-pages || true
+          data.appTheme = data.appTheme || {};
 
-      - name: Build GitHub Pages package
-        run: |
-          pxt staticpkg --route pxt-ev3 --githubpages
-      
-      - name: Fix docs asset paths
-        run: |
-          find gh-pages/docs -type f \( -name "*.html" -o -name "*.md" -o -name "*.json" \) \
-            -exec sed -i \
-              -e 's|src="/docs/static/|src="/pxt-ev3/docs/static/|g' \
-              -e 's|href="/docs/static/|href="/pxt-ev3/docs/static/|g' \
-              -e 's|](/docs/static/|](/pxt-ev3/docs/static/|g' \
-              -e 's|"\/docs\/static\/|"/pxt-ev3/docs/static/|g' \
-            {} +
+          data.appTheme.logoUrl = 'https://theb0nny.github.io/pxt-ev3/';
+          data.appTheme.homeUrl = 'https://theb0nny.github.io/pxt-ev3/';
 
-      - name: Debug remaining bad paths
-        run: |
-          grep -R '"/docs/static/' gh-pages/docs | head -50 || true
-      
-      - name: Push rewritten files
-        run: |
-          cd gh-pages
-          git add .
-          git commit -m "Fix docs static paths" || echo "No changes"
-          git push
+          if (data.appTheme.embedUrl) {
+            data.appTheme.embedUrl = 'https://theb0nny.github.io/pxt-ev3/';
+          }
+          if (data.appTheme.shareUrl) {
+            data.appTheme.shareUrl = 'https://theb0nny.github.io/pxt-ev3/';
+          }
+
+          fs.writeFileSync(path, JSON.stringify(data, null, 4) + '\n');
+          
