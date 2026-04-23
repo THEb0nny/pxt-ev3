@@ -41,17 +41,16 @@ jobs:
         run: |
           node - <<'NODE'
           const fs = require('fs');
-          const path = 'pxtarget.json';
-          const data = JSON.parse(fs.readFileSync(path, 'utf8'));
-
+          const data = JSON.parse(fs.readFileSync('pxtarget.json', 'utf8'));
           data.appTheme = data.appTheme || {};
-          const site = 'https://theb0nny.github.io/pxt-ev3/';
 
-          data.appTheme.logoUrl = site;
-          data.appTheme.homeUrl = site;
+          const base = 'https://theb0nny.github.io/pxt-ev3/';
 
-          if ('embedUrl' in data.appTheme) data.appTheme.embedUrl = site;
-          if ('shareUrl' in data.appTheme) data.appTheme.shareUrl = site;
+          data.appTheme.logoUrl = base;
+          data.appTheme.homeUrl = base;
+
+          if ('embedUrl' in data.appTheme) data.appTheme.embedUrl = base;
+          if ('shareUrl' in data.appTheme) data.appTheme.shareUrl = base;
 
           if (Array.isArray(data.appTheme.docMenu)) {
             data.appTheme.docMenu = data.appTheme.docMenu.map(item => {
@@ -66,7 +65,7 @@ jobs:
             });
           }
 
-          fs.writeFileSync(path, JSON.stringify(data, null, 4) + '\n');
+          fs.writeFileSync('pxtarget.json', JSON.stringify(data, null, 4) + '\n');
           NODE
 
       - name: Patch docs sources before build
@@ -74,74 +73,82 @@ jobs:
           if [ -d "docs" ]; then
             find docs -type f \( -name "*.md" -o -name "*.json" \) \
               -exec sed -i \
-                -e 's|"imageUrl": "/static/|"imageUrl": "/pxt-ev3/static/|g' \
-                -e "s|'imageUrl': '/static/|'imageUrl': '/pxt-ev3/static/|g" \
+                -e 's|"imageUrl": "/static/|"imageUrl": "/pxt-ev3/docs/static/|g' \
+                -e "s|'imageUrl': '/static/|'imageUrl': '/pxt-ev3/docs/static/|g" \
+                -e 's|"largeImageUrl": "/static/|"largeImageUrl": "/pxt-ev3/docs/static/|g' \
+                -e "s|'largeImageUrl': '/static/|'largeImageUrl': '/pxt-ev3/docs/static/|g" \
                 -e 's|"imageUrl": "/docs/static/|"imageUrl": "/pxt-ev3/docs/static/|g' \
                 -e "s|'imageUrl': '/docs/static/|'imageUrl': '/pxt-ev3/docs/static/|g" \
-                -e 's|](/static/|](/pxt-ev3/static/|g' \
+                -e 's|"largeImageUrl": "/docs/static/|"largeImageUrl": "/pxt-ev3/docs/static/|g' \
+                -e "s|'largeImageUrl': '/docs/static/|'largeImageUrl': '/pxt-ev3/docs/static/|g" \
+                -e 's|](/static/|](/pxt-ev3/docs/static/|g' \
                 -e 's|](/docs/static/|](/pxt-ev3/docs/static/|g' \
-                -e 's|src="/static/|src="/pxt-ev3/static/|g' \
+                -e 's|src="/static/|src="/pxt-ev3/docs/static/|g' \
                 -e 's|src="/docs/static/|src="/pxt-ev3/docs/static/|g' \
-                -e 's|href="/static/|href="/pxt-ev3/static/|g' \
+                -e 's|href="/static/|href="/pxt-ev3/docs/static/|g' \
                 -e 's|href="/docs/static/|href="/pxt-ev3/docs/static/|g' \
               {} +
           fi
 
-      - name: Debug source docs imageUrl values
+      - name: Debug source docs references
         run: |
-          echo '--- imageUrl in source docs ---'
-          grep -R '"imageUrl": "/' docs | head -100 || true
-          grep -R "'imageUrl': '/" docs | head -100 || true
+          echo '--- source refs to /static or /docs/static ---'
+          grep -R '"/static/' docs | head -100 || true
+          grep -R '"/docs/static/' docs | head -100 || true
+          grep -R "'/static/" docs | head -100 || true
+          grep -R "'/docs/static/" docs | head -100 || true
+          grep -R '/pxt-ev3/docs/static/' docs | head -100 || true
 
       - name: Build static package
         run: |
           pxt staticpkg --route pxt-ev3
 
-      - name: Patch built output for GitHub Pages
+      - name: Ensure docs/static exists in output
+        run: |
+          ROOT="built/packaged/pxt-ev3"
+          mkdir -p "$ROOT/docs/static"
+
+          if [ -d "docs/static" ]; then
+            cp -R docs/static/. "$ROOT/docs/static/" || true
+          fi
+
+      - name: Patch built output paths
         run: |
           ROOT="built/packaged/pxt-ev3"
 
           if [ -d "$ROOT" ]; then
             find "$ROOT" -type f \( -name "*.html" -o -name "*.md" -o -name "*.json" -o -name "*.js" -o -name "*.css" \) \
               -exec sed -i \
+                -e 's|src="/static/|src="/pxt-ev3/docs/static/|g' \
+                -e 's|href="/static/|href="/pxt-ev3/docs/static/|g' \
+                -e 's|url(/static/|url(/pxt-ev3/docs/static/|g' \
+                -e 's|](/static/|](/pxt-ev3/docs/static/|g' \
+                -e 's|"\\/static\\/|"/pxt-ev3/docs/static/|g' \
+                -e "s|'\\/static\\/|'\\/pxt-ev3\\/docs\\/static\\/|g" \
                 -e 's|src="/docs/static/|src="/pxt-ev3/docs/static/|g' \
                 -e 's|href="/docs/static/|href="/pxt-ev3/docs/static/|g' \
                 -e 's|url(/docs/static/|url(/pxt-ev3/docs/static/|g' \
                 -e 's|](/docs/static/|](/pxt-ev3/docs/static/|g' \
                 -e 's|"\\/docs\\/static\\/|"/pxt-ev3/docs/static/|g' \
                 -e "s|'\\/docs\\/static\\/|'\\/pxt-ev3\\/docs\\/static\\/|g" \
-                -e 's|src="/static/|src="/pxt-ev3/static/|g' \
-                -e 's|href="/static/|href="/pxt-ev3/static/|g' \
-                -e 's|url(/static/|url(/pxt-ev3/static/|g' \
-                -e 's|](/static/|](/pxt-ev3/static/|g' \
-                -e 's|"\\/static\\/|"/pxt-ev3/static/|g' \
-                -e "s|'\\/static\\/|'\\/pxt-ev3\\/static\\/|g" \
               {} +
           fi
 
-      - name: Debug remaining bad paths in build
+      - name: Debug built references
         run: |
           ROOT="built/packaged/pxt-ev3"
 
-          echo '--- leftovers: /docs/static ---'
-          grep -R '"/docs/static/' "$ROOT" | head -100 || true
-          grep -R "'/docs/static/" "$ROOT" | head -100 || true
-          grep -R '](/docs/static/' "$ROOT" | head -100 || true
-
-          echo '--- leftovers: /static ---'
+          echo '--- leftover bad refs ---'
           grep -R '"/static/' "$ROOT" | head -100 || true
+          grep -R '"/docs/static/' "$ROOT" | head -100 || true
           grep -R "'/static/" "$ROOT" | head -100 || true
-          grep -R '](/static/' "$ROOT" | head -100 || true
+          grep -R "'/docs/static/" "$ROOT" | head -100 || true
 
-          echo '--- leftovers: lessons/tutorial imageUrl ---'
-          grep -R 'firmware.png' "$ROOT" | head -50 || true
-          grep -R 'try.png' "$ROOT" | head -50 || true
-          grep -R 'use.png' "$ROOT" | head -50 || true
-          grep -R 'wake-up.png' "$ROOT" | head -50 || true
+          echo '--- correct refs ---'
+          grep -R '/pxt-ev3/docs/static/' "$ROOT" | head -100 || true
 
-      - name: List built static assets
-        run: |
-          find built/packaged/pxt-ev3 -path '*static*' | head -200 || true
+          echo '--- actual files ---'
+          find "$ROOT/docs/static" -type f | head -200 || true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
