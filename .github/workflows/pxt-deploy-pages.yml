@@ -28,7 +28,7 @@ jobs:
           node-version: 20
 
       - name: Install PXT globally
-        run: npm install -g pxt@8.7.2
+        run: npm install -g pxt
 
       - name: Install project dependencies
         run: npm install --ignore-scripts
