@@ -26,38 +26,35 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
-      - name: Install PXT and project deps
+      - name: Install PXT globally + project deps
         run: |
-          npm install -g pxt
-          npm install
+          npm install -g pxt@8.7.2
+          npm ci --ignore-scripts
 
-      - name: Pin legacy TypeScript and ws typings
+      - name: Pin legacy deps (no pxt-core rebuild)
         run: |
-          npm install typescript@3.9.10 --save-dev
-          npm install @types/ws@8.5.4 --save-dev
-
-      - name: Rebuild pxt-core against pinned TypeScript
-        run: |
-          cd node_modules/pxt-core
-          npm install
-          npx jake || true
-          cd ../..
-
-      - name: Verify TypeScript libs exist
-        run: |
-          ls -la node_modules/typescript/lib/lib.dom.d.ts
-          ls -la node_modules/typescript/lib/lib.es2017.d.ts
-          find node_modules/pxt-core -maxdepth 2 -type f | grep 'lib.dom.d.ts' || true
+          npm install typescript@3.9.10 @types/ws@8.5.4 --save-dev --no-save
 
       - name: Build static package
-        run: |
-          pxt staticpkg --route pxt-ev3
+        run: pxt staticpkg --route pxt-ev3
 
-      - name: Copy docs static assets
+      - name: Copy docs static assets  
         run: |
           mkdir -p built/packaged/pxt-ev3/docs/static
-          cp -R docs/static/. built/packaged/pxt-ev3/docs/static/ || true
+          cp -R docs/static/* built/packaged/pxt-ev3/docs/static/ 2>/dev/null || true
+
+      - name: **DEBUG: Find broken paths**
+        run: |
+          echo '=== @cdnUrl@ ==='
+          grep -R '@cdnUrl@' built/packaged/pxt-ev3/ || true
+          
+          echo '=== doubled pxt-ev3 ==='  
+          grep -R 'pxt-ev3.*pxt-ev3' built/packaged/pxt-ev3/ || true
+          
+          echo '=== tutorial refs ==='
+          grep -R 'tutorials.*png' built/packaged/pxt-ev3/ || true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -70,7 +67,6 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
