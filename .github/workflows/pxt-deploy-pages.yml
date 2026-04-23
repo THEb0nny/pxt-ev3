@@ -19,21 +19,42 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install dependencies
+      - name: Install PXT and project deps
         run: |
           npm install -g pxt
           npm install
 
-      - name: Build static package
-        run: pxt staticpkg --route pxt-ev3
+      - name: Pin legacy TypeScript and ws typings
+        run: |
+          npm install typescript@3.9.10 --save-dev
+          npm install @types/ws@8.5.4 --save-dev
 
-      - name: Copy static docs assets
+      - name: Rebuild pxt-core against pinned TypeScript
+        run: |
+          cd node_modules/pxt-core
+          npm install
+          npx jake || true
+          cd ../..
+
+      - name: Verify TypeScript libs exist
+        run: |
+          ls -la node_modules/typescript/lib/lib.dom.d.ts
+          ls -la node_modules/typescript/lib/lib.es2017.d.ts
+          find node_modules/pxt-core -maxdepth 2 -type f | grep 'lib.dom.d.ts' || true
+
+      - name: Build static package
+        run: |
+          pxt staticpkg --route pxt-ev3
+
+      - name: Copy docs static assets
         run: |
           mkdir -p built/packaged/pxt-ev3/docs/static
           cp -R docs/static/. built/packaged/pxt-ev3/docs/static/ || true
@@ -51,5 +72,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - id: deployment
+      - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
