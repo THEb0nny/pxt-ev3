@@ -19,11 +19,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
 
@@ -32,73 +30,13 @@ jobs:
           npm install -g pxt
           npm install
 
-      - name: Fix old deps
-        run: |
-          npm install typescript@3.9.10 --save-dev
-          npm install @types/ws@7.4.0 --save-dev
-
-      - name: Patch pxtarget.json for GitHub Pages
-        run: |
-          node - <<'NODE'
-          const fs = require('fs');
-          const data = JSON.parse(fs.readFileSync('pxtarget.json', 'utf8'));
-          data.appTheme = data.appTheme || {};
-
-          const base = 'https://theb0nny.github.io/pxt-ev3/';
-
-          data.appTheme.logoUrl = base;
-          data.appTheme.homeUrl = base;
-
-          if ('embedUrl' in data.appTheme) data.appTheme.embedUrl = base;
-          if ('shareUrl' in data.appTheme) data.appTheme.shareUrl = base;
-
-          fs.writeFileSync('pxtarget.json', JSON.stringify(data, null, 4) + '\n');
-          NODE
-
-      - name: Patch gallery imageUrl fields only
-        run: |
-          if [ -d "docs" ]; then
-            find docs -type f \( -name "*.md" -o -name "*.json" \) \
-              -exec sed -i \
-                -e 's|"imageUrl":[[:space:]]*"/docs/static/|"imageUrl": "/pxt-ev3/docs/static/|g' \
-                -e 's|"imageUrl":[[:space:]]*"/static/|"imageUrl": "/pxt-ev3/docs/static/|g' \
-                -e 's|"largeImageUrl":[[:space:]]*"/docs/static/|"largeImageUrl": "/pxt-ev3/docs/static/|g' \
-                -e 's|"largeImageUrl":[[:space:]]*"/static/|"largeImageUrl": "/pxt-ev3/docs/static/|g' \
-              {} +
-          fi
-
-      - name: Debug patched gallery refs in source
-        run: |
-          echo '--- source imageUrl refs ---'
-          grep -R '"imageUrl"' docs | head -200 || true
-          grep -R '"largeImageUrl"' docs | head -200 || true
-
       - name: Build static package
-        run: |
-          pxt staticpkg --route pxt-ev3
+        run: pxt staticpkg --route pxt-ev3
 
-      - name: Ensure docs/static exists in output
+      - name: Copy static docs assets
         run: |
-          ROOT="built/packaged/pxt-ev3"
-          mkdir -p "$ROOT/docs/static"
-
-          if [ -d "docs/static" ]; then
-            cp -R docs/static/. "$ROOT/docs/static/" || true
-          fi
-
-      - name: Debug tutorial assets in output
-        run: |
-          ROOT="built/packaged/pxt-ev3/docs/static/tutorials"
-          echo '--- tutorial assets present ---'
-          find "$ROOT" -maxdepth 1 -type f | sort | head -200 || true
-
-      - name: Debug bad doubled prefixes
-        run: |
-          ROOT="built/packaged/pxt-ev3"
-          echo '--- doubled prefixes (should be empty) ---'
-          grep -R '/pxt-ev3/pxt-ev3/' "$ROOT" | head -100 || true
-          grep -R '/docs/pxt-ev3/' "$ROOT" | head -100 || true
-          grep -R '@cdnUrl@' "$ROOT" | head -100 || true
+          mkdir -p built/packaged/pxt-ev3/docs/static
+          cp -R docs/static/. built/packaged/pxt-ev3/docs/static/ || true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -113,6 +51,5 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
+      - id: deployment
         uses: actions/deploy-pages@v4
