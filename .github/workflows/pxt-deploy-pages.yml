@@ -43,12 +43,10 @@ jobs:
           const fs = require('fs');
           const data = JSON.parse(fs.readFileSync('pxtarget.json', 'utf8'));
           data.appTheme = data.appTheme || {};
-
           const base = 'https://theb0nny.github.io/pxt-ev3/';
 
           data.appTheme.logoUrl = base;
           data.appTheme.homeUrl = base;
-
           if ('embedUrl' in data.appTheme) data.appTheme.embedUrl = base;
           if ('shareUrl' in data.appTheme) data.appTheme.shareUrl = base;
 
@@ -68,42 +66,31 @@ jobs:
           fs.writeFileSync('pxtarget.json', JSON.stringify(data, null, 4) + '\n');
           NODE
 
-      - name: Patch docs sources before build
+      - name: Rewrite docs source paths
         run: |
           if [ -d "docs" ]; then
-            find docs -type f \( -name "*.md" -o -name "*.json" \) \
+            find docs -type f \( -name "*.md" -o -name "*.json" -o -name "*.html" -o -name "*.js" -o -name "*.txt" \) \
               -exec sed -i \
-                -e 's|"imageUrl": "/static/|"imageUrl": "/pxt-ev3/docs/static/|g' \
-                -e "s|'imageUrl': '/static/|'imageUrl': '/pxt-ev3/docs/static/|g" \
-                -e 's|"largeImageUrl": "/static/|"largeImageUrl": "/pxt-ev3/docs/static/|g' \
-                -e "s|'largeImageUrl': '/static/|'largeImageUrl': '/pxt-ev3/docs/static/|g" \
-                -e 's|"imageUrl": "/docs/static/|"imageUrl": "/pxt-ev3/docs/static/|g' \
-                -e "s|'imageUrl': '/docs/static/|'imageUrl': '/pxt-ev3/docs/static/|g" \
-                -e 's|"largeImageUrl": "/docs/static/|"largeImageUrl": "/pxt-ev3/docs/static/|g' \
-                -e "s|'largeImageUrl': '/docs/static/|'largeImageUrl': '/pxt-ev3/docs/static/|g" \
-                -e 's|](/static/|](/pxt-ev3/docs/static/|g' \
-                -e 's|](/docs/static/|](/pxt-ev3/docs/static/|g' \
-                -e 's|src="/static/|src="/pxt-ev3/docs/static/|g' \
-                -e 's|src="/docs/static/|src="/pxt-ev3/docs/static/|g' \
-                -e 's|href="/static/|href="/pxt-ev3/docs/static/|g' \
-                -e 's|href="/docs/static/|href="/pxt-ev3/docs/static/|g' \
+                -e 's|/docs/static/|/pxt-ev3/docs/static/|g' \
+                -e 's|/static/|/pxt-ev3/docs/static/|g' \
               {} +
           fi
 
-      - name: Debug source docs references
+      - name: Debug docs source refs
         run: |
-          echo '--- source refs to /static or /docs/static ---'
+          echo '--- BAD refs in docs source ---'
+          grep -R '/docs/static/' docs | head -100 || true
           grep -R '"/static/' docs | head -100 || true
-          grep -R '"/docs/static/' docs | head -100 || true
           grep -R "'/static/" docs | head -100 || true
-          grep -R "'/docs/static/" docs | head -100 || true
+
+          echo '--- GOOD refs in docs source ---'
           grep -R '/pxt-ev3/docs/static/' docs | head -100 || true
 
       - name: Build static package
         run: |
           pxt staticpkg --route pxt-ev3
 
-      - name: Ensure docs/static exists in output
+      - name: Copy docs/static into published site
         run: |
           ROOT="built/packaged/pxt-ev3"
           mkdir -p "$ROOT/docs/static"
@@ -112,43 +99,71 @@ jobs:
             cp -R docs/static/. "$ROOT/docs/static/" || true
           fi
 
-      - name: Patch built output paths
+      - name: Rewrite built output paths
         run: |
           ROOT="built/packaged/pxt-ev3"
 
-          if [ -d "$ROOT" ]; then
-            find "$ROOT" -type f \( -name "*.html" -o -name "*.md" -o -name "*.json" -o -name "*.js" -o -name "*.css" \) \
-              -exec sed -i \
-                -e 's|src="/static/|src="/pxt-ev3/docs/static/|g' \
-                -e 's|href="/static/|href="/pxt-ev3/docs/static/|g' \
-                -e 's|url(/static/|url(/pxt-ev3/docs/static/|g' \
-                -e 's|](/static/|](/pxt-ev3/docs/static/|g' \
-                -e 's|"\\/static\\/|"/pxt-ev3/docs/static/|g' \
-                -e "s|'\\/static\\/|'\\/pxt-ev3\\/docs\\/static\\/|g" \
-                -e 's|src="/docs/static/|src="/pxt-ev3/docs/static/|g' \
-                -e 's|href="/docs/static/|href="/pxt-ev3/docs/static/|g' \
-                -e 's|url(/docs/static/|url(/pxt-ev3/docs/static/|g' \
-                -e 's|](/docs/static/|](/pxt-ev3/docs/static/|g' \
-                -e 's|"\\/docs\\/static\\/|"/pxt-ev3/docs/static/|g' \
-                -e "s|'\\/docs\\/static\\/|'\\/pxt-ev3\\/docs\\/static\\/|g" \
-              {} +
-          fi
+          find "$ROOT" -type f \( -name "*.html" -o -name "*.json" -o -name "*.js" -o -name "*.css" -o -name "*.md" \) \
+            -exec sed -i \
+              -e 's|/docs/static/|/pxt-ev3/docs/static/|g' \
+              -e 's|/static/|/pxt-ev3/docs/static/|g' \
+            {} +
 
-      - name: Debug built references
+      - name: Debug built refs
         run: |
           ROOT="built/packaged/pxt-ev3"
 
-          echo '--- leftover bad refs ---'
-          grep -R '"/static/' "$ROOT" | head -100 || true
+          echo '--- BAD refs in build ---'
           grep -R '"/docs/static/' "$ROOT" | head -100 || true
-          grep -R "'/static/" "$ROOT" | head -100 || true
           grep -R "'/docs/static/" "$ROOT" | head -100 || true
+          grep -R '"/static/' "$ROOT" | head -100 || true
+          grep -R "'/static/" "$ROOT" | head -100 || true
 
-          echo '--- correct refs ---'
-          grep -R '/pxt-ev3/docs/static/' "$ROOT" | head -100 || true
+          echo '--- GOOD refs in build ---'
+          grep -R '/pxt-ev3/docs/static/' "$ROOT" | head -200 || true
 
-          echo '--- actual files ---'
-          find "$ROOT/docs/static" -type f | head -200 || true
+      - name: Debug tutorial images presence
+        run: |
+          ROOT="built/packaged/pxt-ev3/docs/static/tutorials"
+
+          echo '--- tutorial image files ---'
+          find "$ROOT" -maxdepth 1 -type f | sort | head -200 || true
+
+          for f in \
+            wake-up.png \
+            make-an-animation.png \
+            what-animal-am-i.png \
+            pause-on-start.png \
+            music-brick.png \
+            run-motors.png \
+            smooth-turn.png \
+            tank-zigzag.png \
+            spin-turn.png \
+            pivot-turn.png \
+            coast-or-brake.png \
+            touch-sensor-values.png \
+            pause-until-pressed.png \
+            touch-to-run.png \
+            what-color.png \
+            line-following.png \
+            move-to-color.png \
+            redlight-greenlight.png \
+            reflected-light-measure.png \
+            reflected-light-calibration.png \
+            object-near.png \
+            wall-follower.png \
+            calibrate-gyro.png \
+            move-straight-with-gyro.png \
+            drifter.png \
+            turn-with-gyro.png \
+            security-alert.png
+          do
+            if [ -f "$ROOT/$f" ]; then
+              echo "FOUND $f"
+            else
+              echo "MISSING $f"
+            fi
+          done
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
