@@ -1,4 +1,4 @@
-name: pxt-deploy-static
+name: pxt-deploy-pages
 
 on:
   push:
@@ -38,6 +38,134 @@ jobs:
 
       - name: Build static package
         run: pxt staticpkg --route pxt-ev3
+
+      - name: Copy docs static assets into package
+        run: |
+          mkdir -p built/packaged/pxt-ev3/docs/static
+          if [ -d docs/static ]; then
+            cp -R docs/static/. built/packaged/pxt-ev3/docs/static/
+          fi
+
+      - name: Patch manifest and HTML only
+        run: |
+          set -e
+          PKG="built/packaged/pxt-ev3"
+
+          echo "Patch @cdnUrl@ only in html/json/webmanifest"
+          find "$PKG" -type f \( -name '*.html' -o -name '*.json' -o -name '*.webmanifest' \) -print0 | while IFS= read -r -d '' f; do
+            sed -i 's#@cdnUrl@#/pxt-ev3#g' "$f" || true
+          done
+
+          echo "Inject runtime patch into index.html for /docs/static/* and @cdnUrl@ references"
+          python3 - <<'PY'
+from pathlib import Path
+
+index = Path("built/packaged/pxt-ev3/index.html")
+text = index.read_text(encoding="utf-8")
+
+patch = r"""
+<script>
+(function () {
+  var BASE = "/pxt-ev3";
+
+  function fixUrl(url) {
+    if (!url || typeof url !== "string") return url;
+
+    if (url.indexOf("@cdnUrl@") >= 0) {
+      url = url.replace(/@cdnUrl@/g, BASE);
+    }
+
+    if (url.startsWith("/docs/static/")) {
+      url = BASE + url;
+    }
+
+    if (url.startsWith("docs/static/")) {
+      url = BASE + "/" + url;
+    }
+
+    if (url.indexOf("/@cdnUrl@/") >= 0) {
+      url = url.replace("/@cdnUrl@/", BASE + "/");
+    }
+
+    return url;
+  }
+
+  function patchAttr(el, attr) {
+    var v = el.getAttribute(attr);
+    if (!v) return;
+    var nv = fixUrl(v);
+    if (nv !== v) el.setAttribute(attr, nv);
+  }
+
+  function patchNode(root) {
+    if (!root || !root.querySelectorAll) return;
+
+    root.querySelectorAll("[src],[href],link[rel='manifest']").forEach(function (el) {
+      patchAttr(el, "src");
+      patchAttr(el, "href");
+    });
+
+    root.querySelectorAll("img").forEach(function (img) {
+      patchAttr(img, "src");
+      img.addEventListener("error", function () {
+        var cur = img.getAttribute("src");
+        var fixed = fixUrl(cur);
+        if (fixed !== cur) img.setAttribute("src", fixed);
+      }, { once: true });
+    });
+  }
+
+  var _fetch = window.fetch;
+  window.fetch = function(input, init) {
+    if (typeof input === "string") {
+      input = fixUrl(input);
+    } else if (input && typeof input.url === "string") {
+      input = fixUrl(input.url);
+    }
+    return _fetch.call(this, input, init);
+  };
+
+  var mo = new MutationObserver(function(muts) {
+    muts.forEach(function(m) {
+      m.addedNodes.forEach(function(node) {
+        if (node.nodeType === 1) {
+          if (node.matches && (node.matches("[src]") || node.matches("[href]"))) {
+            patchAttr(node, "src");
+            patchAttr(node, "href");
+          }
+          patchNode(node);
+        }
+      });
+    });
+  });
+
+  document.addEventListener("DOMContentLoaded", function() {
+    patchNode(document);
+    mo.observe(document.documentElement, { childList: true, subtree: true });
+  });
+})();
+</script>
+"""
+
+if patch not in text:
+    if "</head>" in text:
+        text = text.replace("</head>", patch + "\n</head>", 1)
+    else:
+        text = patch + "\n" + text
+
+index.write_text(text, encoding="utf-8")
+PY
+
+      - name: Debug packaged output
+        run: |
+          echo "=== remaining @cdnUrl@ in html/json/webmanifest ==="
+          find built/packaged/pxt-ev3 -type f \( -name '*.html' -o -name '*.json' -o -name '*.webmanifest' \) -exec grep -nH '@cdnUrl@' {} \; || true
+
+          echo "=== docs/static files copied ==="
+          find built/packaged/pxt-ev3/docs/static -type f | sort | head -n 200 || true
+
+          echo "=== index.html references to docs/static ==="
+          grep -n 'docs/static' built/packaged/pxt-ev3/index.html || true
 
       - name: Verify package output exists
         run: |
