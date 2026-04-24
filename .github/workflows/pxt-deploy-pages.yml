@@ -27,11 +27,23 @@ jobs:
         with:
           node-version: 20
 
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Force compatible toolchain
+        run: |
+          npm install --save-dev typescript@3.9.10
+          npm install --save-dev @types/ws@8.5.4
+          npm install --save-dev ws@8.14.2
+
+      - name: Rebuild pxt-core
+        run: |
+          cd node_modules/pxt-core
+          npm install
+          npx jake local
+
       - name: Install PXT CLI
         run: npm install -g pxt
-
-      - name: Install target dependencies
-        run: npm install
 
       - name: Build static package
         run: pxt staticpkg --route pxt-ev3
@@ -42,11 +54,14 @@ jobs:
           path: built/packaged/pxt-ev3
 
   deploy:
+    needs: build
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
+    permissions:
+      pages: write
+      id-token: write
 
     steps:
       - name: Deploy to GitHub Pages
