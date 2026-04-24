@@ -45,20 +45,26 @@ jobs:
           if [ -d docs/static ]; then
             cp -R docs/static/. built/packaged/pxt-ev3/docs/static/
           fi
+
       - name: Debug broken paths
         run: |
           echo '=== @cdnUrl@ ==='
           grep -R '@cdnUrl@' built/packaged/pxt-ev3/ || true
+
           echo '=== doubled pxt-ev3 ==='
           grep -R 'pxt-ev3.*pxt-ev3' built/packaged/pxt-ev3/ || true
+
           echo '=== tutorial refs ==='
           grep -R 'tutorials.*png' built/packaged/pxt-ev3/ || true
+
           echo '=== packaged root ==='
           find built/packaged/pxt-ev3 -maxdepth 2 -type f | sort | head -n 200
+
       - name: Verify package output exists
         run: |
           test -d built/packaged/pxt-ev3
           test -f built/packaged/pxt-ev3/index.html
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
