@@ -46,19 +46,19 @@ jobs:
             cp -R docs/static/. built/packaged/pxt-ev3/docs/static/
           fi
 
+      - name: Rewrite static asset paths
+        run: |
+          grep -RIl '../docs/static/' built/packaged/pxt-ev3 | xargs -r sed -i 's#../docs/static/#docs/static/#g'
+          grep -RIl '../../docs/static/' built/packaged/pxt-ev3 | xargs -r sed -i 's#../../docs/static/#docs/static/#g'
+          grep -RIl '/docs/static/' built/packaged/pxt-ev3 | xargs -r sed -i 's#/docs/static/#docs/static/#g'
+
       - name: Debug broken paths
         run: |
-          echo '=== @cdnUrl@ ==='
-          grep -R '@cdnUrl@' built/packaged/pxt-ev3/ || true
+          echo '=== docs/static refs ==='
+          grep -R 'docs/static' built/packaged/pxt-ev3/ || true
 
-          echo '=== doubled pxt-ev3 ==='
-          grep -R 'pxt-ev3.*pxt-ev3' built/packaged/pxt-ev3/ || true
-
-          echo '=== tutorial refs ==='
-          grep -R 'tutorials.*png' built/packaged/pxt-ev3/ || true
-
-          echo '=== packaged root ==='
-          find built/packaged/pxt-ev3 -maxdepth 2 -type f | sort | head -n 200
+          echo '=== route refs ==='
+          grep -R 'pxt-ev3' built/packaged/pxt-ev3/ || true
 
       - name: Verify package output exists
         run: |
