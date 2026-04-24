@@ -2,7 +2,8 @@ name: pxt-deploy-pages
 
 on:
   push:
-    branches: [master]
+    branches:
+      - master
   workflow_dispatch:
 
 permissions:
@@ -50,7 +51,6 @@ jobs:
         run: |
           set -e
           PKG="built/packaged/pxt-ev3"
-
           find "$PKG" -type f \( -name '*.html' -o -name '*.json' -o -name '*.webmanifest' \) -print0 | while IFS= read -r -d '' f; do
             sed -i 's#@cdnUrl@#/pxt-ev3#g' "$f" || true
           done
@@ -59,87 +59,132 @@ jobs:
         run: |
           set -e
           INDEX="built/packaged/pxt-ev3/index.html"
-          PATCH_FILE="$(mktemp)"
+          JS_FILE="$(mktemp)"
 
-          cat > "$PATCH_FILE" <<'EOF'
-<script>
-(function () {
-  var BASE = "/pxt-ev3";
+          printf '%s\n' \
+          '<script>' \
+          '(function(){' \
+          'var BASE="/pxt-ev3";' \
+          'function fixUrl(url){' \
+          ' if(!url||typeof url!=="string") return url;' \
+          ' if(url.indexOf("@cdnUrl@")>=0) url=url.replace(/@cdnUrl@/g,BASE);' \
+          ' if(url.startsWith("/docs/static/")) url=BASE+url;' \
+          ' if(url.startsWith("docs/static/")) url=BASE+"/"+url;' \
+          ' if(url.indexOf("/@cdnUrl@/")>=0) url=url.replace("/@cdnUrl@/",BASE+"/");' \
+          ' return url;' \
+          '}' \
+          'function patchAttr(el,attr){' \
+          ' var v=el.getAttribute(attr);' \
+          ' if(!v) return;' \
+          ' var nv=fixUrl(v);' \
+          ' if(nv!==v) el.setAttribute(attr,nv);' \
+          '}' \
+          'function patchTree(root){' \
+          ' if(!root||!root.querySelectorAll) return;' \
+          ' root.querySelectorAll("[src],[href]").forEach(function(el){' \
+          '   patchAttr(el,"src");' \
+          '   patchAttr(el,"href");' \
+          ' });' \
+          '}' \
+          'var originalFetch=window.fetch;' \
+          'if(originalFetch){' \
+          ' window.fetch=function(input,init){' \
+          '   if(typeof input==="string") input=fixUrl(input);' \
+          '   return originalFetch.call(this,input,init);' \
+          ' };' \
+          '}' \
+          'document.addEventListener("DOMContentLoaded",function(){' \
+          ' patchTree(document);' \
+          ' var mo=new MutationObserver(function(muts){' \
+          '   muts.forEach(function(m){' \
+          '     m.addedNodes.forEach(function(node){' \
+          '       if(node.nodeType===1){' \
+          '         if(node.matches&&(node.matches("[src]")||node.matches("[href]"))){' \
+          '           patchAttr(node,"src");' \
+          '           patchAttr(node,"href");' \
+          '         }' \
+          '         patchTree(node);' \
+          '       }' \
+          '     });' \
+          '   });' \
+          ' });' \
+          ' mo.observe(document.documentElement,{childList:true,subtree:true});' \
+          '});' \
+          '})();' \
+          '</script>' > "$JS_FILE"
 
-  function fixUrl(url) {
-    if (!url || typeof url !== "string") return url;
-    if (url.indexOf("@cdnUrl@") >= 0) url = url.replace(/@cdnUrl@/g, BASE);
-    if (url.startsWith("/docs/static/")) url = BASE + url;
-    if (url.startsWith("docs/static/")) url = BASE + "/" + url;
-    if (url.indexOf("/@cdnUrl@/") >= 0) url = url.replace("/@cdnUrl@/", BASE + "/");
-    return url;
-  }
+          perl -0pi -e 's#</head>#do { local $/; open my $fh, q(<), $ENV{"JS_FILE"}; my $p = <$fh>; $p . "\n</head>" }#se' "$INDEX"
 
-  function patchAttr(el, attr) {
-    var v = el.getAttribute(attr);
-    if (!v) return;
-    var nv = fixUrl(v);
-    if (nv !== v) el.setAttribute(attr, nv);
-  }
+        env:
+          JS_FILE: ${{ runner.temp }}/pxt-runtime-patch.js
 
-  function patchTree(root) {
-    if (!root || !root.querySelectorAll) return;
-    root.querySelectorAll("[src],[href]").forEach(function (el) {
-      patchAttr(el, "src");
-      patchAttr(el, "href");
-    });
-  }
+      - name: Prepare runtime patch file
+        run: |
+          printf '%s\n' \
+          '<script>' \
+          '(function(){' \
+          'var BASE="/pxt-ev3";' \
+          'function fixUrl(url){' \
+          ' if(!url||typeof url!=="string") return url;' \
+          ' if(url.indexOf("@cdnUrl@")>=0) url=url.replace(/@cdnUrl@/g,BASE);' \
+          ' if(url.startsWith("/docs/static/")) url=BASE+url;' \
+          ' if(url.startsWith("docs/static/")) url=BASE+"/"+url;' \
+          ' if(url.indexOf("/@cdnUrl@/")>=0) url=url.replace("/@cdnUrl@/",BASE+"/");' \
+          ' return url;' \
+          '}' \
+          'function patchAttr(el,attr){' \
+          ' var v=el.getAttribute(attr);' \
+          ' if(!v) return;' \
+          ' var nv=fixUrl(v);' \
+          ' if(nv!==v) el.setAttribute(attr,nv);' \
+          '}' \
+          'function patchTree(root){' \
+          ' if(!root||!root.querySelectorAll) return;' \
+          ' root.querySelectorAll("[src],[href]").forEach(function(el){' \
+          '   patchAttr(el,"src");' \
+          '   patchAttr(el,"href");' \
+          ' });' \
+          '}' \
+          'var originalFetch=window.fetch;' \
+          'if(originalFetch){' \
+          ' window.fetch=function(input,init){' \
+          '   if(typeof input==="string") input=fixUrl(input);' \
+          '   return originalFetch.call(this,input,init);' \
+          ' };' \
+          '}' \
+          'document.addEventListener("DOMContentLoaded",function(){' \
+          ' patchTree(document);' \
+          ' var mo=new MutationObserver(function(muts){' \
+          '   muts.forEach(function(m){' \
+          '     m.addedNodes.forEach(function(node){' \
+          '       if(node.nodeType===1){' \
+          '         if(node.matches&&(node.matches("[src]")||node.matches("[href]"))){' \
+          '           patchAttr(node,"src");' \
+          '           patchAttr(node,"href");' \
+          '         }' \
+          '         patchTree(node);' \
+          '       }' \
+          '     });' \
+          '   });' \
+          ' });' \
+          ' mo.observe(document.documentElement,{childList:true,subtree:true});' \
+          '});' \
+          '})();' \
+          '</script>' > "${{ runner.temp }}/pxt-runtime-patch.js"
 
-  var originalFetch = window.fetch;
-  if (originalFetch) {
-    window.fetch = function (input, init) {
-      if (typeof input === "string") input = fixUrl(input);
-      return originalFetch.call(this, input, init);
-    };
-  }
-
-  document.addEventListener("DOMContentLoaded", function () {
-    patchTree(document);
-
-    var mo = new MutationObserver(function (muts) {
-      muts.forEach(function (m) {
-        m.addedNodes.forEach(function (node) {
-          if (node.nodeType === 1) {
-            if (node.matches && (node.matches("[src]") || node.matches("[href]"))) {
-              patchAttr(node, "src");
-              patchAttr(node, "href");
-            }
-            patchTree(node);
-          }
-        });
-      });
-    });
-
-    mo.observe(document.documentElement, { childList: true, subtree: true });
-  });
-})();
-</script>
-EOF
-
-          awk -v patch="$(cat "$PATCH_FILE")" '
-            BEGIN { inserted = 0 }
-            /<\/head>/ && inserted == 0 {
-              print patch
-              inserted = 1
-            }
-            { print }
-          ' "$INDEX" > "$INDEX.tmp"
-
-          mv "$INDEX.tmp" "$INDEX"
+      - name: Inject prepared patch into index.html
+        run: |
+          set -e
+          INDEX="built/packaged/pxt-ev3/index.html"
+          PATCH="${{ runner.temp }}/pxt-runtime-patch.js"
+          perl -0pi -e 's#</head>#do { local $/; open my $fh, q(<), $ARGV[1]; my $p = <$fh>; $p . "\n</head>" }#se' "$INDEX" "$PATCH"
 
       - name: Debug packaged output
         run: |
           echo "=== remaining @cdnUrl@ in html/json/webmanifest ==="
           find built/packaged/pxt-ev3 -type f \( -name '*.html' -o -name '*.json' -o -name '*.webmanifest' \) -exec grep -nH '@cdnUrl@' {} \; || true
-
           echo "=== docs/static files copied ==="
           find built/packaged/pxt-ev3/docs/static -type f | sort | head -n 200 || true
-
           echo "=== index.html references to docs/static ==="
           grep -n 'docs/static' built/packaged/pxt-ev3/index.html || true
 
