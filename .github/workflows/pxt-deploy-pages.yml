@@ -39,11 +39,27 @@ jobs:
       - name: Build static package
         run: pxt staticpkg --route pxt-ev3
 
+      - name: Copy docs static assets
+        run: |
+          mkdir -p built/packaged/pxt-ev3/docs/static
+          if [ -d docs/static ]; then
+            cp -R docs/static/. built/packaged/pxt-ev3/docs/static/
+          fi
+      - name: Rewrite static asset paths
+        run: |
+          grep -RIl '../docs/static/' built/packaged/pxt-ev3 | xargs -r sed -i 's#../docs/static/#docs/static/#g'
+          grep -RIl '../../docs/static/' built/packaged/pxt-ev3 | xargs -r sed -i 's#../../docs/static/#docs/static/#g'
+          grep -RIl '/docs/static/' built/packaged/pxt-ev3 | xargs -r sed -i 's#/docs/static/#docs/static/#g'
+      - name: Debug broken paths
+        run: |
+          echo '=== docs/static refs ==='
+          grep -R 'docs/static' built/packaged/pxt-ev3/ || true
+          echo '=== route refs ==='
+          grep -R 'pxt-ev3' built/packaged/pxt-ev3/ || true
       - name: Verify package output exists
         run: |
           test -d built/packaged/pxt-ev3
           test -f built/packaged/pxt-ev3/index.html
-
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
