@@ -1,9 +1,8 @@
-name: pxt-deploy-pages
+name: Deploy PXT EV3 to GitHub Pages
 
 on:
   push:
-    branches:
-      - master
+    branches: [master]
   workflow_dispatch:
 
 permissions:
@@ -28,170 +27,14 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install PXT globally
+      - name: Install PXT CLI
         run: npm install -g pxt
 
-      - name: Install project dependencies
-        run: npm install --ignore-scripts
-
-      - name: Pin legacy deps
-        run: npm install typescript@3.9.10 @types/ws@8.5.4 --no-save
+      - name: Install target dependencies
+        run: npm install
 
       - name: Build static package
         run: pxt staticpkg --route pxt-ev3
-
-      - name: Copy docs static assets into package
-        run: |
-          mkdir -p built/packaged/pxt-ev3/docs/static
-          if [ -d docs/static ]; then
-            cp -R docs/static/. built/packaged/pxt-ev3/docs/static/
-          fi
-
-      - name: Patch html json and manifest only
-        run: |
-          set -e
-          PKG="built/packaged/pxt-ev3"
-          find "$PKG" -type f \( -name '*.html' -o -name '*.json' -o -name '*.webmanifest' \) -print0 | while IFS= read -r -d '' f; do
-            sed -i 's#@cdnUrl@#/pxt-ev3#g' "$f" || true
-          done
-
-      - name: Inject runtime docs path patch into index.html
-        run: |
-          set -e
-          INDEX="built/packaged/pxt-ev3/index.html"
-          JS_FILE="$(mktemp)"
-
-          printf '%s\n' \
-          '<script>' \
-          '(function(){' \
-          'var BASE="/pxt-ev3";' \
-          'function fixUrl(url){' \
-          ' if(!url||typeof url!=="string") return url;' \
-          ' if(url.indexOf("@cdnUrl@")>=0) url=url.replace(/@cdnUrl@/g,BASE);' \
-          ' if(url.startsWith("/docs/static/")) url=BASE+url;' \
-          ' if(url.startsWith("docs/static/")) url=BASE+"/"+url;' \
-          ' if(url.indexOf("/@cdnUrl@/")>=0) url=url.replace("/@cdnUrl@/",BASE+"/");' \
-          ' return url;' \
-          '}' \
-          'function patchAttr(el,attr){' \
-          ' var v=el.getAttribute(attr);' \
-          ' if(!v) return;' \
-          ' var nv=fixUrl(v);' \
-          ' if(nv!==v) el.setAttribute(attr,nv);' \
-          '}' \
-          'function patchTree(root){' \
-          ' if(!root||!root.querySelectorAll) return;' \
-          ' root.querySelectorAll("[src],[href]").forEach(function(el){' \
-          '   patchAttr(el,"src");' \
-          '   patchAttr(el,"href");' \
-          ' });' \
-          '}' \
-          'var originalFetch=window.fetch;' \
-          'if(originalFetch){' \
-          ' window.fetch=function(input,init){' \
-          '   if(typeof input==="string") input=fixUrl(input);' \
-          '   return originalFetch.call(this,input,init);' \
-          ' };' \
-          '}' \
-          'document.addEventListener("DOMContentLoaded",function(){' \
-          ' patchTree(document);' \
-          ' var mo=new MutationObserver(function(muts){' \
-          '   muts.forEach(function(m){' \
-          '     m.addedNodes.forEach(function(node){' \
-          '       if(node.nodeType===1){' \
-          '         if(node.matches&&(node.matches("[src]")||node.matches("[href]"))){' \
-          '           patchAttr(node,"src");' \
-          '           patchAttr(node,"href");' \
-          '         }' \
-          '         patchTree(node);' \
-          '       }' \
-          '     });' \
-          '   });' \
-          ' });' \
-          ' mo.observe(document.documentElement,{childList:true,subtree:true});' \
-          '});' \
-          '})();' \
-          '</script>' > "$JS_FILE"
-
-          perl -0pi -e 's#</head>#do { local $/; open my $fh, q(<), $ENV{"JS_FILE"}; my $p = <$fh>; $p . "\n</head>" }#se' "$INDEX"
-
-        env:
-          JS_FILE: ${{ runner.temp }}/pxt-runtime-patch.js
-
-      - name: Prepare runtime patch file
-        run: |
-          printf '%s\n' \
-          '<script>' \
-          '(function(){' \
-          'var BASE="/pxt-ev3";' \
-          'function fixUrl(url){' \
-          ' if(!url||typeof url!=="string") return url;' \
-          ' if(url.indexOf("@cdnUrl@")>=0) url=url.replace(/@cdnUrl@/g,BASE);' \
-          ' if(url.startsWith("/docs/static/")) url=BASE+url;' \
-          ' if(url.startsWith("docs/static/")) url=BASE+"/"+url;' \
-          ' if(url.indexOf("/@cdnUrl@/")>=0) url=url.replace("/@cdnUrl@/",BASE+"/");' \
-          ' return url;' \
-          '}' \
-          'function patchAttr(el,attr){' \
-          ' var v=el.getAttribute(attr);' \
-          ' if(!v) return;' \
-          ' var nv=fixUrl(v);' \
-          ' if(nv!==v) el.setAttribute(attr,nv);' \
-          '}' \
-          'function patchTree(root){' \
-          ' if(!root||!root.querySelectorAll) return;' \
-          ' root.querySelectorAll("[src],[href]").forEach(function(el){' \
-          '   patchAttr(el,"src");' \
-          '   patchAttr(el,"href");' \
-          ' });' \
-          '}' \
-          'var originalFetch=window.fetch;' \
-          'if(originalFetch){' \
-          ' window.fetch=function(input,init){' \
-          '   if(typeof input==="string") input=fixUrl(input);' \
-          '   return originalFetch.call(this,input,init);' \
-          ' };' \
-          '}' \
-          'document.addEventListener("DOMContentLoaded",function(){' \
-          ' patchTree(document);' \
-          ' var mo=new MutationObserver(function(muts){' \
-          '   muts.forEach(function(m){' \
-          '     m.addedNodes.forEach(function(node){' \
-          '       if(node.nodeType===1){' \
-          '         if(node.matches&&(node.matches("[src]")||node.matches("[href]"))){' \
-          '           patchAttr(node,"src");' \
-          '           patchAttr(node,"href");' \
-          '         }' \
-          '         patchTree(node);' \
-          '       }' \
-          '     });' \
-          '   });' \
-          ' });' \
-          ' mo.observe(document.documentElement,{childList:true,subtree:true});' \
-          '});' \
-          '})();' \
-          '</script>' > "${{ runner.temp }}/pxt-runtime-patch.js"
-
-      - name: Inject prepared patch into index.html
-        run: |
-          set -e
-          INDEX="built/packaged/pxt-ev3/index.html"
-          PATCH="${{ runner.temp }}/pxt-runtime-patch.js"
-          perl -0pi -e 's#</head>#do { local $/; open my $fh, q(<), $ARGV[1]; my $p = <$fh>; $p . "\n</head>" }#se' "$INDEX" "$PATCH"
-
-      - name: Debug packaged output
-        run: |
-          echo "=== remaining @cdnUrl@ in html/json/webmanifest ==="
-          find built/packaged/pxt-ev3 -type f \( -name '*.html' -o -name '*.json' -o -name '*.webmanifest' \) -exec grep -nH '@cdnUrl@' {} \; || true
-          echo "=== docs/static files copied ==="
-          find built/packaged/pxt-ev3/docs/static -type f | sort | head -n 200 || true
-          echo "=== index.html references to docs/static ==="
-          grep -n 'docs/static' built/packaged/pxt-ev3/index.html || true
-
-      - name: Verify package output exists
-        run: |
-          test -d built/packaged/pxt-ev3
-          test -f built/packaged/pxt-ev3/index.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -199,14 +42,11 @@ jobs:
           path: built/packaged/pxt-ev3
 
   deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
 
     steps:
       - name: Deploy to GitHub Pages
