@@ -123,7 +123,7 @@
         ],
         "lightToc": true,
         "docMenu": [{
-                "name": "Support",
+                "name": "Forum",
                 "path": "https://forum.makecode.com/"
             },
             {
@@ -141,10 +141,6 @@
             {
                 "name": "Reference",
                 "path": "/reference"
-            },
-            {
-                "name": "FIRST LEGO League",
-                "path": "/fll"
             }
         ],
         "print": true,
