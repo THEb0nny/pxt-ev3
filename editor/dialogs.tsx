@@ -1,32 +1,45 @@
 import * as React from "react";
 
-import { canUseWebSerial, enableWebSerialAsync } from "./deploy";
+import { canUseWebSerial, enableBluetoothWebSerialAsync, setUseBluetoothWebSerial } from "./deploy";
 import { projectView } from "./extension";
 
 let confirmAsync: (options: any) => Promise<number>;
+
+let bluetoothDialogShown = false;
 
 export function bluetoothTryAgainAsync(): Promise<void> {
     return confirmAsync({
         header: lf("Bluetooth download failed..."),
         jsx: <ul>
-            <li>{lf("Make sure to stop your program or exit portview on the EV3.")}</li>
+            <li>{lf("Make sure to stop your program or exit 'Port View' on the EV3.")}</li>
+            <li>{lf("Exit the pop-up windows on the EV3.")}</li>
+            <li>{lf("Close EV3 LabView or EV3 Classroom or other MakeCode editor tabs as they may be using the COM port.")}</li>
             <li>{lf("Check your battery level.")}</li>
-            <li>{lf("Close EV3 LabView or other MakeCode editor tabs.")}</li>
+            <li>{lf("Try restarting the Makecode editor tab.")}</li>
         </ul>,
-        hasCloseIcon: false,
-        hideCancel: true,
+        hasCloseIcon: true,
+        hideCancel: false,
         hideAgree: false,
         agreeLbl: lf("Try again")
     }).then(r => {});
 }
 
-function enableWebSerialAndCompileAsync() {
-    return enableWebSerialAsync()
-        .then(() => pxt.U.delay(500))
-        .then(() => projectView.compile());
+export function showEv3BusyDialogAsync(): Promise<void> {
+    return confirmAsync({
+        header: lf("EV3 is busy"),
+        body: lf("The EV3 brick is currently running a program. Please stop it and try again."),
+        hasCloseIcon: false,
+        hideCancel: true,
+        hideAgree: false,
+        agreeLbl: lf("OK")
+    }).then(r => {});
 }
 
-let bluetoothDialogShown = false;
+async function enableWebSerialAndCompileAsync() {
+    await enableBluetoothWebSerialAsync();
+    return projectView.compile();
+}
+
 function explainWebSerialPairingAsync(): Promise<void> {
     if (!confirmAsync || bluetoothDialogShown) return Promise.resolve();
 
@@ -42,9 +55,9 @@ function explainWebSerialPairingAsync(): Promise<void> {
             url: "/bluetooth"
         }],
         jsx: <p>
-            {lf("You will be prompted to select a serial port.")}
+            {lf("You will be prompted to select a serial port. ")}
             {pxt.BrowserUtils.isWindows()
-                ? lf("Look for 'Standard Serial over Bluetooth link'.")
+                ? lf("Look for 'Serial Port' or 'Standard Serial over Bluetooth link'.")
                 : lf("Loop for 'cu.EV3-SerialPort'.")}
             {lf("If you have paired multiple EV3, you might have to try out multiple ports until you find the correct one.")}
         </p>
@@ -62,7 +75,7 @@ export function showUploadDialogAsync(fn: string, url: string, _confirmAsync: (o
 
     const jsx =
         <div className="ui grid stackable">
-            <div className="column five wide" style={{ backgroundColor: "#E2E2E2" }}>
+            <div className="column five wide download-hint">
                 <div className="ui header">{lf("First time here?")}</div>
                 <strong style={{ fontSize: "small" }}>{lf("You must have version 1.10E or above of the firmware")}</strong>
                 <div style={{ justifyContent: "center", display: "flex", padding: "1rem" }}>
@@ -120,14 +133,16 @@ export function showUploadDialogAsync(fn: string, url: string, _confirmAsync: (o
         hideAgree: false,
         agreeLbl: lf("I got it"),
         className: 'downloaddialog',
-        buttons: [canUseWebSerial() && {
+        buttons: [
+        canUseWebSerial() && {
             label: lf("Bluetooth"),
             icon: "bluetooth",
             className: "bluetooth focused",
             onclick: () => {
                 pxt.tickEvent("bluetooth.enable");
+                setUseBluetoothWebSerial();
                 explainWebSerialPairingAsync()
-                    .then(() => enableWebSerialAndCompileAsync())
+                    .then(() => enableWebSerialAndCompileAsync());
             }
         }, downloadAgain && {
             label: fn,
