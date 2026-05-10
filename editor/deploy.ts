@@ -3,365 +3,476 @@
 
 import HF2 = pxt.HF2;
 import UF2 = pxtc.UF2;
+
 import { Ev3Wrapper } from "./wrap";
-import { bluetoothTryAgainAsync } from "./dialogs";
+import { bluetoothTryAgainAsync, showEv3BusyDialogAsync } from "./dialogs";
 
-export let ev3: Ev3Wrapper;
 
-export function debug() {
-    return initHidAsync()
-        .then(w => w.downloadFileAsync("/tmp/dmesg.txt", v => console.log(pxt.Util.uint8ArrayToString(v))))
+enum IOState {
+    Disconnected,
+    Connecting,
+    Connected
 }
 
-// Web Serial API https://wicg.github.io/serial/
-// https://www.npmjs.com/package/@types/web-bluetooth
-// chromium bug https://bugs.chromium.org/p/chromium/issues/detail?id=884928
-// Under experimental features in Chrome Desktop 77+
-enum ParityType {
-    "none",
-    "even",
-    "odd",
-    "mark",
-    "space"
-}
+class WebSerialIO implements pxt.packetio.PacketIO {
 
-declare interface SerialOptions {
-    baudRate?: number;
-    databits?: number;
-    stopbits?: number;
-    parity?: ParityType;
-    buffersize?: number;
-    rtscts?: boolean;
-    xon?: boolean;
-    xoff?: boolean;
-    xany?: boolean;
-}
+    onData = (v: Uint8Array) => {};
+    onEvent = (v: Uint8Array) => {};
+    onError = (e: Error) => {};
+    error: (msg: string) => void;
+    onConnectionChanged = () => {};
+    onDeviceConnectionChanged = () => {};
 
-type SerialPortInfo = pxt.Map<string>;
-type SerialPortRequestOptions = any;
+    private reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
+    private writer: WritableStreamDefaultWriter<Uint8Array> | undefined;
+    
+    private state: IOState = IOState.Disconnected;
 
-declare class SerialPort {
-    open(options?: SerialOptions): Promise<void>;
-    close(): void;
-    readonly readable: any;
-    readonly writable: any;
-    // getInfo(): SerialPortInfo;
-}
-
-declare interface Serial extends EventTarget {
-    onconnect: any;
-    ondisconnect: any;
-    getPorts(): Promise<SerialPort[]>
-    requestPort(options: SerialPortRequestOptions): Promise<SerialPort>;
-}
-
-class WebSerialPackageIO implements pxt.packetio.PacketIO {
-    onData: (v: Uint8Array) => void;
-    onError: (e: Error) => void;
-    onEvent: (v: Uint8Array) => void;
-    onSerial: (v: Uint8Array, isErr: boolean) => void;
-    sendSerialAsync: (buf: Uint8Array, useStdErr: boolean) => Promise<void>;
-    private _reader: any;
-    private _writer: any;
-
-    constructor(private port: SerialPort, private options: SerialOptions) {
-        console.log(`serial: New io`)
+    constructor(private port: any) {
+        console.log("serial: New WebSerialIO");
     }
 
-    bufferSize(buffer: Uint8Array) {
-        return HF2.read16(buffer, 0) + 2;
+    static supported(): boolean {
+        return !!(navigator as any).serial;
     }
 
-    async readSerialAsync() {
-        this._reader = this.port.readable.getReader();
-        let buffer: Uint8Array;
-        const reader = this._reader;
-        while (reader === this._reader) { // will change if we recycle the connection
-            const { done, value } = await this._reader.read();
-            if (!buffer) buffer = value;
-            else { // concat
-                let tmp = new Uint8Array(buffer.length + value.byteLength);
-                tmp.set(buffer, 0);
-                tmp.set(value, buffer.length);
-                buffer = tmp;
-            }
-            if (buffer) {
-                let size = this.bufferSize(buffer);
-                if (buffer.length == size) {
-                    this.onData(new Uint8Array(buffer));
-                    buffer = undefined;
-                } else if (buffer.length > size) {
-                    console.warn(`Received larger buffer than command command: ${buffer.length} received but waiting for ${size}`);
-                    let tmp = buffer.slice(0, size - 1);
-                    this.onData(new Uint8Array(tmp));
-                    tmp = buffer.slice(size, buffer.length - 1);
-                    buffer = tmp;
-                    console.debug(`Next buffer size: ${this.bufferSize(buffer)}`);
-                } else {
-                    console.warn(`Incomplete command: ${buffer.length} received but waiting for ${size}. Keep waiting...`);
-                }
+    static async createAsync(forceRequest: boolean): Promise<WebSerialIO> {
+        const serial = (navigator as any).serial;
+        if (!serial) throw new Error("WebSerial not supported");
+
+        let port: any;
+
+        if (!forceRequest) {
+            const ports = await serial.getPorts();
+            // Используем ранее разрешённый порт
+            if (ports && ports.length > 0) {
+                port = ports[0];
             }
         }
-    }
 
-    static isSupported(): boolean {
-        return !!(<any>navigator).serial;
-    }
-
-    static portIos: WebSerialPackageIO[] = [];
-
-    static async mkPacketIOAsync(): Promise<pxt.packetio.PacketIO> {
-        const serial = (<any>navigator).serial;
-        if (serial) {
+        // Если порт не найден ИЛИ forceRequest = true
+        if (!port) {
             try {
-                const requestOptions: SerialPortRequestOptions = {
-                    // filters: [{ usbVendorId: 0x0694, usbProductId: 0x0005 }],
-                };
-                const port = await serial.requestPort(requestOptions);
-
-                let io = WebSerialPackageIO.portIos.filter(i => i.port == port)[0];
-                if (!io) {
-                    const options: SerialOptions = {
-                        baudRate: 460800,
-                        buffersize: 4096
-                    };
-                    io = new WebSerialPackageIO(port, options);
-                    WebSerialPackageIO.portIos.push(io);
+                port = await serial.requestPort({});
+            } catch (e: any) {
+                // Пользователь закрыл окно выбора порта
+                if (e?.name === "NotFoundError") {
+                    throw new Error("NO_PORT_SELECTED");
                 }
-                return io;
-            } catch (e) {
-                console.log(`Connection error`, e)
+                // Пользователь запретил доступ
+                if (e?.name === "SecurityError") {
+                    
+                    throw new Error("PORT_PERMISSION_DENIED");
+                }
+                throw e; // Всё остальное — пробрасываем дальше
             }
         }
-        throw new Error("could not open serial port");
-    }
 
-    error(msg: string): any {
-        console.error(msg);
-        throw new Error(lf("error on brick ({0})", msg))
-    }
-
-    private openAsync() {
-        console.log(`serial: Opening port`);
-        // this.io.onConnectionChanged();
-        if (!!this._reader) return Promise.resolve();
-        this._reader = undefined;
-        this._writer = undefined;
-        return this.port.open(this.options)
-            .then(() => {
-                this.readSerialAsync();
-                return Promise.resolve();
-            });
-    }
-
-    private async closeAsync() {
-        // don't close port
-        return pxt.U.delay(500);
-    }
-
-    reconnectAsync(): Promise<void> {
-        return this.openAsync();
-    }
-
-    disconnectAsync(): Promise<void> {
-        return this.closeAsync();
-    }
-
-    sendPacketAsync(pkt: Uint8Array): Promise<void> {
-        if (!this._writer)
-            this._writer = this.port.writable.getWriter();
-        return this._writer.write(pkt);
-    }
-
-    onDeviceConnectionChanged(connect: boolean) {
-        throw new Error("onDeviceConnectionChanged not implemented");
-    }
-
-    onConnectionChanged() {
-        throw new Error("onConnectionChanged not implemented");
-    }
-
-    isConnecting() {
-        throw new Error("isConnecting not implemented");
-        return false;
+        return new WebSerialIO(port);
     }
 
     isConnected() {
-        throw new Error("isConnected not implemented");
-        return false;
+        return this.state === IOState.Connected;
     }
 
-    disposeAsync() {
-        return Promise.reject("disposeAsync not implemented")
-    }
-}
-
-function hf2Async() {
-    const pktIOAsync: Promise<pxt.packetio.PacketIO> = useWebSerial
-        ? WebSerialPackageIO.mkPacketIOAsync() : pxt.packetio.mkPacketIOAsync()
-    return pktIOAsync.then(h => {
-        let w = new Ev3Wrapper(h)
-        ev3 = w
-        return w.reconnectAsync(true)
-            .then(() => w)
-    })
-}
-
-let useHID = false;
-let useWebSerial = false;
-
-export function initAsync(): Promise<void> {
-    if (pxt.U.isNodeJS) {
-        // doesn't seem to work ATM
-        useHID = false
-    } else {
-        const nodehid = /nodehid/i.test(window.location.href);
-        if (pxt.BrowserUtils.isLocalHost() && pxt.Cloud.localToken && nodehid)
-            useHID = true;
+    isConnecting() {
+        return this.state === IOState.Connecting;
     }
 
-    if (WebSerialPackageIO.isSupported())
-        pxt.tickEvent("webserial.supported");
+    async reconnectAsync(): Promise<void> {
+        // if (this.isOpen) return;
+        // if (this.isOpen) {
+        //     try { await this.disconnectAsync(); } catch {}
+        // }
 
-    return Promise.resolve();
-}
+        if (this.state === IOState.Connected) {
+            // Порт уже открыт — не трогаем, т.к. Timeout не означает разрыв
+            return;
+        }
 
-export function canUseWebSerial() {
-    return WebSerialPackageIO.isSupported();
-}
+        if (this.state === IOState.Connecting) {
+            throw new Error("CONNECT_IN_PROGRESS");
+        }
 
-export function enableWebSerialAsync() {
-    initPromise = undefined;
-    useWebSerial = WebSerialPackageIO.isSupported();
-    useHID = useWebSerial;
-    if (useWebSerial)
-        return initHidAsync().then(() => { });
-    else return Promise.resolve();
-}
+        this.state = IOState.Connecting;
 
-async function cleanupAsync() {
-    if (ev3) {
-        console.log('cleanup previous port')
         try {
-            await ev3.disconnectAsync()
-        }
-        catch (e) {
-
-        }
-        finally {
-            ev3 = undefined;
+            await this.port.open({ baudRate: 460800, bufferSize: 4096 });
+            this.state = IOState.Connected;
+            this.onConnectionChanged();
+            this.startReader();
+        } catch (e: any) {
+            this.state = IOState.Disconnected;
+            const name = e?.name || "";
+            if (name === "NetworkError") {
+                throw new Error("PORT_OPEN_FAILED");
+            }
+            if (name === "SecurityError") {
+                throw new Error("PORT_PERMISSION_DENIED");
+            }
+            throw e;
         }
     }
-}
 
-let initPromise: Promise<Ev3Wrapper>
+    async disconnectAsync(): Promise<void> {
+        if (this.state === IOState.Disconnected) {
+            return;
+        }
 
-function initHidAsync() { // needs to run within a click handler
-    if (initPromise)
-        return initPromise
-    if (useHID) {
-        initPromise = cleanupAsync()
-            .then(() => hf2Async())
-            .catch((err: any) => {
-                console.error(err);
-                initPromise = null
-                useHID = false;
-                useWebSerial = false;
-                return Promise.reject(err);
-            })
-    } else {
-        useHID = false
-        useWebSerial = false;
-        initPromise = Promise.reject(new Error("no HID"))
+        this.state = IOState.Disconnected;
+
+        try {
+            if (this.reader) {
+                try { await this.reader.cancel(); } catch {}
+                try { this.reader.releaseLock(); } catch {}
+                this.reader = undefined;
+            }
+            if (this.writer) {
+                try { this.writer.releaseLock(); } catch {}
+                this.writer = undefined;
+            }
+            await this.port.close();
+        } catch (e) {
+            console.warn("serial close error", e);
+        }
+        this.onConnectionChanged();
     }
-    return initPromise;
+
+    async sendPacketAsync(pkt: Uint8Array): Promise<void> {
+        if (!this.writer) {
+            this.writer = this.port.writable.getWriter();
+        }
+        await this.writer.write(pkt);
+    }
+
+    disposeAsync(): Promise<void> {
+        return this.disconnectAsync();
+    }
+
+    bufferSize(buf: Uint8Array) {
+        return pxt.HF2.read16(buf, 0) + 2;
+    }
+
+    private async startReader() {
+        this.reader = this.port.readable.getReader();
+        let buffer: Uint8Array | undefined;
+
+        try {
+            while (this.state === IOState.Connected) {
+                const { done, value } = await this.reader.read();
+                if (done || !value) break;
+
+                buffer = buffer
+                    ? pxt.U.uint8ArrayConcat([buffer, value])
+                    : value;
+
+                while (buffer && buffer.length >= 2) {
+                    const size = pxt.HF2.read16(buffer, 0) + 2;
+                    if (buffer.length < size) break;
+
+                    const pkt = buffer.slice(0, size);
+                    this.onData(pkt);
+
+                    buffer = buffer.length > size ? buffer.slice(size) : undefined;
+                }
+            }
+        } catch (e) {
+            console.warn("Reader crashed", e);
+        } finally {
+            this.state = IOState.Disconnected;
+            try { this.reader?.releaseLock(); } catch {}
+            this.reader = undefined;
+            this.onConnectionChanged();
+        }
+    }
+    
 }
 
-// this comes from aux/pxt.lms
-const fspath = "../prjs/BrkProg_SAVE/"
+
+enum TransportState {
+    Unpaired,
+    Idle,
+    Connecting,
+    Connected,
+    Disconnecting,
+    FatalError
+}
+
+class TransportManager {
+
+    private state = TransportState.Unpaired;
+    private wrapper?: Ev3Wrapper;
+    private io?: WebSerialIO;
+
+    private connectPromise?: Promise<Ev3Wrapper>; // Защита от параллельных connectAsync()
+
+    async connectAsync(): Promise<Ev3Wrapper> {
+        // Уже подключены
+        if (this.state === TransportState.Connected && this.wrapper) {
+            return this.wrapper;
+        }
+        // Если уже идёт подключение — возвращаем тот же Promise
+        if (this.connectPromise) {
+            return this.connectPromise;
+        }
+
+        this.connectPromise = this.doConnectAsync();
+        try {
+            return await this.connectPromise;
+        } finally {
+            this.connectPromise = undefined;
+        }
+    }
+
+    private async doConnectAsync(): Promise<Ev3Wrapper> {
+        if (!WebSerialIO.supported()) {
+            this.state = TransportState.FatalError;
+            throw new Error("WebSerial not supported");
+        }
+
+        try {
+            // Если IO уже существует — сначала закрываем его
+            // if (this.io) {
+            //     try { await this.io.disconnectAsync(); } catch {}
+            //     this.io = undefined;
+            //     this.wrapper = undefined;
+            // }
+            // Не создаём новый IO если он уже существует
+            if (!this.io) {
+                const force = this.state === TransportState.Unpaired;
+                this.io = await WebSerialIO.createAsync(force);
+            }
+            // this.io = await WebSerialIO.createAsync(false);
+            this.state = TransportState.Connecting;
+            await this.io.reconnectAsync();
+            if (!this.wrapper) {
+                this.wrapper = new Ev3Wrapper(this.io);
+            }
+            // this.wrapper = new Ev3Wrapper(this.io);
+            this.state = TransportState.Connected;
+            return this.wrapper;
+        } catch (e: any) {
+            // Пользователь просто закрыл окно выбора порта
+            if (e?.message === "NO_PORT_SELECTED") {
+                this.state = TransportState.Idle;
+                throw e;
+            }
+            if (e?.message === "PORT_PERMISSION_DENIED") {
+                this.state = TransportState.Idle;
+                throw e;
+            }
+            if (e?.message === "PORT_OPEN_FAILED") {
+                console.warn("Bluetooth connection is stuck. Windows did not release the RFCOMM channel. Please reset Bluetooth or re-enable the COM port.");
+                await bluetoothTryAgainAsync();
+                // Уничтожаем старый IO если он есть
+                if (this.io) {
+                    try { await this.io.disconnectAsync(); } catch {}
+                    this.io = undefined;
+                    this.wrapper = undefined;
+                }
+                this.state = TransportState.Connecting;
+                try {
+                    // Retry — принудительный выбор порта
+                    await this.openAsync(true);
+                    this.state = TransportState.Connected;
+                    return this.wrapper!;
+                } catch (retryError) {
+                    this.state = TransportState.FatalError;
+                    throw retryError;
+                }
+            }
+            this.state = TransportState.FatalError;
+            throw e;
+        }
+    }
+
+    private async openAsync(forceRequest: boolean): Promise<void> {
+        this.io = await WebSerialIO.createAsync(forceRequest);
+        try {
+            await this.io.reconnectAsync();
+        } catch (e) {
+            // Если reconnect не удался — чистим io
+            this.io = undefined;
+            throw e;
+        }
+        this.wrapper = new Ev3Wrapper(this.io);
+    }
+
+    async disconnectAsync() {
+        if (!this.io) {
+            this.state = TransportState.Idle;
+            return;
+        }
+        this.state = TransportState.Disconnecting;
+        try {
+            await this.io.disconnectAsync();
+        } finally {
+            this.io = undefined;
+            this.wrapper = undefined;
+            this.state = TransportState.Idle;
+        }
+    }
+
+    async hardResetAsync() {
+        console.log("serial: HARD RESET");
+        try { await this.disconnectAsync(); } catch {}
+        this.state = TransportState.Idle;
+    }
+
+}
+
+
+enum DeployTransport {
+    FileTransfer,
+    BluetoothWebSerial,
+    UsbHid
+}
+
+let preferredTransport = DeployTransport.FileTransfer;
+
+export function canUseWebSerial(): boolean {
+    return !!(navigator as any).serial;
+}
+
+export function setUseUsbHID() {
+    preferredTransport = DeployTransport.UsbHid;
+}
+
+export function setUseBluetoothWebSerial() {
+    preferredTransport = DeployTransport.BluetoothWebSerial;
+}
+
+export async function enableBluetoothWebSerialAsync(): Promise<void> {
+    preferredTransport = DeployTransport.BluetoothWebSerial;
+}
+
+
+const transport = new TransportManager();
+
+// This comes from aux/pxt.lms
+const defaultDeployFolder = "BrkProg_SAVE";
 const rbfTemplate = `
 4c45474f580000006d000100000000001c000000000000000e000000821b038405018130813e8053
 74617274696e672e2e2e0084006080XX00448581644886488405018130813e80427965210084000a
-`
+`;
 
-export function deployCoreAsync(resp: pxtc.CompileResult) {
-    let filename = resp.downloadFileBaseName || "pxt"
-    filename = filename.replace(/^lego-/, "")
+export async function deployCoreAsync(resp: pxtc.CompileResult) {
+    const filename = (resp.downloadFileBaseName || "pxt").replace(/^lego-/, "");
 
-    let elfPath = fspath + filename + ".elf"
-    let rbfPath = fspath + filename + ".rbf"
+    const projectPxtJson = await (window as any).getPxtJson();
 
-    let rbfHex = rbfTemplate
+    const isWebSerial = preferredTransport === DeployTransport.BluetoothWebSerial;
+
+    const deployFolder =
+        isWebSerial && projectPxtJson?.deployFolder ? projectPxtJson.deployFolder : defaultDeployFolder;
+
+    const fspath = `../prjs/${deployFolder}/`;
+    console.log(`fspath: ${fspath}`);
+    const elfPath = fspath + filename + ".elf";
+    const rbfPath = fspath + filename + ".rbf";
+
+    // Build rbf
+    const rbfHex = rbfTemplate
         .replace(/\s+/g, "")
-        .replace("XX", pxt.U.toHex(pxt.U.stringToUint8Array(elfPath)))
-    let rbfBIN = pxt.U.fromHex(rbfHex)
-    pxt.HF2.write16(rbfBIN, 4, rbfBIN.length)
+        .replace("XX", pxt.U.toHex(pxt.U.stringToUint8Array(elfPath)));
 
-    let origElfUF2 = UF2.parseFile(pxt.U.stringToUint8Array(ts.pxtc.decodeBase64(resp.outfiles[pxt.outputName()])))
+    const rbfBIN = pxt.U.fromHex(rbfHex);
+    HF2.write16(rbfBIN, 4, rbfBIN.length);
 
-    let mkFile = (ext: string, data: Uint8Array = null) => {
-        let f = UF2.newBlockFile()
-        f.filename = "Projects/" + filename + ext
-        if (data)
-            UF2.writeBytes(f, 0, data)
-        return f
-    }
+    // Parse elf
+    const origElfUF2 = UF2.parseFile(
+        pxt.U.stringToUint8Array(
+            ts.pxtc.decodeBase64(resp.outfiles[pxt.outputName()])
+        )
+    );
+    
+    // USB MODE (UF2 packaging like original pxt-ev3)
+    if (!isWebSerial) {
+        const mkFile = (ext: string, data?: Uint8Array) => {
+            const f = UF2.newBlockFile();
+            f.filename = "Projects/" + filename + ext;
+            if (data) UF2.writeBytes(f, 0, data);
+            return f;
+        };
 
-    let elfUF2 = mkFile(".elf")
-    for (let b of origElfUF2) {
-        UF2.writeBytes(elfUF2, b.targetAddr, b.data)
-    }
+        const elfUF2 = mkFile(".elf");
 
-    let r = UF2.concatFiles([elfUF2, mkFile(".rbf", rbfBIN)])
-    let data = UF2.serializeFile(r)
+        for (const b of origElfUF2) {
+            UF2.writeBytes(elfUF2, b.targetAddr, b.data);
+        }
 
-    resp.outfiles[pxtc.BINARY_UF2] = btoa(data)
+        const combined = UF2.concatFiles([
+            elfUF2,
+            mkFile(".rbf", rbfBIN)
+        ]);
 
-    let saveUF2Async = () => {
-        if (pxt.commands && pxt.commands.electronDeployAsync) {
+        const data = UF2.serializeFile(combined);
+
+        resp.outfiles[pxtc.BINARY_UF2] = btoa(data);
+
+        if (pxt.commands?.electronDeployAsync) {
             return pxt.commands.electronDeployAsync(resp);
         }
-        if (pxt.commands && pxt.commands.saveOnlyAsync) {
+        if (pxt.commands?.saveOnlyAsync) {
             return pxt.commands.saveOnlyAsync(resp);
         }
+
         return Promise.resolve();
     }
 
-    if (!useHID) return saveUF2Async()
-
+    // WEBSERIAL MODE
     pxt.tickEvent("webserial.flash");
-    let w: Ev3Wrapper;
-    return initHidAsync()
-        .then(w_ => {
-            w = w_
-            if (w.isStreaming)
-                pxt.U.userError("please stop the program first")
-            return w.reconnectAsync(false)
-                .catch(e => {
-                    // user easily forgets to stop robot
-                    bluetoothTryAgainAsync().then(() => w.disconnectAsync())
-                        .then(() => pxt.U.delay(1000))
-                        .then(() => w.reconnectAsync());
-
-                    // nothing we can do
-                    return Promise.reject(e);
-                })
-        })
-        .then(() => w.stopAsync())
-        .then(() => w.rmAsync(elfPath))
-        .then(() => w.flashAsync(elfPath, UF2.readBytes(origElfUF2, 0, origElfUF2.length * 256)))
-        .then(() => w.flashAsync(rbfPath, rbfBIN))
-        .then(() => w.runAsync(rbfPath))
-        .then(() => pxt.U.delay(500))
-        .then(() => {
-            pxt.tickEvent("webserial.success");
-            return w.disconnectAsync()
-            //return Promise.delay(1000).then(() => w.dmesgAsync())
-        }).catch(e => {
-            pxt.tickEvent("webserial.fail");
-            useHID = false;
-            useWebSerial = false;
-            // if we failed to initalize, tell the user to retry
-            return Promise.reject(e)
-        })
+    try {
+        const wrapper = await transport.connectAsync();
+        // if (wrapper.isStreaming) pxt.U.userError("Stop program first"); // Data values streaming? Not use
+        
+        try {
+            await wrapper.stopAsync();
+        } catch (e: any) {
+            if (/Timeout/i.test(e?.message || "")) {
+                console.warn("Timeout. EV3 is busy. Stop the running program and try again.");
+                await showEv3BusyDialogAsync();
+                return;
+            }
+            throw e;
+        }
+        await wrapper.rmAsync(elfPath);
+        await wrapper.flashAsync(
+            elfPath,
+            UF2.readBytes(origElfUF2, 0, origElfUF2.length * 256)
+        );
+        await wrapper.flashAsync(rbfPath, rbfBIN);
+        await wrapper.runAsync(rbfPath);
+        pxt.tickEvent("webserial.success");
+    } catch (e: any) {
+        pxt.tickEvent("webserial.fail");
+        // await transport.hardResetAsync();
+        throw e;
+    }
 }
+
+// (pxt.commands as any).getDownloadMenuItems = () => {
+//     return [
+//         {
+//             text: lf("Download as File"),
+//             icon: "download",
+//             value: "usb"
+//         },
+//         {
+//             text: lf("Download via Bluetooth"),
+//             icon: "bluetooth",
+//             value: "webserial"
+//         }
+//     ];
+// };
+
+// (pxt.commands as any).onDownloadMenuItemClick = async (opts: any) => {
+//     console.log("Download menu click:", opts);
+//     const value = opts?.value;
+//     if (value === "webserial") {
+//         preferredTransport = "webserial";
+//     } else {
+//         preferredTransport = undefined;
+//     }
+//     await (window as any).projectView.compile();
+// };
