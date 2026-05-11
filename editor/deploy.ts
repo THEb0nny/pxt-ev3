@@ -15,6 +15,7 @@ enum IOState {
 }
 
 class WebSerialIO implements pxt.packetio.PacketIO {
+    // Web Serial API https://wicg.github.io/serial/
 
     onData = (v: Uint8Array) => {};
     onEvent = (v: Uint8Array) => {};
@@ -53,7 +54,11 @@ class WebSerialIO implements pxt.packetio.PacketIO {
         // Если порт не найден ИЛИ forceRequest = true
         if (!port) {
             try {
-                port = await serial.requestPort({});
+                port = await serial.requestPort({
+                    filters: [{
+                        bluetoothServiceClassId: "00001101-0000-1000-8000-00805f9b34fb"
+                    }]
+                }); // Bluetooth Classic Serial Port Profile (SPP)
             } catch (e: any) {
                 // Пользователь закрыл окно выбора порта
                 if (e?.name === "NotFoundError") {
