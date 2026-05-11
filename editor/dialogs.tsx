@@ -11,11 +11,11 @@ export function bluetoothTryAgainAsync(): Promise<void> {
     return confirmAsync({
         header: lf("Bluetooth download failed..."),
         jsx: <ul>
-            <li>{lf("Make sure to stop your program or exit 'Port View' on the EV3.")}</li>
+            <li>{lf("Make sure to stop your program or exit 'Port View' and 'Motor Control' or others on the EV3.")}</li>
             <li>{lf("Exit the pop-up windows on the EV3.")}</li>
             <li>{lf("Close EV3 LabView or EV3 Classroom or other MakeCode editor tabs as they may be using the COM port.")}</li>
-            <li>{lf("Check your battery level.")}</li>
-            <li>{lf("Try restarting the Makecode editor tab.")}</li>
+            <li>{lf("Try restarting the Makecode editor tab and browser.")}</li>
+            {/* <li>{lf("Check your battery level.")}</li> */}
         </ul>,
         hasCloseIcon: true,
         hideCancel: false,
@@ -57,7 +57,7 @@ function explainWebSerialPairingAsync(): Promise<void> {
         jsx: <p>
             {lf("You will be prompted to select a serial port. ")}
             {pxt.BrowserUtils.isWindows()
-                ? lf("Look for 'Serial Port' or 'Standard Serial over Bluetooth link' or maybe 'EV3'.")
+                ? lf("Look for 'Serial Port' or 'Standard Serial over Bluetooth link' or maybe brick name ('EV3' by default).")
                 : lf("Loop for 'cu.EV3-SerialPort'.")}
             {lf("If you have paired multiple EV3, you might have to try out multiple ports until you find the correct one.")}
         </p>
