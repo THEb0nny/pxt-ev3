@@ -66,7 +66,6 @@ class WebSerialIO implements pxt.packetio.PacketIO {
                 }
                 // Пользователь запретил доступ
                 if (e?.name === "SecurityError") {
-                    
                     throw new Error("PORT_PERMISSION_DENIED");
                 }
                 throw e; // Всё остальное — пробрасываем дальше
@@ -167,9 +166,7 @@ class WebSerialIO implements pxt.packetio.PacketIO {
                 const { done, value } = await this.reader.read();
                 if (done || !value) break;
 
-                buffer = buffer
-                    ? pxt.U.uint8ArrayConcat([buffer, value])
-                    : value;
+                buffer = buffer ? pxt.U.uint8ArrayConcat([buffer, value]) : value;
 
                 while (buffer && buffer.length >= 2) {
                     const size = pxt.HF2.read16(buffer, 0) + 2;
