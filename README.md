@@ -1,6 +1,6 @@
-# LEGO® MINDSTORMS® Education EV3 for Microsoft MakeCode [![Build Status](https://travis-ci.org/microsoft/pxt-ev3.svg?branch=master)](https://travis-ci.org/microsoft/pxt-ev3)
+# Community fork LEGO® MINDSTORMS® Education EV3 for Microsoft MakeCode [![Build Status](https://travis-ci.org/microsoft/pxt-ev3.svg?branch=master)](https://travis-ci.org/microsoft/pxt-ev3)
 
-This repo contains the editor target hosted at https://makecode.mindstorms.com
+This repo contains the editor target hosted at https://pxt-ev3-community.github.io/
 
 ## Local setup
 
@@ -10,11 +10,16 @@ These instructions assume familiarity with dev tools and languages.
 * install Docker; make sure `docker` command is in your `PATH`
 * (optional) install [Visual Studio Code](https://code.visualstudio.com/)
 
-* clone https://github.com/Microsoft/pxt-ev3 to ``pxt-ev3`` folder
+* clone https://github.com/pxt-ev3-community/pxt-ev3 to ``pxt-ev3`` folder
 * go to ``pxt`` and run
 
 ```
 npm install
+```
+
+* global installation of the command line interface (CLI),
+```
+pxt serve --cloud
 ```
 
 * to run the local server,
