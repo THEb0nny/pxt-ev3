@@ -19,7 +19,7 @@ npm install
 
 * global installation of the command line interface (CLI),
 ```
-pxt serve --cloud
+npm install pxt -g
 ```
 
 * to run the local server,
