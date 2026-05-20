@@ -1,6 +1,6 @@
 {
     "name": "nxt-light-sensor",
-    "description": "NXT Light Sensor support - beta",
+    "description": "LEGO® MINDSTORMS® NXT Light Sensor support - beta",
     "files": [
         "README.md",
         "light.ts"
@@ -8,6 +8,9 @@
     "testFiles": [
         "test.ts"
     ],
+    "weight": 10,
+    "searchOnly": false,
+    "icon": "./static/packages/nxt-light-sensor/icon.png",
     "public": true,
     "dependencies": {
         "core": "file:../core"

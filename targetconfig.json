@@ -1,14 +1,15 @@
 {
     "packages": {
         "approvedOrgs": [
-            "Microsoft",
-            "LEGO"
+            "pxt-ev3-community"
         ],
         "approvedRepoLib": {
-            "microsoft/pxt-automation": {
+            "theb0nny/pxt-automation": {
+                "tags": [ "Control" ],
                 "preferred": true
             },
             "theb0nny/makecode-ev3-hitechnic-color-sensor-v2": {
+                "tags": [ "Sensors" ],
                 "preferred": true
             }
         }

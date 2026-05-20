@@ -1,4 +1,4 @@
-//% color="#FE5722" weight=5 icon="\uf1c0"
+//% color="#FF7E14" weight=5 icon="\uf1c0" advanced=true
 namespace storage {
     // automatically send console output to temp storage
     storage.temporary.remove("console.txt");
