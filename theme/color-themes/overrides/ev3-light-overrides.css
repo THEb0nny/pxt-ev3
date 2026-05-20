@@ -1,5 +1,9 @@
 /* Lots of specificity to override another !important rule */
 
+.ui.item.logo .name, .ui.item.logo .name-short {
+    color: var(--pxt-tertiary-foreground);
+}
+
 /* Blockly toolbox colors */
 .blocklyToolbox, .monacoToolboxDiv {
     background: var(--pxt-neutral-background1) !important;
