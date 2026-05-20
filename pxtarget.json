@@ -94,6 +94,7 @@
         "appLogo": "./static/icons/android-chrome-192x192.png",
         "organization": "pxt-ev3-community",
         "organizationText": "Community fork of MakeCode® EV3",
+        "organizationShortText": "Fork of MakeCode® EV3",
         "organizationUrl": "https://github.com/pxt-ev3-community",
         "organizationLogo": "./static/icons/android-chrome-192x192.png",
         "organizationWideLogo": "./static/icons/android-chrome-192x192.png",
