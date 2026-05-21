@@ -136,10 +136,6 @@
                 "path": "https://makecode.mindstorms.com/troubleshoot"
             },
             {
-                "name": "JavaScript",
-                "path": "/javascript"
-            },
-            {
                 "name": "Reference",
                 "path": "/reference"
             }
