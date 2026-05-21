@@ -17,7 +17,7 @@ These instructions assume familiarity with dev tools and languages.
 npm install
 ```
 
-* global installation of the command line interface (CLI),
+* pxt global installation of the command line interface (CLI),
 ```
 npm install pxt -g
 ```
