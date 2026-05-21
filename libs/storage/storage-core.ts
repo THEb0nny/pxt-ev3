@@ -47,7 +47,8 @@ namespace storage {
 
         /**
          * Append string data to a new or existing file.
-         * @param filename the file name to append data, eg: "data.txt"
+         * If you plan to save a text file to the EV3's permanent memory, then you should use the rft format, as it is displayed and readable in the EV3 interface.
+         * @param filename the file name to append data, eg: "data.rtf"
          * @param data the data to append
          */
         //% blockId=storageAppend block="storage %source|%filename|append %data"
@@ -58,7 +59,8 @@ namespace storage {
 
         /**
          * Appends a new line of data in the file.
-         * @param filename the file name to append data, eg: "data.txt"
+         * If you plan to save a text file to the EV3's permanent memory, then you should use the rft format, as it is displayed and readable in the EV3 interface.
+         * @param filename the file name to append data, eg: "data.rtf"
          * @param data the data to append
          */
         //% blockId=storageAppendLine block="storage %source|%filename|append line %data"
@@ -76,6 +78,7 @@ namespace storage {
 
         /**
          * Append a row of CSV headers.
+         * If you plan to store CSV in the EV3's persistent memory, the EV3 interface does not display this format.
          * @param filename the file name to append data, eg: "data.csv"
          * @param headers the data to append
          */
@@ -93,6 +96,7 @@ namespace storage {
 
         /**
          * Append a row of CSV data.
+         * If you plan to store CSV in the EV3's persistent memory, the EV3 interface does not display this format.
          * @param filename the file name to append data, eg: "data.csv"
          * @param data the data to append
          */
@@ -105,7 +109,8 @@ namespace storage {
 
         /**
          * Overwrite file with string data.
-         * @param filename the file name to append data, eg: "data.txt"
+         * If you plan to save a text file to the EV3's permanent memory, then you should use the rft format, as it is displayed and readable in the EV3 interface.
+         * @param filename the file name to append data, eg: "data.rtf"
          * @param data the data to append
          */
         //% blockId=storageOverwrite block="storage %source|%filename|overwrite with|%data"
@@ -122,7 +127,7 @@ namespace storage {
 
         /**
          * Tests if a file exists.
-         * @param filename the file name to append data, eg: "data.txt"
+         * @param filename the file name to append data, eg: "data.rtf"
          */
         //% blockId=storageExists block="storage %source|%filename|exists"
         //% weight=99
@@ -132,7 +137,7 @@ namespace storage {
 
         /**
          * Delete a file, or do nothing if it doesn't exist.
-         * @param filename the file name to append data, eg: "data.txt"
+         * @param filename the file name to append data, eg: "data.rtf"
          */
         //% blockId=storageRemove block="storage %source|remove %filename"
         //% weight=97
@@ -142,7 +147,7 @@ namespace storage {
 
         /**
          * Return the size of the file, or -1 if it doesn't exists.
-         * @param filename the file name to append data, eg: "data.txt"
+         * @param filename the file name to append data, eg: "data.rtf"
          */
         //% blockId=storageSize block="storage %source|%filename|size"
         //% weight=98
@@ -154,7 +159,7 @@ namespace storage {
 
         /**
          * Read contents of file as a string.
-         * @param filename the file name to append data, eg: "data.txt"
+         * @param filename the file name to append data, eg: "data.rtf"
          */
         //% blockId=storageRead block="storage %source|read %filename|as string"
         //% weight=96
@@ -175,7 +180,7 @@ namespace storage {
 
         /**
          * Resizing the size of a file to stay under the limit.
-         * @param filename name of the file to drop, eg: "data.txt"
+         * @param filename name of the file to drop, eg: "data.rtf"
          * @param size maximum length
          */
         //% blockId=storageLimit block="storage %source|limit %filename|to %size|bytes"
@@ -223,7 +228,7 @@ namespace storage {
         }
 
         protected mapFilename(filename: string) {
-            if (filename[0] == '/') filename = filename.substr(1);
+            if (filename[0] == '/') filename = filename.slice(1);
             return '/tmp/logs/' + filename;
         }
     }
@@ -240,8 +245,23 @@ namespace storage {
         }
 
         protected mapFilename(filename: string) {
-            if (filename[0] == '/') return filename;
-            return '/' + filename;
+            // Save simple filenames into BrkProg_SAVE:
+            // data.rtf -> /home/root/lms2012/prjs/BrkProg_SAVE/data.rtf
+            if (filename.indexOf("/") < 0) {
+                return "/home/root/lms2012/prjs/BrkProg_SAVE/" + filename;
+            }
+
+            // Save relative paths inside prjs:
+            // MyPath/data.rtf -> /home/root/lms2012/prjs/MyPath/data.rtf
+            if (filename[0] != "/") {
+                return "/home/root/lms2012/prjs/" + filename;
+            }
+
+            // Keep absolute Linux paths unchanged:
+            // /home/root/data.rtf
+            // /media/card/data.rtf
+            // /mnt/ramdisk/data.rtf
+            return filename;
         }
     }
 
