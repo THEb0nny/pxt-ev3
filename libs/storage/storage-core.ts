@@ -48,6 +48,8 @@ namespace storage {
         /**
          * Append string data to a new or existing file.
          * If you plan to save a text file to the EV3's permanent memory, then you should use the rft format, as it is displayed and readable in the EV3 interface.
+         * If you specify PathName/data.rtf, you can save the file in a folder.
+         * All user folders can be manually deleted on the controller.
          * @param filename the file name to append data, eg: "data.rtf"
          * @param data the data to append
          */
@@ -60,6 +62,8 @@ namespace storage {
         /**
          * Appends a new line of data in the file.
          * If you plan to save a text file to the EV3's permanent memory, then you should use the rft format, as it is displayed and readable in the EV3 interface.
+         * If you specify PathName/data.rtf, you can save the file in a folder.
+         * All user folders can be manually deleted on the controller.
          * @param filename the file name to append data, eg: "data.rtf"
          * @param data the data to append
          */
