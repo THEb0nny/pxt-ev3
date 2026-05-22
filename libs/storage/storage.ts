@@ -220,8 +220,6 @@ namespace storage {
         //% inlineInputMode=inline
         //% group="Read"
         exists(filename: string): boolean {
-            // Fix It: the simulator says that the file exists and then an error may appear that the file is empty?
-            // You need to look at sim/state/storage.ts. It's empty.
             return !!control.mmap(this.mapFilename(filename), 0, 0);
         }
 
