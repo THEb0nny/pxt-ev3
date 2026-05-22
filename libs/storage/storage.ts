@@ -159,6 +159,38 @@ namespace storage {
         }
 
         /**
+         * Read CSV row as array of strings.
+         * @param filename the CSV file name, eg: "data.csv"
+         * @param row CSV row number starting from 0
+         */
+        //% blockId=storageReadCSVRow
+        //% block="storage $source|read CSV $filename|row $row"
+        //% weight=87
+        //% blockGap=8
+        //% inlineInputMode=inline
+        //% subcategory="Extra"
+        //% group="Read"
+        readCSVRow(filename: string, row: number): string[] {
+            const text = this.read(filename);
+
+            // Split file into rows
+            let rows = text.split("\n");
+
+            // Remove \r from row endings
+            for (let i = 0; i < rows.length; i++) {
+                rows[i] = rows[i].replace("\r", "");
+            }
+
+            // Row does not exist
+            if (row < 0 || row >= rows.length) return [];
+            
+            if (!rows[row]) return []; // Empty rows
+
+            // Split CSV columns
+            return rows[row].split(csvSeparator);
+        }
+
+        /**
          * Overwrite file with string data.
          * If you plan to save a text file to the EV3's permanent memory, then you should use the rtf format, as it is displayed and readable in the EV3 interface.
          * @param filename the file name to append data, eg: "data.rtf"
