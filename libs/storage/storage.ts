@@ -325,6 +325,25 @@ namespace storage {
     export const permanent: Storage = new PermanentStorage();
 
 
+    class ExternalStorage extends Storage {
+        constructor() {
+            super();
+        }
+
+        protected mapFilename(filename: string) {
+            if (filename[0] == '/') filename = filename.slice(1);
+            return '/media/card/' + filename;
+        }
+    }
+
+    /**
+     * Permanent external storage on the sd card.
+     */
+    //% whenUsed fixedInstance
+    //% block="external"
+    export const external: Storage = new ExternalStorage();
+
+
     // Automatically send console output to temp storage
     storage.temporary.remove("console.txt");
     console.addListener(function(line) {
