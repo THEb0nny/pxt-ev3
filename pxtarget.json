@@ -105,7 +105,7 @@
         "githubUrl": "https://github.com/pxt-ev3-community/pxt-ev3",
         "driveDisplayName": "EV3",
         "boardName": "LEGO® MINDSTORMS® Education EV3",
-        "copyrightText": "LEGO, the LEGO logo, MINDSTORMS and the MINDSTORMS EV3 logo are trademarks and/ or copyrights of the LEGO Group. ©2018 The LEGO Group. All rights reserved. This is a community maintained fork.",
+        "copyrightText": "MICROSOFT, the Microsoft Logo, and MakeCode are registered trademarks of Microsoft Corporation. LEGO, the LEGO logo, MINDSTORMS and the MINDSTORMS EV3 logo are trademarks and/ or copyrights of the LEGO Group. ©2018 The LEGO Group. All rights reserved. This is a community maintained fork.",
         "crowdinProject": "makecode",
         "selectLanguage": true,
         "defaultColorTheme": "ev3-light",
