@@ -1,10 +1,9 @@
-enum Separators {
+enum CSVSeparator {
     //% block="comma"
-    Comma,
+    Comma = ",",
     //% block="semicolon"
-    Semicolon
+    Semicolon = ";"
 }
-
 
 //% color="#FE5722" weight=5 icon="\uf1c0"
 namespace storage {
@@ -14,26 +13,10 @@ namespace storage {
     //% shim=storage::__truncate
     function __truncate(filename: string): void { }
 
-    let csvSeparator = separatorConverter(Separators.Comma);
+    let csvSeparator: CSVSeparator = CSVSeparator.Comma;
 
-    /**
-     * Set for CSV file separator.
-     * It is necessary to use depending on your regional settings of the application displaying CSV. By default, a comma is used.
-     * @param sep separator character, eg: Separators.Comma
-     */
-    //% blockId=setCSVSeparator
-    //% block="storage CSV set $sep|separator"
-    //% weight=80
-    export function setCSVSeparator(sep: Separators) {
-        csvSeparator = separatorConverter(sep);
-    }
 
-    function separatorConverter(sep: Separators): string {
-        if (sep == Separators.Semicolon) return ";";
-        else return ",";
-    }
-
-    export function toCSV(data: number[], sep: string) {
+    function toCSV(data: number[], sep: string) {
         let s = "";
         for (const d of data) {
             if (s) s += sep;
@@ -41,6 +24,23 @@ namespace storage {
         }
         s += "\r\n";
         return s;
+    }
+
+
+    /**
+     * Set for CSV file separator.
+     * It is necessary to use depending on your regional settings of the application displaying CSV. By default, a comma is used.
+     * @param sep separator character, eg: CSVSeparator.Comma
+     */
+    //% blockId=storageSetCSVSeparator
+    //% block="storage CSV set $sep|separator"
+    //% weight=80
+    //% blockGap=8
+    //% inlineInputMode=inline
+    //% subcategory="Extra"
+    //% group="Manage"
+    export function setCSVSeparator(sep: CSVSeparator) {
+        csvSeparator = sep;
     }
 
 
@@ -76,7 +76,7 @@ namespace storage {
 
         /**
          * Append string data to a new or existing file.
-         * If you plan to save a text file to the EV3's permanent memory, then you should use the rft format, as it is displayed and readable in the EV3 interface.
+         * If you plan to save a text file to the EV3's permanent memory, then you should use the rtf format, as it is displayed and readable in the EV3 interface.
          * If you specify PathName/data.rtf, you can save the file in a folder.
          * All user folders can be manually deleted on the controller.
          * @param filename the file name to append data, eg: "data.rtf"
@@ -85,13 +85,16 @@ namespace storage {
         //% blockId=storageAppend
         //% block="storage $source|$filename|append $data"
         //% weight=94
+        //% blockGap=8
+        //% inlineInputMode=inline
+        //% group="Write"
         append(filename: string, data: string): void {
             this.appendBuffer(filename, __stringToBuffer(data));
         }
 
         /**
          * Appends a new line of data in the file.
-         * If you plan to save a text file to the EV3's permanent memory, then you should use the rft format, as it is displayed and readable in the EV3 interface.
+         * If you plan to save a text file to the EV3's permanent memory, then you should use the rtf format, as it is displayed and readable in the EV3 interface.
          * If you specify PathName/data.rtf, you can save the file in a folder.
          * All user folders can be manually deleted on the controller.
          * @param filename the file name to append data, eg: "data.rtf"
@@ -100,6 +103,9 @@ namespace storage {
         //% blockId=storageAppendLine
         //% block="storage $source|$filename|append line $data"
         //% weight=93
+        //% blockGap=8
+        //% inlineInputMode=inline
+        //% group="Write"
         appendLine(filename: string, data: string): void {
             this.append(filename, data + "\r\n");
         }
@@ -120,6 +126,10 @@ namespace storage {
         //% blockId=storageAppendCSVHeaders
         //% block="storage $source|$filename|append CSV headers $headers"
         //% weight=89
+        //% blockGap=8
+        //% inlineInputMode=inline
+        //% subcategory="Extra"
+        //% group="Write"
         appendCSVHeaders(filename: string, headers: string[]) {
             let s = "";
             for (const d of headers) {
@@ -139,6 +149,10 @@ namespace storage {
         //% blockId=storageAppendCSV
         //% block="storage $source|$filename|append CSV $data"
         //% weight=88
+        //% blockGap=8
+        //% inlineInputMode=inline
+        //% subcategory="Extra"
+        //% group="Write"
         appendCSV(filename: string, data: number[]) {
             let s = toCSV(data, csvSeparator);
             this.append(filename, s);
@@ -146,13 +160,16 @@ namespace storage {
 
         /**
          * Overwrite file with string data.
-         * If you plan to save a text file to the EV3's permanent memory, then you should use the rft format, as it is displayed and readable in the EV3 interface.
+         * If you plan to save a text file to the EV3's permanent memory, then you should use the rtf format, as it is displayed and readable in the EV3 interface.
          * @param filename the file name to append data, eg: "data.rtf"
          * @param data the data to append
          */
         //% blockId=storageOverwrite
         //% block="storage $source|$filename|overwrite with|$data"
         //% weight=95
+        //% blockGap=8
+        //% inlineInputMode=inline
+        //% group="Write"
         overwrite(filename: string, data: string): void {
             this.overwriteWithBuffer(filename, __stringToBuffer(data));
         }
@@ -170,6 +187,9 @@ namespace storage {
         //% blockId=storageExists
         //% block="storage $source|$filename|exists"
         //% weight=99
+        //% blockGap=8
+        //% inlineInputMode=inline
+        //% group="Read"
         exists(filename: string): boolean {
             return !!control.mmap(this.mapFilename(filename), 0, 0);
         }
@@ -181,6 +201,9 @@ namespace storage {
         //% blockId=storageRemove
         //% block="storage $source|remove $filename"
         //% weight=97
+        //% blockGap=8
+        //% inlineInputMode=inline
+        //% group="Manage"
         remove(filename: string): void {
             __unlink(this.mapFilename(filename));
         }
@@ -192,6 +215,9 @@ namespace storage {
         //% blockId=storageSize
         //% block="storage $source|$filename|size"
         //% weight=98
+        //% blockGap=8
+        //% inlineInputMode=inline
+        //% group="Read"
         size(filename: string): int32 {
             let f = control.mmap(this.mapFilename(filename), 0, 0);
             if (!f) return -1;
@@ -205,12 +231,14 @@ namespace storage {
         //% blockId=storageRead
         //% block="storage $source|read $filename|as string"
         //% weight=96
+        //% blockGap=8
+        //% inlineInputMode=inline
+        //% group="Read"
         read(filename: string): string {
             return __bufferToString(this.readAsBuffer(filename));
         }
 
         /** Read contents of file as a buffer. */
-        //%
         readAsBuffer(filename: string): Buffer {
             let f = this.getFile(filename);
             let sz = f.lseek(0, SeekWhence.End);
@@ -228,6 +256,9 @@ namespace storage {
         //% blockId=storageLimit
         //% block="storage $source|limit $filename|to $size|bytes"
         //% weight=100
+        //% blockGap=8
+        //% inlineInputMode=inline
+        //% group="Manage"
         limit(filename: string, size: number) {
             if (!this.exists(filename) || size < 0) return;
 
@@ -287,7 +318,7 @@ namespace storage {
     }
 
     /**
-     * Permanent storage on the brick, must be deleted with code.
+     * Permanent internal storage on the brick, must be deleted with code.
      */
     //% whenUsed fixedInstance
     //% block="permanent"
