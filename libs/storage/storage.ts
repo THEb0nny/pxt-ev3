@@ -1,8 +1,8 @@
 enum CSVSeparator {
     //% block="comma"
-    Comma = ",",
+    Comma,
     //% block="semicolon"
-    Semicolon = ";"
+    Semicolon
 }
 
 //% color="#FE5722" weight=5 icon="\uf1c0"
@@ -13,7 +13,7 @@ namespace storage {
     //% shim=storage::__truncate
     function __truncate(filename: string): void { }
 
-    let csvSeparator: CSVSeparator = CSVSeparator.Comma;
+    let csvSeparator = ",";
 
 
     function toCSV(data: number[], sep: string) {
@@ -26,6 +26,11 @@ namespace storage {
         return s;
     }
 
+
+    function separatorToString(sep: CSVSeparator): string {
+        if (sep == CSVSeparator.Semicolon) return ";";
+        return ",";
+    }
 
     /**
      * Set for CSV file separator.
@@ -40,7 +45,7 @@ namespace storage {
     //% subcategory="Extra"
     //% group="Manage"
     export function setCSVSeparator(sep: CSVSeparator) {
-        csvSeparator = sep;
+        csvSeparator = separatorToString(sep);
     }
 
 
