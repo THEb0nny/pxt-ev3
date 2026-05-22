@@ -172,22 +172,14 @@ namespace storage {
         //% group="Read"
         readCSVRow(filename: string, row: number): string[] {
             const text = this.read(filename);
-
-            // Split file into rows
-            let rows = text.split("\n");
-
+            let rows = text.split("\n"); // Split file into rows
             // Remove \r from row endings
             for (let i = 0; i < rows.length; i++) {
                 rows[i] = rows[i].replace("\r", "");
             }
-
-            // Row does not exist
-            if (row < 0 || row >= rows.length) return [];
-            
+            if (row < 0 || row >= rows.length) return []; // Row does not exist
             if (!rows[row]) return []; // Empty rows
-
-            // Split CSV columns
-            return rows[row].split(csvSeparator);
+            return rows[row].split(csvSeparator); // Split CSV columns
         }
 
         /**
