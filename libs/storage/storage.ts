@@ -13,7 +13,7 @@ namespace storage {
     //% shim=storage::__truncate
     function __truncate(filename: string): void { }
 
-    let csvSeparator = ",";
+    let csvSeparator: string = ",";
 
 
     function toCSV(data: number[], sep: string) {
@@ -179,13 +179,30 @@ namespace storage {
             if (row < 0) return []; // Row does not exist
             const text = this.read(filename);
             let rows = text.split("\n"); // Split file into rows
-            // Remove \r from row endings
-            for (let i = 0; i < rows.length; i++) {
-                rows[i] = rows[i].replace("\r", "");
-            }
             if (row >= rows.length) return []; // Row does not exist
-            if (!rows[row]) return []; // Empty rows
-            return rows[row].split(csvSeparator); // Split CSV columns
+            let line = rows[row].replace("\r", "");
+            if (!line) return []; // Empty line
+            return line.split(csvSeparator); // Split CSV columns
+        }
+
+        /**
+         * Read CSV cell as string.
+         * @param filename the CSV file name, eg: "data.csv"
+         * @param row CSV row number starting from 0, eg: 0
+         * @param column CSV column number starting from 0, eg: 0
+         */
+        //% blockId=storageReadCSVCell
+        //% block="storage %source|read cell CSV $filename|row $row|column $column"
+        //% weight=86
+        //% blockGap=8
+        //% inlineInputMode=inline
+        //% subcategory="Extra"
+        //% group="Read"
+        readCSVCell(filename: string, row: number, column: number): string {
+            if (column < 0) return ""; // Col does not exist
+            let cells = this.readCSVRow(filename, row);
+            if (column >= cells.length) return ""; // Col does not exist
+            return cells[column];
         }
 
         /**
