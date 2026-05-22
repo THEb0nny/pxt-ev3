@@ -337,7 +337,7 @@ namespace storage {
     export const temporary: Storage = new TemporaryStorage();
 
     
-    class PermanentStorage extends Storage {
+    class InternalStorage extends Storage {
         constructor() {
             super();
         }
@@ -368,7 +368,7 @@ namespace storage {
      */
     //% whenUsed fixedInstance
     //% block="permanent"
-    export const permanent: Storage = new PermanentStorage();
+    export const internal: Storage = new InternalStorage();
 
 
     class ExternalStorage extends Storage {
