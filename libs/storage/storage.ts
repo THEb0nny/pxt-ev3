@@ -88,7 +88,7 @@ namespace storage {
          * @param data the data to append
          */
         //% blockId=storageAppend
-        //% block="storage $source|$filename|append $data"
+        //% block="storage %source|$filename|append $data"
         //% weight=94
         //% blockGap=8
         //% inlineInputMode=inline
@@ -106,7 +106,7 @@ namespace storage {
          * @param data the data to append
          */
         //% blockId=storageAppendLine
-        //% block="storage $source|$filename|append line $data"
+        //% block="storage %source|$filename|append line $data"
         //% weight=93
         //% blockGap=8
         //% inlineInputMode=inline
@@ -129,7 +129,7 @@ namespace storage {
          * @param headers the data to append
          */
         //% blockId=storageAppendCSVHeaders
-        //% block="storage $source|$filename|append CSV headers $headers"
+        //% block="storage %source|$filename|append CSV headers $headers"
         //% weight=89
         //% blockGap=8
         //% inlineInputMode=inline
@@ -152,7 +152,7 @@ namespace storage {
          * @param data the data to append
          */
         //% blockId=storageAppendCSV
-        //% block="storage $source|$filename|append CSV $data"
+        //% block="storage %source|$filename|append CSV $data"
         //% weight=88
         //% blockGap=8
         //% inlineInputMode=inline
@@ -169,7 +169,7 @@ namespace storage {
          * @param row CSV row number starting from 0
          */
         //% blockId=storageReadCSVRow
-        //% block="storage $source|read CSV $filename|row $row"
+        //% block="storage %source|read CSV $filename|row $row"
         //% weight=87
         //% blockGap=8
         //% inlineInputMode=inline
@@ -194,7 +194,7 @@ namespace storage {
          * @param data the data to append
          */
         //% blockId=storageOverwrite
-        //% block="storage $source|$filename|overwrite with|$data"
+        //% block="storage %source|$filename|overwrite with|$data"
         //% weight=95
         //% blockGap=8
         //% inlineInputMode=inline
@@ -214,7 +214,7 @@ namespace storage {
          * @param filename the file name to append data, eg: "data.rtf"
          */
         //% blockId=storageExists
-        //% block="storage $source|$filename|exists"
+        //% block="storage %source|$filename|exists"
         //% weight=99
         //% blockGap=8
         //% inlineInputMode=inline
@@ -228,7 +228,7 @@ namespace storage {
          * @param filename the file name to append data, eg: "data.rtf"
          */
         //% blockId=storageRemove
-        //% block="storage $source|remove $filename"
+        //% block="storage %source|remove $filename"
         //% weight=97
         //% blockGap=8
         //% inlineInputMode=inline
@@ -242,7 +242,7 @@ namespace storage {
          * @param filename the file name to append data, eg: "data.rtf"
          */
         //% blockId=storageSize
-        //% block="storage $source|$filename|size"
+        //% block="storage %source|$filename|size"
         //% weight=98
         //% blockGap=8
         //% inlineInputMode=inline
@@ -258,7 +258,7 @@ namespace storage {
          * @param filename the file name to append data, eg: "data.rtf"
          */
         //% blockId=storageRead
-        //% block="storage $source|read $filename|as string"
+        //% block="storage %source|read $filename|as string"
         //% weight=96
         //% blockGap=8
         //% inlineInputMode=inline
@@ -283,7 +283,7 @@ namespace storage {
          * @param size maximum length
          */
         //% blockId=storageLimit
-        //% block="storage $source|limit $filename|to $size|bytes"
+        //% block="storage %source|limit $filename|to $size|bytes"
         //% weight=100
         //% blockGap=8
         //% inlineInputMode=inline
