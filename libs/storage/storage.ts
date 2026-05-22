@@ -55,24 +55,23 @@ namespace storage {
         }
 
         private getFile(filename: string): MMap {
-            filename = this.mapFilename(filename)
-            let r = control.mmap(filename, 0, 0)
+            filename = this.mapFilename(filename);
+            let r = control.mmap(filename, 0, 0);
             if (!r) {
-                __mkdir(this.dirname(filename))
-                __truncate(filename)
-                r = control.mmap(filename, 0, 0)
+                __mkdir(this.dirname(filename));
+                __truncate(filename);
+                r = control.mmap(filename, 0, 0);
             }
-            if (!r)
-                control.panic(906)
+            if (!r) control.panic(906);
             return r
         }
 
         dirname(filename: string) {
-            let last = 0
-            for (let i = 0; i < filename.length; ++i)
-                if (filename[i] == "/")
-                    last = i
-            return filename.substr(0, last)
+            let last = 0;
+            for (let i = 0; i < filename.length; ++i) {
+                if (filename[i] == "/") last = i;
+            }
+            return filename.substr(0, last);
         }
 
         /**
@@ -87,7 +86,7 @@ namespace storage {
         //% block="storage $source|$filename|append $data"
         //% weight=94
         append(filename: string, data: string): void {
-            this.appendBuffer(filename, __stringToBuffer(data))
+            this.appendBuffer(filename, __stringToBuffer(data));
         }
 
         /**
@@ -155,13 +154,13 @@ namespace storage {
         //% block="storage $source|$filename|overwrite with|$data"
         //% weight=95
         overwrite(filename: string, data: string): void {
-            this.overwriteWithBuffer(filename, __stringToBuffer(data))
+            this.overwriteWithBuffer(filename, __stringToBuffer(data));
         }
 
         /** Overwrite file with a buffer. */
         overwriteWithBuffer(filename: string, data: Buffer): void {
-            __truncate(this.mapFilename(filename))
-            this.appendBuffer(filename, data)
+            __truncate(this.mapFilename(filename));
+            this.appendBuffer(filename, data);
         }
 
         /**
@@ -183,7 +182,7 @@ namespace storage {
         //% block="storage $source|remove $filename"
         //% weight=97
         remove(filename: string): void {
-            __unlink(this.mapFilename(filename))
+            __unlink(this.mapFilename(filename));
         }
 
         /**
@@ -207,7 +206,7 @@ namespace storage {
         //% block="storage $source|read $filename|as string"
         //% weight=96
         read(filename: string): string {
-            return __bufferToString(this.readAsBuffer(filename))
+            return __bufferToString(this.readAsBuffer(filename));
         }
 
         /** Read contents of file as a buffer. */
@@ -234,7 +233,7 @@ namespace storage {
 
             const sz = storage.temporary.size(filename);
             if (sz > size) {
-                let buf = storage.temporary.readAsBuffer(filename)
+                let buf = storage.temporary.readAsBuffer(filename);
                 buf = buf.slice(buf.length / 2);
                 storage.temporary.overwriteWithBuffer(filename, buf);
             }
@@ -263,7 +262,7 @@ namespace storage {
     
     class PermanentStorage extends Storage {
         constructor() {
-            super()
+            super();
         }
 
         protected mapFilename(filename: string) {
