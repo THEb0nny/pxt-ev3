@@ -68,7 +68,7 @@ namespace storage {
                 r = control.mmap(filename, 0, 0);
             }
             if (!r) control.panic(906);
-            return r
+            return r;
         }
 
         dirname(filename: string) {
@@ -192,7 +192,7 @@ namespace storage {
          * @param column CSV column number starting from 0, eg: 0
          */
         //% blockId=storageReadCSVCell
-        //% block="storage %source|read cell CSV $filename|row $row|column $column"
+        //% block="storage %source|read CSV cell $filename|row $row|column $column"
         //% weight=86
         //% blockGap=8
         //% inlineInputMode=inline
@@ -308,12 +308,11 @@ namespace storage {
         //% group="Manage"
         limit(filename: string, size: number) {
             if (!this.exists(filename) || size < 0) return;
-
-            const sz = storage.temporary.size(filename);
+            const sz = this.size(filename);
             if (sz > size) {
-                let buf = storage.temporary.readAsBuffer(filename);
+                let buf = this.readAsBuffer(filename);
                 buf = buf.slice(buf.length / 2);
-                storage.temporary.overwriteWithBuffer(filename, buf);
+                this.overwriteWithBuffer(filename, buf);
             }
         }
     }
