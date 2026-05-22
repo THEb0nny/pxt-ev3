@@ -166,7 +166,7 @@ namespace storage {
         /**
          * Read CSV row as array of strings.
          * @param filename the CSV file name, eg: "data.csv"
-         * @param row CSV row number starting from 0
+         * @param row CSV row number starting from 0, eg: 0
          */
         //% blockId=storageReadCSVRow
         //% block="storage %source|read CSV $filename|row $row"
@@ -176,13 +176,14 @@ namespace storage {
         //% subcategory="Extra"
         //% group="Read"
         readCSVRow(filename: string, row: number): string[] {
+            if (row < 0) return []; // Row does not exist
             const text = this.read(filename);
             let rows = text.split("\n"); // Split file into rows
             // Remove \r from row endings
             for (let i = 0; i < rows.length; i++) {
                 rows[i] = rows[i].replace("\r", "");
             }
-            if (row < 0 || row >= rows.length) return []; // Row does not exist
+            if (row >= rows.length) return []; // Row does not exist
             if (!rows[row]) return []; // Empty rows
             return rows[row].split(csvSeparator); // Split CSV columns
         }
