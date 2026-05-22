@@ -5,7 +5,7 @@ enum CSVSeparator {
     Semicolon
 }
 
-//% color="#FE5722" weight=5 icon="\uf1c0"
+//% color="#FE5722" weight=5 icon="\uf1c0" advanced=true
 namespace storage {
 
     //% shim=storage::__unlink
