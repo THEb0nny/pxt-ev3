@@ -3,7 +3,6 @@
     "description": "USB Pen-drive support and flash storage - beta",
     "files": [
         "storage.cpp",
-        "storage-core.ts",
         "storage.ts",
         "shims.d.ts"
     ],
