@@ -538,6 +538,22 @@ body.pxt-theme-root .modal>.closeIcon {
     fill: url(#legoColorNonePattern) !important;
 }
 
+/* Beta ver site text in logo */
+.ev3beta .ui.item.logo.brand:after {
+    content: "beta";
+    position: absolute;
+    right: 1px;
+    top: 70%;
+    font-size: 10px;
+    line-height: 1;
+    font-weight: 600;
+    color: var(--pxt-header-secondary-background);
+}
+/* Beta ver site text in logo at editor */
+.ev3beta .ui.item.logo.brand[role=menuitem]:after {
+    right: 17px;
+}
+
 
 /* Mobile */
 @media only screen and (max-width: @largestMobileScreen) {

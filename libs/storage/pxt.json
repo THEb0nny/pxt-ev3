@@ -6,6 +6,9 @@
         "storage.ts",
         "shims.d.ts"
     ],
+    "weight": 11,
+    "searchOnly": false,
+    "icon": "./static/packages/storage/icon.png",
     "public": true,
     "dependencies": {
         "core": "file:../core"
