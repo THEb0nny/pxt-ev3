@@ -5,7 +5,7 @@ set -x
 
 # This script builds a static package for hosting pxt-ev3 editor.
 # The URL path can be given as argument if not at root of site.
-URL=$(echo $1 | sed 's|/+$||' | sed '/^\//! s|^|/|')
+URL=$(echo $1 | sed -E 's|/+$||' | sed -E '/^$/! s|^([^/])|/\1|')
 
 PXT=$(which pxt || echo node_modules/pxt/pxt)
 if ! [ -e $PXT ]
@@ -13,7 +13,7 @@ then npm install pxt
 fi
 
 # Run pxt site generator
-$PXT staticpkg --locs-src translations --route "$URL"
+$PXT staticpkg --locs-src translations --route "$URL/"
 OUTDIR=built/packaged$URL
 
 # Copy static document files
@@ -28,7 +28,7 @@ do
 done
 
 # Add custom .js and .css overrides
-cp -R static-files/* built/packaged/pxt-ev3/beta/
+cp -R static-files/* $OUTDIR
 for file in $OUTDIR/*.html
 do sed -i '/<\/head>/e cat static-files/ev3-community.html' $file
 done
