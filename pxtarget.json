@@ -2,8 +2,8 @@
     "id": "ev3",
     "platformid": "linux",
     "nickname": "lego",
-    "name": "LEGO® MINDSTORMS® Education EV3",
-    "title": "LEGO® MINDSTORMS® Education EV3 - Blocks / Javascript editor - Community fork",
+    "name": "BrickCode",
+    "title": "BrickCode for EV3",
     "description": "Community-maintained fork of the MakeCode Blocks / JavaScript code editor for the LEGO® MINDSTORMS® Education EV3.",
     "corepkg": "ev3",
     "bundleddirs": [
@@ -41,7 +41,8 @@
         "githubPackages": true,
         "cloudProviders": {
             "github": {}
-        }
+        },
+        "apiRoot": "https://www.makecode.com/api/"
     },
     "compile": {
         "isNative": true,
@@ -93,13 +94,13 @@
         "cardLogo": "./static/icons/android-chrome-192x192.png",
         "appLogo": "./static/icons/android-chrome-192x192.png",
         "organization": "pxt-ev3-community",
-        "organizationText": "Community fork of MakeCode® EV3",
-        "organizationShortText": "Fork of MakeCode® EV3",
+        "organizationText": "BrickCode – A community fork of MakeCode® EV3",
+        "organizationShortText": "BrickCode",
         "organizationUrl": "https://github.com/pxt-ev3-community",
         "organizationLogo": "./static/icons/android-chrome-192x192.png",
         "organizationWideLogo": "./static/icons/android-chrome-192x192.png",
-        "homeUrl": "https://pxt-ev3-community.github.io/",
-        "embedUrl": "https://pxt-ev3-community.github.io/",
+        "homeUrl": "https://brickcode.org/",
+        "embedUrl": "https://brickcode.org/",
         "privacyUrl": "https://github.com/pxt-ev3-community/",
         "termsOfUseUrl": "https://github.com/pxt-ev3-community/",
         "githubUrl": "https://github.com/pxt-ev3-community/pxt-ev3",
@@ -122,6 +123,7 @@
             "fr",
             "fi"
         ],
+        "disableLiveTranslations": true,
         "lightToc": true,
         "docMenu": [{
                 "name": "PXT-EV3 GitHub Discussions",

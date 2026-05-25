@@ -31,12 +31,6 @@ jobs:
           CLEAN_VERSION=$(git describe | sed 's/^v//')
           sed -i "s/\"version\": \".*\"/\"version\": \"$CLEAN_VERSION\"/" package.json
 
-      - name: Checkout deploy tools
-        uses: actions/checkout@v4
-        with:
-          repository: pxt-ev3-community/pxt-ev3-community.github.io
-          path: github-deploy
-
       - name: Checkout translations
         uses: actions/checkout@v4
         with:
@@ -57,11 +51,6 @@ jobs:
       - name: Pin legacy deps
         run: npm install @types/ws@8.5.4 --no-save
 
-      - name: Apply pxtarget.json overrides
-        run: |
-          mv pxtarget.json pxtarget-original.json
-          jq -s '.[0] * .[1]' pxtarget-original.json github-deploy/pxtarget-override.json > pxtarget.json
-
       - name: Build static package
         run: pxt staticpkg --locs-src translations --route pxt-ev3/beta
 
@@ -79,16 +68,16 @@ jobs:
 
       - name: Copy additional static files
         run: |
-          cp -R github-deploy/extra-files/* built/packaged/pxt-ev3/beta/
+          cp -R static-files/* built/packaged/pxt-ev3/beta/
 
       - name: Add custom .js and .css overrides
         run: |
-          sed -i '/<\/head>/e cat github-deploy/extra-files/ev3-community.html' built/packaged/pxt-ev3/beta/index.html
-          sed -i '/<\/head>/e cat github-deploy/extra-files/ev3-community.html' built/packaged/pxt-ev3/beta/docs.html
+          sed -i '/<\/head>/e cat static-files/ev3-community.html' built/packaged/pxt-ev3/beta/index.html
+          sed -i '/<\/head>/e cat static-files/ev3-community.html' built/packaged/pxt-ev3/beta/docs.html
 
       - name: Redirect /pxt-ev3/ to /pxt-ev3/beta/
         run: |
-          cp github-deploy/extra-files/beta/index.html built/packaged/pxt-ev3/
+          cp static-files/beta/index.html built/packaged/pxt-ev3/
 
       - name: Patch html json and manifest only
         run: |
