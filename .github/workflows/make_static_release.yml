@@ -1,0 +1,60 @@
+name: Make static release package
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout pxt-ev3
+        uses: actions/checkout@v4
+        with:
+          repository: pxt-ev3-community/pxt-ev3
+          fetch-depth: 0
+
+      - name: Update version in package.json
+        run: |
+          CLEAN_VERSION=$(git describe | sed 's/^v//')
+          sed -i "s/\"version\": \".*\"/\"version\": \"$CLEAN_VERSION\"/" package.json
+
+      - name: Checkout translations
+        uses: actions/checkout@v4
+        with:
+          repository: pxt-ev3-community/pxt-ev3-translations
+          path: translations
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install PXT globally
+        run: npm install -g pxt
+
+      - name: Install project dependencies
+        run: npm install --ignore-scripts
+
+      - name: Build static package
+        run: ./build_static_package.sh /
+
+      - name: Verify package output exists
+        run: |
+          test -d built/packaged
+          test -f built/packaged/index.html
+
+      - name: Create hostable .zip
+        run: |
+          cd built/packaged
+          cp ../../LICENSE .
+          cp ../../README.md .
+          echo "To host this yourself, run e.g. python3 -m http.server" > README_HOSTING.txt
+          zip -r ../../self-hostable-pxt-ev3-${{ github.event.release.tag_name }}.zip *
+
+      - name: Upload Asset to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: "self-hostable-pxt-ev3-${{ github.event.release.tag_name }}.zip"
+
