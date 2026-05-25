@@ -23,8 +23,8 @@ cp -R docs/static/. $OUTDIR/docs/static/
 # Patch cdnUrl
 find "$OUTDIR" -type f \( -name '*.html' -o -name '*.json' -o -name '*.webmanifest' \) -print0 | while IFS= read -r -d '' f
 do
-    sed -i 's#@cdnUrl@/blob/[a-z0-9]*/#$URL/docs/#g' "$f" || true
-    sed -i 's#@cdnUrl@#$URL#g' "$f" || true
+    sed -i "s#@cdnUrl@/blob/[a-z0-9]*/#$URL/docs/#g" "$f" || true
+    sed -i "s#@cdnUrl@#$URL#g" "$f" || true
 done
 
 # Add custom .js and .css overrides
