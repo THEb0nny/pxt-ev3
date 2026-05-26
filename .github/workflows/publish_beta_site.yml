@@ -23,7 +23,6 @@ jobs:
       - name: Checkout pxt-ev3
         uses: actions/checkout@v4
         with:
-          repository: pxt-ev3-community/pxt-ev3
           fetch-depth: 0
 
       - name: Update version in package.json
@@ -37,6 +36,10 @@ jobs:
           repository: pxt-ev3-community/pxt-ev3-translations
           path: translations
 
+      - name: Get GitHub Pages path
+        id: pages
+        uses: actions/configure-pages@v5
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -49,21 +52,17 @@ jobs:
         run: npm install --ignore-scripts
 
       - name: Build static package
-        run: ./build_static_package.sh /pxt-ev3/beta
-
-      - name: Redirect /pxt-ev3/ to /pxt-ev3/beta/
-        run: |
-          cp static-files/beta/index.html built/packaged/pxt-ev3/
+        run: ./build_static_package.sh ${{ steps.pages.outputs.base_path }}
 
       - name: Verify package output exists
         run: |
           test -d built/packaged
-          test -f built/packaged/pxt-ev3/beta/index.html
+          test -f built/packaged/${{ steps.pages.outputs.base_path }}/index.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: built/packaged/pxt-ev3
+          path: built/packaged/${{ steps.pages.outputs.base_path }}
 
   deploy:
     needs: build

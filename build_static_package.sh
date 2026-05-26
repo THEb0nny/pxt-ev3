@@ -27,6 +27,16 @@ do
     sed -i "s#@cdnUrl@#$URL#g" "$f" || true
 done
 
+if [ x$URL != x ]
+then
+    # Fix relative paths in tutorials
+    find "$OUTDIR/docs" -type f \( -name '*.html' -o -name '*.md' \) -print0 | while IFS= read -r -d '' f
+    do
+        sed -i "s#\"/docs#\"$URL/docs#g" "$f" || true
+        sed -i "s#\"/tutorials#\"$URL/tutorials#g" "$f" || true
+    done
+fi
+
 # Add custom .js and .css overrides
 cp -R static-files/* $OUTDIR
 for file in $OUTDIR/*.html
