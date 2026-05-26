@@ -51,8 +51,8 @@ jobs:
       - name: Create hostable .zip
         run: |
           cd built/
-          cp ../../LICENSE packaged
-          cp ../../README.md packaged
+          cp ../LICENSE packaged
+          cp ../README.md packaged
           echo "To host this yourself, run e.g. python3 -m http.server" > packaged/README_HOSTING.txt
           mv packaged self-hostable-pxt-ev3-${{ github.event.release.tag_name }}
           zip -r ../../self-hostable-pxt-ev3-${{ github.event.release.tag_name }}.zip self-hostable-pxt-ev3-${{ github.event.release.tag_name }}
