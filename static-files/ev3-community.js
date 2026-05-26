@@ -44,7 +44,7 @@ if (window.location.pathname.split('/').pop() == "docs.html")
 }
 
 /* Add class to body to customize CSS for beta site */
-if (window.location.pathname.startsWith("/pxt-ev3/beta"))
+if (window.location.hostname != 'brickcode.org')
 {
     window.addEventListener('DOMContentLoaded', () => {
         document.body.classList.add('ev3beta');
