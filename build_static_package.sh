@@ -37,6 +37,9 @@ then
     done
 fi
 
+# Fix relative paths in download screen
+sed -i "s#\"/static/#\"$URL/docs/static/#g" "$OUTDIR/editor.js" || true
+
 # Add custom .js and .css overrides
 cp -R static-files/* $OUTDIR
 for file in $OUTDIR/*.html
