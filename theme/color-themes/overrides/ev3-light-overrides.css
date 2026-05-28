@@ -1,5 +1,11 @@
 /* Lots of specificity to override another !important rule */
 
+/* Menu background color in debug mode */
+.debugger .ui.inverted.menu {
+    background: var(--pxt-header-background) !important;
+}
+
+/* Project name in menu */
 .ui.item.logo .name, .ui.item.logo .name-short {
     color: var(--pxt-tertiary-foreground);
 }
