@@ -13,7 +13,7 @@
 
 namespace pxt {
 
-    static int usbFD;
+static int usbFD;
 
 #define USB_MAGIC 0x3d3f
 #define USB_SERIAL 1
@@ -207,7 +207,7 @@ void initKeys() {}
 static const char *progPath = "/mnt/ramdisk/prjs/BrkProg_SAVE";
 
 // These are disabled except when building File_manager.pdf
-// %
+//% shim=pxt::deletePrjFile
 void deletePrjFile(String filename) {
     const char *d = filename->getUTF8Data();
     if (strlen(d) > 500 || strchr(d, '/'))
@@ -217,7 +217,7 @@ void deletePrjFile(String filename) {
     unlink(buf);
 }
 
-// %
+//% shim=pxt::listPrjFiles
 RefCollection *listPrjFiles() {
     auto res = Array_::mk();
     registerGCObj(res);
