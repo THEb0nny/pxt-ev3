@@ -1,5 +1,3 @@
-# docs/storage/read.md
-
 # Read file
 
 Reads text from a file.
@@ -7,7 +5,7 @@ Reads text from a file.
 ## Example
 
 ```blocks
-let text = storage.read("log.rtf")
+let text = storage.internal.read("log.rtf")
 ```
 
 ## Notes

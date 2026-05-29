@@ -5,7 +5,7 @@ enum CSVSeparator {
     Semicolon
 }
 
-//% color="#FE5722" weight=5 icon="\uf1c0" advanced=true
+//% color="#FE5722" weight=5 icon="\uf1c0" help=storage advanced=true
 namespace storage {
 
     //% shim=storage::__unlink
@@ -37,6 +37,7 @@ namespace storage {
      * It is necessary to use depending on your regional settings of the application displaying CSV. By default, a comma is used.
      * @param sep separator character, eg: CSVSeparator.Comma
      */
+    //% help=storage/set-csv-separator
     //% blockId=storageSetCSVSeparator
     //% block="storage CSV set $sep|separator"
     //% weight=80
@@ -87,6 +88,7 @@ namespace storage {
          * @param filename the file name to append data, eg: "data.rtf"
          * @param data the data to append
          */
+        //% help=storage/append
         //% blockId=storageAppend
         //% block="storage %source|$filename|append $data"
         //% weight=94
@@ -105,6 +107,7 @@ namespace storage {
          * @param filename the file name to append data, eg: "data.rtf"
          * @param data the data to append
          */
+        //% help=storage/append-line
         //% blockId=storageAppendLine
         //% block="storage %source|$filename|append line $data"
         //% weight=93
@@ -128,6 +131,7 @@ namespace storage {
          * @param filename the file name to append data, eg: "data.csv"
          * @param headers the data to append
          */
+        //% help=storage/append-csv-headers
         //% blockId=storageAppendCSVHeaders
         //% block="storage %source|$filename|append CSV headers $headers"
         //% weight=89
@@ -151,6 +155,7 @@ namespace storage {
          * @param filename the file name to append data, eg: "data.csv"
          * @param data the data to append
          */
+        //% help=storage/append-csv
         //% blockId=storageAppendCSV
         //% block="storage %source|$filename|append CSV $data"
         //% weight=88
@@ -168,6 +173,7 @@ namespace storage {
          * @param filename the CSV file name, eg: "data.csv"
          * @param row CSV row number starting from 0, eg: 0
          */
+        //% help=storage/read-csv-row
         //% blockId=storageReadCSVRow
         //% block="storage %source|read CSV $filename|row $row"
         //% weight=87
@@ -191,6 +197,7 @@ namespace storage {
          * @param row CSV row number starting from 0, eg: 0
          * @param column CSV column number starting from 0, eg: 0
          */
+        //% help=storage/read-csv-cell
         //% blockId=storageReadCSVCell
         //% block="storage %source|read CSV cell $filename|row $row|column $column"
         //% weight=86
@@ -211,6 +218,7 @@ namespace storage {
          * @param filename the file name to append data, eg: "data.rtf"
          * @param data the data to append
          */
+        //% help=storage/overwrite
         //% blockId=storageOverwrite
         //% block="storage %source|$filename|overwrite with|$data"
         //% weight=95
@@ -231,6 +239,7 @@ namespace storage {
          * Tests if a file exists.
          * @param filename the file name to append data, eg: "data.rtf"
          */
+        //% help=storage/exists
         //% blockId=storageExists
         //% block="storage %source|$filename|exists"
         //% weight=99
@@ -245,6 +254,7 @@ namespace storage {
          * Delete a file, or do nothing if it doesn't exist.
          * @param filename the file name to append data, eg: "data.rtf"
          */
+        //% help=storage/remove
         //% blockId=storageRemove
         //% block="storage %source|remove $filename"
         //% weight=97
@@ -259,6 +269,7 @@ namespace storage {
          * Return the size of the file, or -1 if it doesn't exists.
          * @param filename the file name to append data, eg: "data.rtf"
          */
+        //% help=storage/size
         //% blockId=storageSize
         //% block="storage %source|$filename|size"
         //% weight=98
@@ -275,6 +286,7 @@ namespace storage {
          * Read contents of file as a string.
          * @param filename the file name to append data, eg: "data.rtf"
          */
+        //% help=storage/read
         //% blockId=storageRead
         //% block="storage %source|read $filename|as string"
         //% weight=96
@@ -300,6 +312,7 @@ namespace storage {
          * @param filename name of the file to drop, eg: "data.rtf"
          * @param size maximum length
          */
+        //% help=storage/limit
         //% blockId=storageLimit
         //% block="storage %source|limit $filename|to $size|bytes"
         //% weight=100

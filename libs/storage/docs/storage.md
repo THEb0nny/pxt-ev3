@@ -43,4 +43,4 @@ Always test important storage code on a real EV3 brick.
 ## See also
 
 * [Text files](storage/text-files)
-* [CSV files](storage/csv)
+* [CSV files](storage/csv-files)

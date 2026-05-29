@@ -1,5 +1,3 @@
-# docs/storage/append.md
-
 # Append file
 
 Adds text to the end of a file.
@@ -7,7 +5,7 @@ Adds text to the end of a file.
 ## Example
 
 ```blocks
-storage.append("log.rtf", "New line")
+storage.internal.append("log.rtf", "New line")
 ```
 
 ## Notes
