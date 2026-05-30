@@ -377,7 +377,7 @@ namespace storage {
     }
 
     /**
-     * Permanent internal storage on the brick, must be deleted with code.
+     * Internal storage on the brick, must be deleted with code.
      */
     //% whenUsed fixedInstance
     //% block="internal"
@@ -396,7 +396,7 @@ namespace storage {
     }
 
     /**
-     * Permanent external storage on the sd card.
+     * External storage on the sd card.
      */
     //% whenUsed fixedInstance
     //% block="external"
