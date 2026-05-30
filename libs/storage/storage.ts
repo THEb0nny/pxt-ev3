@@ -380,7 +380,7 @@ namespace storage {
      * Permanent internal storage on the brick, must be deleted with code.
      */
     //% whenUsed fixedInstance
-    //% block="permanent"
+    //% block="internal"
     export const internal: Storage = new InternalStorage();
 
 
