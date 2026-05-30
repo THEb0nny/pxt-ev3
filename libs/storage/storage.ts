@@ -26,6 +26,48 @@ namespace storage {
         return s;
     }
 
+    function escapeCSV(value: string) {
+        if (
+            value.indexOf(csvSeparator) >= 0 ||
+            value.indexOf('"') >= 0 ||
+            value.indexOf('\r') >= 0 ||
+            value.indexOf('\n') >= 0
+        ) {
+            value = value.replace(/"/g, '""');
+            return '"' + value + '"';
+        }
+
+        return value;
+    }
+
+    function parseCSVRow(line: string, sep: string): string[] {
+        let result: string[] = [];
+        let current = "";
+        let inQuotes = false;
+
+        for (let i = 0; i < line.length; i++) {
+            const ch = line.charAt(i);
+            if (ch == '"') {
+                // escaped quote
+                if (inQuotes && i + 1 < line.length && line.charAt(i + 1) == '"') {
+                    current += '"';
+                    i++;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            }
+            else if (ch == sep && !inQuotes) {
+                result.push(current);
+                current = "";
+            } else {
+                current += ch;
+            }
+        }
+
+        result.push(current);
+        return result;
+    }
+
 
     function separatorToString(sep: CSVSeparator): string {
         if (sep == CSVSeparator.Semicolon) return ";";
@@ -143,7 +185,7 @@ namespace storage {
             let s = "";
             for (const d of headers) {
                 if (s) s += csvSeparator;
-                s = s + d;
+                s += escapeCSV(d);
             }
             s += "\r\n";
             this.append(filename, s);
@@ -188,7 +230,7 @@ namespace storage {
             if (row >= rows.length) return []; // Row does not exist
             let line = rows[row].replace("\r", "");
             if (!line) return []; // Empty line
-            return line.split(csvSeparator); // Split CSV columns
+            return parseCSVRow(line, csvSeparator);
         }
 
         /**
