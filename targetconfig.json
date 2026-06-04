@@ -1,6 +1,8 @@
 {
     "packages": {
         "approvedOrgs": [
+            "Microsoft",
+            "LEGO",
             "pxt-ev3-community"
         ],
         "approvedRepoLib": {
