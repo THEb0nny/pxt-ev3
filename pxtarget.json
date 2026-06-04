@@ -126,7 +126,7 @@
         "disableLiveTranslations": true,
         "lightToc": true,
         "docMenu": [{
-                "name": "PXT-EV3 GitHub Discussions",
+                "name": "BrickCode discussions",
                 "path": "https://github.com/orgs/pxt-ev3-community/discussions"
             },
             {
