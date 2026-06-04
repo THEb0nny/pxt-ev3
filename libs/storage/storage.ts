@@ -33,8 +33,13 @@ namespace storage {
             value.indexOf('\r') >= 0 ||
             value.indexOf('\n') >= 0
         ) {
-            value = value.replace(/"/g, '""');
-            return '"' + value + '"';
+            let escaped = "";
+            for (let i = 0; i < value.length; i++) {
+                const ch = value.charAt(i);
+                if (ch == '"') escaped += '""';
+                else escaped += ch;
+            }
+            return '"' + escaped + '"';
         }
 
         return value;
