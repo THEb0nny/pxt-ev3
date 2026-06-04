@@ -10,6 +10,12 @@ Use CSV files to save measurements, logs, sensor readings, or other data that ca
 storage.internal.appendCSVHeaders("scores.csv", ["Name", "Score"])
 ```
 
+## Creating a CSV file
+
+```blocks
+storage.internal.overwriteCSVHeaders("scores.csv", ["Name", "Score"])
+```
+
 ## Writing rows
 
 ```blocks
@@ -39,6 +45,8 @@ let rows = storage.internal.csvRowCount("scores.csv")
 ```blocks
 storage.setCSVSeparator(CSVSeparator.Comma)
 
+storage.internal.overwriteCSVHeaders( "data.csv", ["Time", "Distance"])
+
 storage.internal.appendCSVHeaders("data.csv", ["Time", "Distance"])
 
 storage.internal.appendCSV("data.csv", [1, 100])
@@ -49,6 +57,7 @@ let distance = storage.internal.readCSVCell("data.csv", 1, 1)
 ## Notes
 
 * CSV files are stored as plain text.
+* Creating a CSV file with Overwrite CSV headers removes any existing contents.
 * The first row often contains column headers.
 * Spreadsheet applications may use either commas or semicolons as separators depending on regional settings.
 * Use **Set CSV separator** to select the separator used when reading and writing CSV files.

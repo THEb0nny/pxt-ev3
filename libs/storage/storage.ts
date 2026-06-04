@@ -173,6 +173,30 @@ namespace storage {
         }
 
         /**
+         * Overwrite CSV file and write header row.
+         * If the file already exists, all previous contents will be removed.
+         * @param filename the file name to overwrite, eg: "data.csv"
+         * @param headers the header row
+         */
+        //% help=storage/overwrite-csv-headers
+        //% blockId=storageOverwriteCSVHeaders
+        //% block="storage %source|overwrite CSV $filename|headers $headers"
+        //% weight=89
+        //% blockGap=8
+        //% inlineInputMode=inline
+        //% subcategory="Extra"
+        //% group="Write"
+        overwriteCSVHeaders(filename: string, headers: string[]) {
+            let s = "";
+            for (const d of headers) {
+                if (s) s += csvSeparator;
+                s += d;
+            }
+            s += "\r\n";
+            this.overwrite(filename, s);
+        }
+
+        /**
          * Append a row of CSV headers.
          * If you plan to store CSV in the EV3's persistent memory, the EV3 interface does not display this format.
          * @param filename the file name to append data, eg: "data.csv"
@@ -181,7 +205,7 @@ namespace storage {
         //% help=storage/append-csv-headers
         //% blockId=storageAppendCSVHeaders
         //% block="storage %source|$filename|append CSV headers $headers"
-        //% weight=89
+        //% weight=88
         //% blockGap=8
         //% inlineInputMode=inline
         //% subcategory="Extra"
@@ -205,7 +229,7 @@ namespace storage {
         //% help=storage/append-csv
         //% blockId=storageAppendCSV
         //% block="storage %source|$filename|append CSV $data"
-        //% weight=88
+        //% weight=87
         //% blockGap=8
         //% inlineInputMode=inline
         //% subcategory="Extra"
@@ -223,7 +247,7 @@ namespace storage {
         //% help=storage/read-csv-row
         //% blockId=storageReadCSVRow
         //% block="storage %source|read CSV $filename|row $row"
-        //% weight=87
+        //% weight=86
         //% blockGap=8
         //% inlineInputMode=inline
         //% subcategory="Extra"
@@ -247,7 +271,7 @@ namespace storage {
         //% help=storage/read-csv-cell
         //% blockId=storageReadCSVCell
         //% block="storage %source|read CSV cell $filename|row $row|column $column"
-        //% weight=86
+        //% weight=85
         //% blockGap=8
         //% inlineInputMode=inline
         //% subcategory="Extra"
@@ -266,7 +290,7 @@ namespace storage {
         //% help=storage/csv-row-count
         //% blockId=storageCSVRowCount
         //% block="storage %source|$filename|CSV row count"
-        //% weight=85
+        //% weight=84
         //% blockGap=8
         //% inlineInputMode=inline
         //% subcategory="Extra"
