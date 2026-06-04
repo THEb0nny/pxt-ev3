@@ -1,11 +1,19 @@
 # CSV files
 
-CSV files store values separated by commas or semicolons.
+CSV (Comma-Separated Values) files store tabular data as plain text. Values are separated by commas or semicolons.
+
+Use CSV files to save measurements, logs, sensor readings, or other data that can later be opened in spreadsheet applications.
+
+## Writing headers
+
+```blocks
+storage.internal.appendCSVHeaders("scores.csv", ["Name", "Score"])
+```
 
 ## Writing rows
 
 ```blocks
-storage.internal.writeCSVRow("scores.csv", "Alex,10")
+storage.internal.appendCSV("scores.csv", [10, 20, 30])
 ```
 
 ## Reading rows
@@ -20,17 +28,28 @@ let row = storage.internal.readCSVRow("scores.csv", 0)
 let value = storage.internal.readCSVCell("scores.csv", 0, 1)
 ```
 
+## Counting rows
+
+```blocks
+let rows = storage.internal.csvRowCount("scores.csv")
+```
+
 ## Example
 
 ```blocks
-storage.internal.writeCSVRow("data.csv", "Name,Score")
-storage.internal.writeCSVRow("data.csv", "Robot,100")
+storage.setCSVSeparator(CSVSeparator.Comma)
 
-let score = storage.internal.readCSVCell("data.csv", 1, 1)
+storage.internal.appendCSVHeaders("data.csv", ["Time", "Distance"])
+
+storage.internal.appendCSV("data.csv", [1, 100])
+
+let distance = storage.internal.readCSVCell("data.csv", 1, 1)
 ```
 
 ## Notes
 
-* CSV files are plain text.
-* `.csv` files are usually hidden in the EV3 file browser.
-* Different separators may be supported depending on the API.
+* CSV files are stored as plain text.
+* The first row often contains column headers.
+* Spreadsheet applications may use either commas or semicolons as separators depending on regional settings.
+* Use **Set CSV separator** to select the separator used when reading and writing CSV files.
+* CSV files may not be visible in the EV3 file browser.

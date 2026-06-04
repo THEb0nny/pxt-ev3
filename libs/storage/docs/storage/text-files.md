@@ -34,6 +34,6 @@ storage.internal.remove("notes.rtf")
 
 ```blocks
 if (storage.internal.exists("notes.rtf")) {
-    brick.showString("Found", 1)
+    brick.printString("Found", 1)
 }
 ```

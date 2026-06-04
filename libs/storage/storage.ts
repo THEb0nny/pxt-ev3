@@ -260,6 +260,29 @@ namespace storage {
         }
 
         /**
+         * Get number of CSV rows.
+         * @param filename the CSV file name, eg: "data.csv"
+         */
+        //% help=storage/csv-row-count
+        //% blockId=storageCSVRowCount
+        //% block="storage %source|$filename|CSV row count"
+        //% weight=85
+        //% blockGap=8
+        //% inlineInputMode=inline
+        //% subcategory="Extra"
+        //% group="Read"
+        csvRowCount(filename: string): number {
+            const text = this.read(filename);
+            if (!text) return 0;
+            let rows = text.split("\n");
+            if (rows.length > 0) { // Ignore trailing empty row caused by final CRLF
+                let last = rows[rows.length - 1].replace("\r", "");
+                if (!last) rows.pop();
+            }
+            return rows.length;
+        }
+
+        /**
          * Overwrite file with string data.
          * If you plan to save a text file to the EV3's permanent memory, then you should use the rtf format, as it is displayed and readable in the EV3 interface.
          * @param filename the file name to append data, eg: "data.rtf"
