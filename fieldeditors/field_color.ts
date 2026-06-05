@@ -86,6 +86,12 @@ export class FieldColorEnum extends pxtblockly.FieldColorNumber {
     }
 
     showEditor_() {
+        // Firefox doesn't get the editor location correctly if the border rect
+        // width is 0. But we don't want the border rect to show on top of the
+        // color selection.
+        this.getBorderRect().setAttribute('width', '10');
+        this.getBorderRect().setAttribute('opacity', '0');
+
         super.showEditor_();
         const picker = Blockly.DropDownDiv.getContentDiv().childNodes[0] as HTMLElement;
         if (this.className_ && picker) {
