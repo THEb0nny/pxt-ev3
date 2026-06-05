@@ -38,8 +38,19 @@ namespace brick {
         WhiteOnBlack
     }
 
+    export enum FontSize {
+        //% block="small"
+        FontSmall,
+        //% block="medium"
+        FontMedium,
+        //% block="large"
+        FontLarge
+    }
+
     let screenMode = ScreenMode.None;
     export let font = image.font8;
+    export let font16 = image.scaledFont(image.font8, 2);
+    export let font32 = image.scaledFont(image.font8, 4);
 
     /**
      * Gets the text line height
@@ -65,20 +76,30 @@ namespace brick {
         return ((screen.width - textOffset) / font.charWidth) >> 0
     }
 
+    export function getFont(fontSize: FontSize): image.Font {
+        if (fontSize == FontSize.FontMedium)
+            return font16;
+        else if (fontSize == FontSize.FontLarge)
+            return font32;
+        else
+            return font;
+    }
+
     /**
      * Show text on the screen on a specific line and starting at a column and the selected print style.
      * @param text the text to print on the screen, eg: "Hello world"
      * @param line the line number to print the text at (starting at 1), eg: 1
      * @param column the column number to print the text at (starting at 1), eg: 1
      * @param printStyle print style black on white or white on black
+     * @param fontSize set size of text (2x or 4x font size)
      */
-    //% blockId=screenPrintString block="show string $text|at line $line||column $column|style $printStyle"
+    //% blockId=screenPrintString block="show string $text|at line $line||column $column|style $printStyle|size $fontSize"
     //% weight=98 group="Screen" inlineInputMode="inline" blockGap=8
     //% expandableArgumentMode="enabled"
     //% help=brick/show-string
     //% line.min=1 line.max=12
     //% column.min=1 column.max=29
-    export function printString(text: string, line: number, column: number = 1, printStyle: PrintStyle = PrintStyle.BlackOnWhite) {
+    export function printString(text: string, line: number, column: number = 1, printStyle: PrintStyle = PrintStyle.BlackOnWhite, fontSize: FontSize = FontSize.FontSmall) {
         if (screenMode != ScreenMode.ShowLines) {
             screenMode = ScreenMode.ShowLines;
             screen.fill(0);
@@ -91,12 +112,13 @@ namespace brick {
         if (line < 0 || line > nlines) return; // out of screen by line
         if (column < 0 || column > nColumn) return; // out of screen by column
         
-        const w = font.charWidth;
-        const h = lineHeight();
-        const x = textOffset + w * column;
-        const y = textOffset + h * line;
-        screen.fillRect(x, y, text.length * font.charWidth, h, (printStyle == PrintStyle.BlackOnWhite ? 0 : 255)); // clear background
-        screen.print(text, x, y, (printStyle == PrintStyle.BlackOnWhite ? 1 : 2), font);
+        // Line and column coordinates match the native 8x8 font size, but
+        // clearing uses the selected font size.
+        const selectedFont = getFont(fontSize);
+        const x = textOffset + font.charWidth * column;
+        const y = textOffset + lineHeight() * line;
+        screen.fillRect(x, y, text.length * selectedFont.charWidth, lineHeight() * selectedFont.multiplier, (printStyle == PrintStyle.BlackOnWhite ? 0 : 255)); // clear background
+        screen.print(text, x, y, (printStyle == PrintStyle.BlackOnWhite ? 1 : 2), selectedFont);
     }
 
     /**
@@ -132,15 +154,16 @@ namespace brick {
      * @param line the line number to print the text at, eg: 1
      * @param column the column number to print the text at (starting at 1), eg: 1
      * @param printStyle print style black on white or white on black
+     * @param fontSize set size of text (2x or 4x font size)
      */
-    //% blockId=screenPrintNumber block="show number $value|at line $line||column $column|style $printStyle"
+    //% blockId=screenPrintNumber block="show number $value|at line $line||column $column|style $printStyle|size $fontSize"
     //% weight=97 group="Screen" inlineInputMode="inline" blockGap=8
     //% expandableArgumentMode="enabled"
     //% help=brick/show-number
     //% line.min=1 line.max=12
     //% column.min=1 column.max=29
-    export function printNumber(value: number, line: number, column: number = 1, printStyle: PrintStyle = PrintStyle.BlackOnWhite) {
-        printString("" + value, line, column, printStyle);
+    export function printNumber(value: number, line: number, column: number = 1, printStyle: PrintStyle = PrintStyle.BlackOnWhite, fontSize: FontSize = FontSize.FontSmall) {
+        printString("" + value, line, column, printStyle, fontSize);
     }
 
     /**
@@ -164,16 +187,17 @@ namespace brick {
      * @param line the line number to print the text at, eg: 1
      * @param column the column number to print the text at (starting at 1), eg: 1
      * @param printStyle print style black on white or white on black
+     * @param fontSize set size of text (2x or 4x font size)
      */
-    //% blockId=screenPrintValue block="show value $name|= $value|at line $line||column $column|style $printStyle"
+    //% blockId=screenPrintValue block="show value $name|= $value|at line $line||column $column|style $printStyle|size $fontSize"
     //% weight=96 group="Screen" inlineInputMode="inline" blockGap=8
     //% expandableArgumentMode="enabled"
     //% help=brick/show-value
     //% line.min=1 line.max=12
     //% column.min=1 column.max=29
-    export function printValue(name: string, value: number, line: number, column: number = 1, printStyle: PrintStyle = PrintStyle.BlackOnWhite) {
+    export function printValue(name: string, value: number, line: number, column: number = 1, printStyle: PrintStyle = PrintStyle.BlackOnWhite, fontSize: FontSize = FontSize.FontSmall) {
         value = Math.round(value * 1000) / 1000;
-        printString((name ? name + ": " : "") + value, line, column, printStyle);
+        printString((name ? name + ": " : "") + value, line, column, printStyle, fontSize);
     }
 
     /**
