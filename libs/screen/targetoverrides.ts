@@ -117,7 +117,8 @@ namespace brick {
         const selectedFont = getFont(fontSize);
         const x = textOffset + font.charWidth * column;
         const y = textOffset + lineHeight() * line;
-        screen.fillRect(x, y, text.length * selectedFont.charWidth, lineHeight() * selectedFont.multiplier, (printStyle == PrintStyle.BlackOnWhite ? 0 : 255)); // clear background
+        const mult = selectedFont.multiplier > 1 ? selectedFont.multiplier : 1;
+        screen.fillRect(x, y, text.length * selectedFont.charWidth, lineHeight() * mult, (printStyle == PrintStyle.BlackOnWhite ? 0 : 255)); // clear background
         screen.print(text, x, y, (printStyle == PrintStyle.BlackOnWhite ? 1 : 2), selectedFont);
     }
 
