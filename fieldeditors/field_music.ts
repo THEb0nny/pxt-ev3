@@ -137,6 +137,7 @@ export class FieldMusic extends pxtblockly.FieldImages {
             button.style.borderColor = backgroundColor;
             Blockly.browserEvents.bind(button, 'click', this, this.categoryClick_);
             Blockly.browserEvents.bind(button, 'mouseup', this, this.categoryClick_);
+            Blockly.browserEvents.bind(button, 'mousedown', this, this.categoryClick_);
 
             const textNode = this.createTextNode_(category);
             textNode.setAttribute('data-value', category);
@@ -296,6 +297,7 @@ export class FieldMusic extends pxtblockly.FieldImages {
         this.refreshOptions(contentDiv, options);
 
         this.stopSounds();
+        e.stopPropagation();
     }
 
     /**
