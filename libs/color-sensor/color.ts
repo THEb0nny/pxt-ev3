@@ -151,6 +151,7 @@ namespace sensors {
         //% this.fieldOptions.width="300"
         //% weight=100 blockGap=8
         //% group="Color Sensor"
+        //% blockAllowMultiple=1
         onColorDetected(color: number, handler: () => void) {
             this.setMode(ColorSensorMode.Color)
             const v = this._colorEventValue(<number>color);
