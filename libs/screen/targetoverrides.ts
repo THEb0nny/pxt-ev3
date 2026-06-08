@@ -1,3 +1,19 @@
+const enum PrintStyle {
+    //% block="black on white"
+    BlackOnWhite,
+    //% block="white on black"
+    WhiteOnBlack
+}
+
+const enum FontSize {
+    //% block="small"
+    FontSmall,
+    //% block="medium"
+    FontMedium,
+    //% block="large"
+    FontLarge
+}
+
 /**
  * Tagged image literal converter
  */
@@ -29,22 +45,6 @@ namespace brick {
         Image,
         Ports,
         Custom
-    }
-
-    export enum PrintStyle {
-        //% block="black on white"
-        BlackOnWhite,
-        //% block="white on black"
-        WhiteOnBlack
-    }
-
-    export enum FontSize {
-        //% block="small"
-        FontSmall,
-        //% block="medium"
-        FontMedium,
-        //% block="large"
-        FontLarge
     }
 
     let screenMode = ScreenMode.None;
