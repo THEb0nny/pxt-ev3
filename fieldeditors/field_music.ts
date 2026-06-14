@@ -149,7 +149,8 @@ export class FieldMusic extends pxtblockly.FieldImages {
     refreshOptions(contentDiv: Element, options: any) {
         let sourceBlock = this.sourceBlock_ as any;
         const categories = this.getCategories(options);
-        let row = this.createRow();
+        let rowIndex = 0;
+        let row = this.createRow(rowIndex);
         // Show options
         for (let i = 0, option: any; option = options[i]; i++) {
             const content = (options[i] as any)[0]; // Human-readable text or image.
@@ -240,7 +241,7 @@ export class FieldMusic extends pxtblockly.FieldImages {
             row.append(buttonContainer);
             if (row.childElementCount === this.columns_) {
                 contentDiv.appendChild(row);
-                row = this.createRow();
+                row = this.createRow(++rowIndex);
             }
         }
         if (row.childElementCount) {
