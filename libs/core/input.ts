@@ -61,10 +61,12 @@ namespace sensors.internal {
     }
 
     let analogMM: MMap;
+    let dcmMM: MMap;
     let uartMM: MMap;
     let IICMM: MMap;
     let powerMM: MMap;
     let devcon: Buffer;
+    let dcmState: Buffer;
     let devPoller: Poller;
     let sensorInfos: SensorInfo[];
 
@@ -109,21 +111,27 @@ namespace sensors.internal {
     }
 
     function init() {
-        if (sensorInfos) return
-        sensorInfos = []
-        for (let i = 0; i < DAL.NUM_INPUTS; ++i) sensorInfos.push(new SensorInfo(i))
-        devcon = output.createBuffer(DevConOff.Size)
+        if (sensorInfos) return;
 
-        analogMM = control.mmap("/dev/lms_analog", AnalogOff.Size, 0)
-        if (!analogMM) control.fail("no analog sensor")
+        sensorInfos = [];
+        for (let i = 0; i < DAL.NUM_INPUTS; ++i) sensorInfos.push(new SensorInfo(i));
+        devcon = output.createBuffer(DevConOff.Size);
 
-        uartMM = control.mmap("/dev/lms_uart", UartOff.Size, 0)
-        if (!uartMM) control.fail("no uart sensor")
+        analogMM = control.mmap("/dev/lms_analog", AnalogOff.Size, 0);
+        if (!analogMM) control.fail("no analog sensor");
 
-        IICMM = control.mmap("/dev/lms_iic", IICOff.Size, 0)
-        if (!IICMM) control.fail("no iic sensor")
+        dcmMM = control.mmap("/dev/lms_dcm", 0, 0);
+        if (!dcmMM) control.fail("no dcm device");
 
-        powerMM = control.mmap("/dev/lms_power", 2, 0)
+        uartMM = control.mmap("/dev/lms_uart", UartOff.Size, 0);
+        if (!uartMM) control.fail("no uart sensor");
+
+        IICMM = control.mmap("/dev/lms_iic", IICOff.Size, 0);
+        if (!IICMM) control.fail("no iic sensor");
+
+        powerMM = control.mmap("/dev/lms_power", 2, 0);
+
+        dcmState = control.createBuffer(DAL.NUM_INPUTS);
 
         devPoller = new Poller(900, () => { return hashDevices(); },
             (prev, curr) => {
