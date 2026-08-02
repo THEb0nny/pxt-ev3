@@ -53,11 +53,11 @@ namespace sensors.internal {
     }
 
     export function bufferToString(buf: Buffer): string {
-        let s = ''
-        for (let i = 0; i < buf.length; i++)
-            s += String.fromCharCode(buf[i])
-
-        return s
+        let s = '';
+        for (let i = 0; i < buf.length; i++) {
+            s += String.fromCharCode(buf[i]);
+        }
+        return s;
     }
 
     let analogMM: MMap;
@@ -78,20 +78,20 @@ namespace sensors.internal {
     let batteryVMax: number;
 
     class SensorInfo {
-        port: number
-        sensor: Sensor
-        sensors: Sensor[]
-        connType: number
-        devType: number
-        iicid: string
+        port: number;
+        sensor: Sensor;
+        sensors: Sensor[];
+        connType: number;
+        devType: number;
+        iicid: string;
         poller: Poller;
 
         constructor(p: number) {
-            this.port = p
-            this.connType = DAL.CONN_NONE
-            this.devType = DAL.DEVICE_TYPE_NONE
-            this.iicid = ''
-            this.sensors = []
+            this.port = p;
+            this.connType = DAL.CONN_NONE;
+            this.devType = DAL.DEVICE_TYPE_NONE;
+            this.iicid = '';
+            this.sensors = [];
             this.poller = new Poller(25, () => this.query(), (prev, curr) => this.update(prev, curr));
         }
 
@@ -105,7 +105,7 @@ namespace sensors.internal {
         }
 
         private update(prev: number, curr: number) {
-            if (this.sensor) this.sensor._update(prev, curr)
+            if (this.sensor) this.sensor._update(prev, curr);
         }
     }
 
