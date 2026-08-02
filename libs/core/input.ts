@@ -454,49 +454,49 @@ namespace sensors.internal {
     }
 
     export class IICSensor extends Sensor {
-        protected mode: number // the mode user asked for
-        protected realmode: number // the mode the hardware is in
-        private readLength: number
+        protected mode: number; // the mode user asked for
+        protected realmode: number; // the mode the hardware is in
+        private readLength: number;
 
         constructor(port: number) {
-            super(port)
-            this.mode = 0
-            this.realmode = 0
+            super(port);
+            this.mode = 0;
+            this.realmode = 0;
             this.readLength = 1;
         }
 
         _activated() {
-            this.realmode = 0
-            this._setMode(this.mode)
+            this.realmode = 0;
+            this._setMode(this.mode);
         }
 
         protected _setMode(m: number) {
-            let v = m | 0
-            this.mode = v
-            if (!this.isActive()) return
+            let v = m | 0;
+            this.mode = v;
+            if (!this.isActive()) return;
             if (this.realmode != this.mode) {
-                this.realmode = v
-                setIICMode(this._port, this._deviceType(), v)
+                this.realmode = v;
+                setIICMode(this._port, this._deviceType(), v);
             }
         }
 
         getBytes(): Buffer {
-            return getIICBytes(this.isActive() ? this._port : -1, this.readLength)
+            return getIICBytes(this.isActive() ? this._port : -1, this.readLength);
         }
 
         getNumber(fmt: NumberFormat, off: number) {
             if (!this.isActive())
-                return 0
-            return getIICNumber(this.readLength, fmt, off, this._port)
+                return 0;
+            return getIICNumber(this.readLength, fmt, off, this._port);
         }
 
         transaction(deviceAddress: number, write: number[], read: number) {
             this.readLength = read;
-            transactionIIC(this._port, deviceAddress, write, read)
+            transactionIIC(this._port, deviceAddress, write, read);
         }
 
         _deviceType() {
-            return DAL.DEVICE_TYPE_IIC_UNKNOWN
+            return DAL.DEVICE_TYPE_IIC_UNKNOWN;
         }
     }
 
@@ -505,7 +505,7 @@ namespace sensors.internal {
     export const i2cSensor3 = new IICSensor(3);
     export const i2cSensor4 = new IICSensor(4);
 
-    
+
     function readUartInfo(port: number, mode: number) {
         let buf = output.createBuffer(UartCtlOff.Size);
         buf[UartCtlOff.Port] = port;
