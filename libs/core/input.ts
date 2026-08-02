@@ -442,8 +442,7 @@ namespace sensors.internal {
         }
 
         getNumber(fmt: NumberFormat, off: number) {
-            if (!this.isActive())
-                return 0;
+            if (!this.isActive()) return 0;
             return getUartNumber(fmt, off, this._port);
         }
 
@@ -485,8 +484,7 @@ namespace sensors.internal {
         }
 
         getNumber(fmt: NumberFormat, off: number) {
-            if (!this.isActive())
-                return 0;
+            if (!this.isActive()) return 0;
             return getIICNumber(this.readLength, fmt, off, this._port);
         }
 
@@ -516,17 +514,17 @@ namespace sensors.internal {
     }
 
     function uartReset(port: number) {
-        if (port < 0) return
-        control.dmesg(`UART reset at ${port}`)
-        devcon.setNumber(NumberFormat.Int8LE, DevConOff.Connection + port, DAL.CONN_NONE)
-        devcon.setNumber(NumberFormat.Int8LE, DevConOff.Type + port, 0)
-        devcon.setNumber(NumberFormat.Int8LE, DevConOff.Mode + port, 0)
-        uartMM.ioctl(IO.UART_SET_CONN, devcon)
+        if (port < 0) return;
+        control.dmesg(`UART reset at ${port}`);
+        devcon.setNumber(NumberFormat.Int8LE, DevConOff.Connection + port, DAL.CONN_NONE);
+        devcon.setNumber(NumberFormat.Int8LE, DevConOff.Type + port, 0);
+        devcon.setNumber(NumberFormat.Int8LE, DevConOff.Mode + port, 0);
+        uartMM.ioctl(IO.UART_SET_CONN, devcon);
     }
 
     function getUartStatus(port: number) {
-        if (port < 0) return 0
-        return uartMM.getNumber(NumberFormat.Int8LE, UartOff.Status + port)
+        if (port < 0) return 0;
+        return uartMM.getNumber(NumberFormat.Int8LE, UartOff.Status + port);
     }
 
     function waitNonZeroUartStatus(port: number) {
@@ -543,20 +541,20 @@ namespace sensors.internal {
     function uartClearChange(port: number) {
         control.dmesg(`UART clear change at port ${port}`);
         while (true) {
-            let status = getUartStatus(port)
-            if (port < 0) break
+            let status = getUartStatus(port);
+            if (port < 0) break;
 
             if ((status & UART_DATA_READY) != 0 && (status & UART_PORT_CHANGED) == 0)
-                break
+                break;
 
-            devcon.setNumber(NumberFormat.Int8LE, DevConOff.Connection + port, DAL.CONN_INPUT_UART)
-            devcon.setNumber(NumberFormat.Int8LE, DevConOff.Type + port, 0)
-            devcon.setNumber(NumberFormat.Int8LE, DevConOff.Mode + port, 0)
-            control.dmesg(`UART_CLEAR_CHANGED status ${status} ${devcon.toHex()}`)
-            uartMM.ioctl(IO.UART_CLEAR_CHANGED, devcon)
+            devcon.setNumber(NumberFormat.Int8LE, DevConOff.Connection + port, DAL.CONN_INPUT_UART);
+            devcon.setNumber(NumberFormat.Int8LE, DevConOff.Type + port, 0);
+            devcon.setNumber(NumberFormat.Int8LE, DevConOff.Mode + port, 0);
+            control.dmesg(`UART_CLEAR_CHANGED status ${status} ${devcon.toHex()}`);
+            uartMM.ioctl(IO.UART_CLEAR_CHANGED, devcon);
 
-            uartMM.setNumber(NumberFormat.Int8LE, UartOff.Status + port, getUartStatus(port) & 0xfffe)
-            pause(10)
+            uartMM.setNumber(NumberFormat.Int8LE, UartOff.Status + port, getUartStatus(port) & 0xfffe);
+            pause(10);
         }
     }
 
@@ -581,9 +579,9 @@ namespace sensors.internal {
 
     function updateUartMode(port: number, mode: number) {
         control.dmesg(`UART update mode to ${mode} at port ${port}`);
-        devcon.setNumber(NumberFormat.Int8LE, DevConOff.Connection + port, DAL.CONN_INPUT_UART)
-        devcon.setNumber(NumberFormat.Int8LE, DevConOff.Type + port, 33)
-        devcon.setNumber(NumberFormat.Int8LE, DevConOff.Mode + port, mode)
+        devcon.setNumber(NumberFormat.Int8LE, DevConOff.Connection + port, DAL.CONN_INPUT_UART);
+        devcon.setNumber(NumberFormat.Int8LE, DevConOff.Type + port, 33);
+        devcon.setNumber(NumberFormat.Int8LE, DevConOff.Mode + port, mode);
     }
     
     function setUartMode(port: number, mode: number) {
@@ -606,18 +604,18 @@ namespace sensors.internal {
     }
 
     function getUartBytes(port: number): Buffer {
-        if (port < 0) return output.createBuffer(DAL.MAX_DEVICE_DATALENGTH)
-        let index = uartMM.getNumber(NumberFormat.UInt16LE, UartOff.Actual + port * 2)
+        if (port < 0) return output.createBuffer(DAL.MAX_DEVICE_DATALENGTH);
+        let index = uartMM.getNumber(NumberFormat.UInt16LE, UartOff.Actual + port * 2);
         return uartMM.slice(
             UartOff.Raw + DAL.MAX_DEVICE_DATALENGTH * 300 * port + DAL.MAX_DEVICE_DATALENGTH * index,
-            DAL.MAX_DEVICE_DATALENGTH)
+            DAL.MAX_DEVICE_DATALENGTH);
     }
 
     function getUartNumber(fmt: NumberFormat, off: number, port: number): number {
-        if (port < 0) return 0
-        const index = uartMM.getNumber(NumberFormat.UInt16LE, UartOff.Actual + port * 2)
+        if (port < 0) return 0;
+        const index = uartMM.getNumber(NumberFormat.UInt16LE, UartOff.Actual + port * 2);
         return uartMM.getNumber(fmt,
-            UartOff.Raw + DAL.MAX_DEVICE_DATALENGTH * 300 * port + DAL.MAX_DEVICE_DATALENGTH * index + off)
+            UartOff.Raw + DAL.MAX_DEVICE_DATALENGTH * 300 * port + DAL.MAX_DEVICE_DATALENGTH * index + off);
     }
 
     function setAnalogMode(port: number, type: number, mode: number) {
