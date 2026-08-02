@@ -23,8 +23,9 @@ namespace sensors.internal {
 
         poke(): void {
             const now = control.millis();
-            if (now - this.lastQuery >= this.interval * 2)
+            if (now - this.lastQuery >= this.interval * 2) {
                 this.queryAndUpdate(); // sensor poller is not allowed to run
+            }
             control.cooperate(); // allow events to trigger
         }
 
@@ -313,8 +314,9 @@ namespace sensors.internal {
 
         constructor(port_: number) {
             super();
-            if (!(1 <= port_ && port_ <= DAL.NUM_INPUTS))
+            if (!(1 <= port_ && port_ <= DAL.NUM_INPUTS)) {
                 control.panic(120);
+            }
             this._port = port_ - 1;
             init();
             sensorInfos[this._port].sensors.push(this);
@@ -322,8 +324,9 @@ namespace sensors.internal {
         }
 
         poke() {
-            if (this.isActive())
+            if (this.isActive()) {
                 sensorInfos[this._port].poke();
+            }
         }
 
         markUsed() {
@@ -544,8 +547,7 @@ namespace sensors.internal {
             let status = getUartStatus(port);
             if (port < 0) break;
 
-            if ((status & UART_DATA_READY) != 0 && (status & UART_PORT_CHANGED) == 0)
-                break;
+            if ((status & UART_DATA_READY) != 0 && (status & UART_PORT_CHANGED) == 0) break;
 
             devcon.setNumber(NumberFormat.Int8LE, DevConOff.Connection + port, DAL.CONN_INPUT_UART);
             devcon.setNumber(NumberFormat.Int8LE, DevConOff.Type + port, 0);
@@ -572,8 +574,9 @@ namespace sensors.internal {
             const port = ports.pop();
             const status = waitNonZeroUartStatus(port);
             control.dmesg(`UART status ${status} at port ${port}`);
-            if (!(status & UART_DATA_READY))
+            if (!(status & UART_DATA_READY)) {
                 setUartMode(port, devcon[DevConOff.Mode + port]);
+            }
         }
     }
 
@@ -596,8 +599,7 @@ namespace sensors.internal {
                 uartClearChange(port);
             } else {
                 control.dmesg(`UART status ${status} at port ${port}`);
-                if (status & UART_DATA_READY)
-                    break;
+                if (status & UART_DATA_READY) break;
             }
             pause(10);
         }
@@ -869,7 +871,7 @@ namespace sensors {
         }
 
         public setLevel(level: number) {
-            if (this == null) return
+            if (this == null) return;
             this.level = this.clampValue(level);
 
             if (this.level >= this.highThreshold) {
@@ -907,8 +909,7 @@ namespace sensors {
         private clampValue(value: number) {
             if (value < this.min) {
                 return this.min;
-            }
-            else if (value > this.max) {
+            } else if (value > this.max) {
                 return this.max;
             }
             return value;
