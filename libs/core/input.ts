@@ -66,7 +66,6 @@ namespace sensors.internal {
     let IICMM: MMap;
     let powerMM: MMap;
     let devcon: Buffer;
-    let dcmState: Buffer;
     let devPoller: Poller;
     let sensorInfos: SensorInfo[];
 
@@ -130,8 +129,6 @@ namespace sensors.internal {
         if (!IICMM) control.fail("no iic sensor");
 
         powerMM = control.mmap("/dev/lms_power", 2, 0);
-
-        dcmState = control.createBuffer(DAL.NUM_INPUTS);
 
         devPoller = new Poller(900, () => { return hashDevices(); },
             (prev, curr) => {
@@ -365,7 +362,6 @@ namespace sensors.internal {
     }
 
     export class AnalogSensor extends Sensor {
-        
         protected mode: number; // the mode user asked for
         protected realmode: number;
         protected undetectable: boolean; // not all NXT analog sensors can be detected
@@ -392,14 +388,18 @@ namespace sensors.internal {
             }
         }
 
-        _readPin1() {
+        protected _readPin1() {
             if (!this.undetectable && !this.isActive()) return 0;
             return analogMM.getNumber(NumberFormat.Int16LE, AnalogOff.InPin1 + 2 * this._port);
         }
 
-        _readPin6() {
+        protected _readPin6() {
             if (!this.isActive()) return 0;
             return analogMM.getNumber(NumberFormat.Int16LE, AnalogOff.InPin6 + 2 * this._port);
+        }
+
+        protected _writeDcm(value: string) {
+            writeDcm(this._port, value.charCodeAt(0));
         }
 
         _deviceType() {
@@ -637,6 +637,16 @@ namespace sensors.internal {
         analogMM.ioctl(0, devcon);
     }
 
+    function writeDcm(port: number, value: number) {
+        if (port < 0) return;
+        const buf = control.createBuffer(DAL.NUM_INPUTS);
+        for (let i = 0; i < DAL.NUM_INPUTS; i++) {
+            buf[i] = "-".charCodeAt(0);
+        }
+        buf[port] = value;
+        dcmMM.write(buf);
+    }
+
     export function setIICMode(port: number, type: number, mode: number) {
         if (port < 0) return;
         control.dmesg(`iic set type ${type} mode ${mode} at port ${port}`);
@@ -690,6 +700,7 @@ namespace sensors.internal {
         Padding = 70,
         Size = 72
     }
+
     const enum AnalogOff {
         InPin1 = 0, // int16[4]
         InPin6 = 8, // int16[4]
