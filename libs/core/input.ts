@@ -638,7 +638,7 @@ namespace sensors.internal {
         dcmMM.write(buf);
     }
 
-    export function readIICID(port: number) {
+    function readIICID(port: number) {
         const buf = output.createBuffer(IICStr.Size);
         buf[IICStr.Port] = port;
         IICMM.ioctl(IO.IIC_READ_TYPE_INFO, buf);
@@ -647,7 +647,7 @@ namespace sensors.internal {
         return manufacturer + sensorType;
     }
 
-    export function setIICMode(port: number, type: number, mode: number) {
+    function setIICMode(port: number, type: number, mode: number) {
         if (port < 0) return;
         control.dmesg(`iic set type ${type} mode ${mode} at port ${port}`);
         devcon.setNumber(NumberFormat.Int8LE, DevConOff.Connection + port, DAL.CONN_NXT_IIC);
@@ -656,21 +656,22 @@ namespace sensors.internal {
         IICMM.ioctl(IO.IIC_SET_CONN, devcon);
     }
 
-    export function transactionIIC(port: number, deviceAddress: number, writeBuf: number[], readLen: number) {
+    function transactionIIC(port: number, deviceAddress: number, writeBuf: number[], readLen: number) {
         if (port < 0) return;
-        const iicdata = output.createBuffer(IICDat.Size)
-        iicdata.setNumber(NumberFormat.Int8LE, IICDat.Port, port)
-        iicdata.setNumber(NumberFormat.Int8LE, IICDat.Repeat, 0)
-        iicdata.setNumber(NumberFormat.Int16LE, IICDat.Time, 0)
-        iicdata.setNumber(NumberFormat.Int8LE, IICDat.WrLng, writeBuf.length + 1)
-        for (let i = 0; i < writeBuf.length; i++)
-            iicdata.setNumber(NumberFormat.Int8LE, IICDat.WrData + i + 1, writeBuf[i])
-        iicdata.setNumber(NumberFormat.Int8LE, IICDat.WrData, deviceAddress)
-        iicdata.setNumber(NumberFormat.Int8LE, IICDat.RdLng, readLen)
-        IICMM.ioctl(IO.IIC_SETUP, iicdata)
+        const iicdata = output.createBuffer(IICDat.Size);
+        iicdata.setNumber(NumberFormat.Int8LE, IICDat.Port, port);
+        iicdata.setNumber(NumberFormat.Int8LE, IICDat.Repeat, 0);
+        iicdata.setNumber(NumberFormat.Int16LE, IICDat.Time, 0);
+        iicdata.setNumber(NumberFormat.Int8LE, IICDat.WrLng, writeBuf.length + 1);
+        for (let i = 0; i < writeBuf.length; i++) {
+            iicdata.setNumber(NumberFormat.Int8LE, IICDat.WrData + i + 1, writeBuf[i]);
+        }
+        iicdata.setNumber(NumberFormat.Int8LE, IICDat.WrData, deviceAddress);
+        iicdata.setNumber(NumberFormat.Int8LE, IICDat.RdLng, readLen);
+        IICMM.ioctl(IO.IIC_SETUP, iicdata);
     }
 
-    export function getIICBytes(port: number, length: number) {
+    function getIICBytes(port: number, length: number) {
         if (port < 0) return output.createBuffer(length);
         let index = IICMM.getNumber(NumberFormat.UInt16LE, IICOff.Actual + port * 2);
         let buf = IICMM.slice(
@@ -680,15 +681,15 @@ namespace sensors.internal {
 
         // Reverse
         for (let i = 0; i < length / 2; i++) {
-            let c = buf[i]
-            buf[i] = buf[length - i - 1]
-            buf[length - i - 1] = c
+            let c = buf[i];
+            buf[i] = buf[length - i - 1];
+            buf[length - i - 1] = c;
         }
         return buf;
     }
 
-    export function getIICNumber(length: number, format: NumberFormat, off: number, port: number) {
-        return getIICBytes(port, length).getNumber(format, off)
+    function getIICNumber(length: number, format: NumberFormat, off: number, port: number) {
+        return getIICBytes(port, length).getNumber(format, off);
     }
 
     const enum NxtColOff {
