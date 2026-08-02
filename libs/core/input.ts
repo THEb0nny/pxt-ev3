@@ -514,15 +514,6 @@ namespace sensors.internal {
         return buf;
     }
 
-    export function readIICID(port: number) {
-        const buf = output.createBuffer(IICStr.Size);
-        buf[IICStr.Port] = port;
-        IICMM.ioctl(IO.IIC_READ_TYPE_INFO, buf);
-        const manufacturer = bufferToString(buf.slice(IICStr.Manufacturer, 8));
-        const sensorType = bufferToString(buf.slice(IICStr.SensorType, 8));
-        return manufacturer + sensorType;
-    }
-
     function uartReset(port: number) {
         if (port < 0) return
         control.dmesg(`UART reset at ${port}`)
@@ -645,6 +636,15 @@ namespace sensors.internal {
         }
         buf[port] = value;
         dcmMM.write(buf);
+    }
+
+    export function readIICID(port: number) {
+        const buf = output.createBuffer(IICStr.Size);
+        buf[IICStr.Port] = port;
+        IICMM.ioctl(IO.IIC_READ_TYPE_INFO, buf);
+        const manufacturer = bufferToString(buf.slice(IICStr.Manufacturer, 8));
+        const sensorType = bufferToString(buf.slice(IICStr.SensorType, 8));
+        return manufacturer + sensorType;
     }
 
     export function setIICMode(port: number, type: number, mode: number) {
