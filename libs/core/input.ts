@@ -142,32 +142,32 @@ namespace sensors.internal {
         return sensorInfos.filter(si => si.sensor && si.sensor.isActive()).map(si => si.sensor);
     }
 
-    const ADC_REF = 5000                  //!< [mV]  maximal value on ADC
-    const ADC_RES = 4095                  //!< [CNT] maximal count on ADC
+    const ADC_REF = 5000; //!< [mV]  maximal value on ADC
+    const ADC_RES = 4095; //!< [CNT] maximal count on ADC
     // see c_ui.c
-    const SHUNT_IN = 0.11              //  [Ohm]
-    const AMP_CIN = 22.0              //  [Times]
+    const SHUNT_IN = 0.11; //  [Ohm]
+    const AMP_CIN = 22.0; //  [Times]
 
-    const EP2_SHUNT_IN = 0.05              //  [Ohm]
-    const EP2_AMP_CIN = 15.0              //  [Times]
+    const EP2_SHUNT_IN = 0.05; //  [Ohm]
+    const EP2_AMP_CIN = 15.0;  //  [Times]
 
-    const SHUNT_OUT = 0.055             //  [Ohm]
-    const AMP_COUT = 19.0              //  [Times]
+    const SHUNT_OUT = 0.055; //  [Ohm]
+    const AMP_COUT = 19.0; //  [Times]
 
-    const VCE = 0.05              //  [V]
-    const AMP_VIN = 0.5               //  [Times]
+    const VCE = 0.05; //  [V]
+    const AMP_VIN = 0.5; //  [Times]
 
-    const AVR_CIN = 300
-    const AVR_COUT = 30
-    const AVR_VIN = 30
+    const AVR_CIN = 300;
+    const AVR_COUT = 30;
+    const AVR_VIN = 30;
     // lms2012
-    const BATT_INDICATOR_HIGH = 7500          //!< Battery indicator high [mV]
-    const BATT_INDICATOR_LOW = 6200          //!< Battery indicator low [mV]
-    const ACCU_INDICATOR_HIGH = 7500          //!< Rechargeable battery indicator high [mV]
-    const ACCU_INDICATOR_LOW = 7100          //!< Rechargeable battery indicator low [mV]    
+    const BATT_INDICATOR_HIGH = 7500; //!< Battery indicator high [mV]
+    const BATT_INDICATOR_LOW = 6200; //!< Battery indicator low [mV]
+    const ACCU_INDICATOR_HIGH = 7500; //!< Rechargeable battery indicator high [mV]
+    const ACCU_INDICATOR_LOW = 7100; //!< Rechargeable battery indicator low [mV]    
 
     function CNT_V(C: number) {
-        return ((C * ADC_REF) / (ADC_RES * 1000.0))
+        return ((C * ADC_REF) / (ADC_RES * 1000.0));
     }
 
     function updateBatteryInfo() {
@@ -180,7 +180,7 @@ namespace sensors.internal {
             if (powerMM) {
                 const accu = powerMM.getNumber(NumberFormat.UInt8LE, 0);
                 if (accu > 0) {
-                    control.dmesg("rechargeable battery")
+                    control.dmesg("rechargeable battery");
                     batteryVMin = ACCU_INDICATOR_LOW;
                     batteryVMax = ACCU_INDICATOR_HIGH;
                 }
