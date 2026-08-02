@@ -500,11 +500,12 @@ namespace sensors.internal {
         }
     }
 
-    export const i2csensor1 = new IICSensor(1);
-    export const i2csensor2 = new IICSensor(2);
-    export const i2csensor3 = new IICSensor(3);
-    export const i2csensor4 = new IICSensor(4);
+    export const i2cSensor1 = new IICSensor(1);
+    export const i2cSensor2 = new IICSensor(2);
+    export const i2cSensor3 = new IICSensor(3);
+    export const i2cSensor4 = new IICSensor(4);
 
+    
     function readUartInfo(port: number, mode: number) {
         let buf = output.createBuffer(UartCtlOff.Size);
         buf[UartCtlOff.Port] = port;
