@@ -230,7 +230,7 @@ namespace sensors.internal {
     }
 
     function hashDevices(): number {
-        const conns = analogMM.slice(AnalogOff.InConn, DAL.NUM_INPUTS)
+        const conns = analogMM.slice(AnalogOff.InConn, DAL.NUM_INPUTS);
         let r = 0;
         for (let i = 0; i < conns.length; ++i) {
             r = conns[i] + (r << 6) + (r << 16) - r;
@@ -309,15 +309,15 @@ namespace sensors.internal {
     }
 
     export class Sensor extends control.Component {
-        protected _port: number // this is 0-based
+        protected _port: number; // this is 0-based
 
         constructor(port_: number) {
-            super()
+            super();
             if (!(1 <= port_ && port_ <= DAL.NUM_INPUTS))
-                control.panic(120)
-            this._port = port_ - 1
-            init()
-            sensorInfos[this._port].sensors.push(this)
+                control.panic(120);
+            this._port = port_ - 1;
+            init();
+            sensorInfos[this._port].sensors.push(this);
             this.markUsed();
         }
 
@@ -334,11 +334,11 @@ namespace sensors.internal {
 
         // 1-based
         port() {
-            return this._port + 1
+            return this._port + 1;
         }
 
         isActive() {
-            return sensorInfos[this._port].sensor == this
+            return sensorInfos[this._port].sensor == this;
         }
 
         _query(): number[] {
@@ -353,11 +353,11 @@ namespace sensors.internal {
         }
 
         _deviceType() {
-            return 0
+            return 0;
         }
 
         _IICId() {
-            return ''
+            return '';
         }
     }
 
@@ -408,8 +408,8 @@ namespace sensors.internal {
     }
 
     export class UartSensor extends Sensor {
-        protected mode: number // the mode user asked for
-        protected realmode: number // the mode the hardware is in
+        protected mode: number; // the mode user asked for
+        protected realmode: number; // the mode the hardware is in
 
         constructor(port: number) {
             super(port);
@@ -438,13 +438,13 @@ namespace sensors.internal {
         }
 
         getBytes(): Buffer {
-            return getUartBytes(this.isActive() ? this._port : -1)
+            return getUartBytes(this.isActive() ? this._port : -1);
         }
 
         getNumber(fmt: NumberFormat, off: number) {
             if (!this.isActive())
-                return 0
-            return getUartNumber(fmt, off, this._port)
+                return 0;
+            return getUartNumber(fmt, off, this._port);
         }
 
         reset() {
