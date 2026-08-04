@@ -40,11 +40,11 @@ namespace sensors {
 
         _query() {
             if (this.mode == NXTLightSensorMode.ReflectedLight) {
-                return [this.reflectetLight()];
+                return [this.reflectedLight()];
             } else if (this.mode == NXTLightSensorMode.AmbientLight) {
                 return [this.ambientLight()];
             } else if (this.mode == NXTLightSensorMode.ReflectedLightRaw) {
-                return [this.reflectetLightRaw()];
+                return [this.reflectedLightRaw()];
             } else if (this.mode == NXTLightSensorMode.AmbientLightRaw) {
                 return [this.ambientLightRaw()];
             }
@@ -111,9 +111,9 @@ namespace sensors {
             this.poke();
             switch (mode) {
                 case NXTLightIntensityMode.ReflectedRaw:
-                    return this.reflectetLightRaw();
+                    return this.reflectedLightRaw();
                 case NXTLightIntensityMode.Reflected:
-                    return this.reflectetLight();
+                    return this.reflectedLight();
                 case NXTLightIntensityMode.AmbientRaw:
                     return this.ambientLightRaw();
                 case NXTLightIntensityMode.Ambient:
@@ -169,6 +169,9 @@ namespace sensors {
             this.brightAmbientLight = Math.constrain(bright, 0, 4095);
         }
 
+        /**
+         * Enables or disables the built-in illumination LED.
+         */
         private setLedState(enable: boolean) {
             this._writeDcm(enable ? "2" : "0");
         }
@@ -185,7 +188,7 @@ namespace sensors {
          * Gets the raw reflection light value.
          */
         //%
-        reflectetLightRaw() {
+        reflectedLightRaw() {
             return this.readValue();
         }
 
@@ -201,7 +204,7 @@ namespace sensors {
          * Gets the normalize reflection light value.
          */
         //%
-        reflectetLight() {
+        reflectedLight() {
             if (!this.isActive()) return 0;
             let reflectedVal = Math.map(this.readValue(), this.darkReflectedLight, this.brightReflectedLight, 0, 100);
             reflectedVal = Math.round(Math.constrain(reflectedVal, 0, 100));
