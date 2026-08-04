@@ -70,7 +70,20 @@ namespace sensors {
         }
 
         setMode(m: number) {
+            const modeChanged = m != this.mode && this.isActive();
             this._setMode(m);
+            if (modeChanged) {
+                switch (m) {
+                    case NXTLightSensorMode.ReflectedLight:
+                    case NXTLightSensorMode.ReflectedLightRaw:
+                        this.setLedState(true);
+                        break;
+                    case NXTLightSensorMode.AmbientLight:
+                    case NXTLightSensorMode.AmbientLightRaw:
+                        this.setLedState(false);
+                        break;
+                }
+            }
         }
 
         /**
@@ -78,11 +91,6 @@ namespace sensors {
          */
         lightMode() {
             return <NXTLightSensorMode>this.mode;
-        }
-
-        // This pin is not used by the NXT Analog Sensor
-        _readPin6() {
-            return 0;
         }
 
         /**
@@ -164,6 +172,10 @@ namespace sensors {
             this.brightAmbientLight = Math.constrain(bright, 0, 4095);
         }
 
+        private setLedState(enable: boolean) {
+            this._writeDcm(enable ? "2" : "0");
+        }
+
         /**
          * Gets the raw light value.
          */
@@ -177,7 +189,6 @@ namespace sensors {
          */
         //%
         reflectetLightRaw() {
-            // ToDo: the red LED should be turned off in ambient lighting mode
             return this.readValue();
         }
 
@@ -186,7 +197,6 @@ namespace sensors {
          */
         //%
         ambientLightRaw() {
-            // ToDo: the red LED should be turned off in ambient lighting mode
             return this.readValue();
         }
 
