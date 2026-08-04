@@ -288,7 +288,7 @@ namespace sensors.internal {
         control.dmesg(`UPDATE SENSOR STATUS`);
         for (const sensorInfo of sensorInfos.filter(si => !si.sensor)) {
             if (sensorInfo.devType == DAL.DEVICE_TYPE_IIC_UNKNOWN) {
-                sensorInfo.sensor = sensorInfo.sensors.filter(s => s._i2cId() == sensorInfo.i2cId)[0];
+                sensorInfo.sensor = (<IICSensor[]>sensorInfo.sensors).filter(s => s._i2cId() == sensorInfo.i2cId)[0];
                 if (!sensorInfo.sensor) {
                     control.dmesg(`sensor not found for i2cId=${sensorInfo.i2cId} at port ${sensorInfo.port}`);
                 } else {
@@ -357,10 +357,6 @@ namespace sensors.internal {
 
         _deviceType() {
             return 0;
-        }
-
-        _i2cId() {
-            return '';
         }
     }
 
@@ -498,6 +494,10 @@ namespace sensors.internal {
 
         _deviceType() {
             return DAL.DEVICE_TYPE_IIC_UNKNOWN;
+        }
+
+        _i2cId() {
+            return '';
         }
     }
 
