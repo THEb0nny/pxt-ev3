@@ -257,7 +257,7 @@ namespace sensors.internal {
                 updateUartMode(sensorInfo.port, 0);
             } else if (newConn == DAL.CONN_NXT_IIC) {
                 sensorInfo.devType = DAL.DEVICE_TYPE_IIC_UNKNOWN;
-                sensorInfo.i2cId = readIICID(sensorInfo.port);
+                sensorInfo.i2cId = readI2cId(sensorInfo.port);
                 control.dmesg(`new I2C connection at port ${sensorInfo.port} with ID ${sensorInfo.i2cId.length}`);
             } else if (newConn == DAL.CONN_NXT_DUMB) {
                 sensorInfo.devType = inDcm[sensorInfo.port];
@@ -288,7 +288,7 @@ namespace sensors.internal {
         control.dmesg(`UPDATE SENSOR STATUS`);
         for (const sensorInfo of sensorInfos.filter(si => !si.sensor)) {
             if (sensorInfo.devType == DAL.DEVICE_TYPE_IIC_UNKNOWN) {
-                sensorInfo.sensor = (<IICSensor[]>sensorInfo.sensors).filter(s => s._i2cId() == sensorInfo.i2cId)[0];
+                sensorInfo.sensor = (<I2cSensor[]>sensorInfo.sensors).filter(s => s._i2cId() == sensorInfo.i2cId)[0];
                 if (!sensorInfo.sensor) {
                     control.dmesg(`sensor not found for i2cId=${sensorInfo.i2cId} at port ${sensorInfo.port}`);
                 } else {
@@ -451,7 +451,7 @@ namespace sensors.internal {
         }
     }
 
-    export class IICSensor extends Sensor {
+    export class I2cSensor extends Sensor {
         protected mode: number; // the mode user asked for
         protected realmode: number; // the mode the hardware is in
         private readLength: number;
@@ -474,22 +474,22 @@ namespace sensors.internal {
             if (!this.isActive()) return;
             if (this.realmode != this.mode) {
                 this.realmode = v;
-                setIICMode(this._port, this._deviceType(), v);
+                setI2cMode(this._port, this._deviceType(), v);
             }
         }
 
         getBytes(): Buffer {
-            return getIICBytes(this.isActive() ? this._port : -1, this.readLength);
+            return getI2cBytes(this.isActive() ? this._port : -1, this.readLength);
         }
 
         getNumber(fmt: NumberFormat, off: number) {
             if (!this.isActive()) return 0;
-            return getIICNumber(this.readLength, fmt, off, this._port);
+            return getI2cNumber(this.readLength, fmt, off, this._port);
         }
 
         transaction(deviceAddress: number, write: number[], read: number) {
             this.readLength = read;
-            transactionIIC(this._port, deviceAddress, write, read);
+            transactionI2c(this._port, deviceAddress, write, read);
         }
 
         _deviceType() {
@@ -501,10 +501,10 @@ namespace sensors.internal {
         }
     }
 
-    export const i2cSensor1 = new IICSensor(1);
-    export const i2cSensor2 = new IICSensor(2);
-    export const i2cSensor3 = new IICSensor(3);
-    export const i2cSensor4 = new IICSensor(4);
+    export const i2cSensor1 = new I2cSensor(1);
+    export const i2cSensor2 = new I2cSensor(2);
+    export const i2cSensor3 = new I2cSensor(3);
+    export const i2cSensor4 = new I2cSensor(4);
 
 
     function readUartInfo(port: number, mode: number) {
@@ -639,7 +639,7 @@ namespace sensors.internal {
         dcmMM.write(buf);
     }
 
-    function readIICID(port: number) {
+    function readI2cId(port: number) {
         const buf = output.createBuffer(IICStr.Size);
         buf[IICStr.Port] = port;
         i2cMM.ioctl(IO.IIC_READ_TYPE_INFO, buf);
@@ -648,7 +648,7 @@ namespace sensors.internal {
         return manufacturer + sensorType;
     }
 
-    function setIICMode(port: number, type: number, mode: number) {
+    function setI2cMode(port: number, type: number, mode: number) {
         if (port < 0) return;
         control.dmesg(`i2c set type ${type} mode ${mode} at port ${port}`);
         devcon.setNumber(NumberFormat.Int8LE, DevConOff.Connection + port, DAL.CONN_NXT_IIC);
@@ -657,22 +657,22 @@ namespace sensors.internal {
         i2cMM.ioctl(IO.IIC_SET_CONN, devcon);
     }
 
-    function transactionIIC(port: number, deviceAddress: number, writeBuf: number[], readLen: number) {
+    function transactionI2c(port: number, deviceAddress: number, writeBuf: number[], readLen: number) {
         if (port < 0) return;
-        const iicdata = output.createBuffer(IICDat.Size);
-        iicdata.setNumber(NumberFormat.Int8LE, IICDat.Port, port);
-        iicdata.setNumber(NumberFormat.Int8LE, IICDat.Repeat, 0);
-        iicdata.setNumber(NumberFormat.Int16LE, IICDat.Time, 0);
-        iicdata.setNumber(NumberFormat.Int8LE, IICDat.WrLng, writeBuf.length + 1);
+        const i2cData = output.createBuffer(IICDat.Size);
+        i2cData.setNumber(NumberFormat.Int8LE, IICDat.Port, port);
+        i2cData.setNumber(NumberFormat.Int8LE, IICDat.Repeat, 0);
+        i2cData.setNumber(NumberFormat.Int16LE, IICDat.Time, 0);
+        i2cData.setNumber(NumberFormat.Int8LE, IICDat.WrLng, writeBuf.length + 1);
         for (let i = 0; i < writeBuf.length; i++) {
-            iicdata.setNumber(NumberFormat.Int8LE, IICDat.WrData + i + 1, writeBuf[i]);
+            i2cData.setNumber(NumberFormat.Int8LE, IICDat.WrData + i + 1, writeBuf[i]);
         }
-        iicdata.setNumber(NumberFormat.Int8LE, IICDat.WrData, deviceAddress);
-        iicdata.setNumber(NumberFormat.Int8LE, IICDat.RdLng, readLen);
-        i2cMM.ioctl(IO.IIC_SETUP, iicdata);
+        i2cData.setNumber(NumberFormat.Int8LE, IICDat.WrData, deviceAddress);
+        i2cData.setNumber(NumberFormat.Int8LE, IICDat.RdLng, readLen);
+        i2cMM.ioctl(IO.IIC_SETUP, i2cData);
     }
 
-    function getIICBytes(port: number, length: number) {
+    function getI2cBytes(port: number, length: number) {
         if (port < 0) return output.createBuffer(length);
         let index = i2cMM.getNumber(NumberFormat.UInt16LE, IICOff.Actual + port * 2);
         let buf = i2cMM.slice(
@@ -689,8 +689,8 @@ namespace sensors.internal {
         return buf;
     }
 
-    function getIICNumber(length: number, format: NumberFormat, off: number, port: number) {
-        return getIICBytes(port, length).getNumber(format, off);
+    function getI2cNumber(length: number, format: NumberFormat, off: number, port: number) {
+        return getI2cBytes(port, length).getNumber(format, off);
     }
 
     const enum NxtColOff {
