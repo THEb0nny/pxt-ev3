@@ -15,10 +15,8 @@ enum NXTLightIntensityMode {
     //% block="reflected light"
     Reflected = NXTLightSensorMode.ReflectedLight,
     //% block="ambient light (raw)"
-    //% blockHidden=true
     AmbientRaw = NXTLightSensorMode.AmbientLightRaw,
     //% block="ambient light"
-    //% blockHidden=true
     Ambient = NXTLightSensorMode.AmbientLight
 }
 
@@ -42,11 +40,11 @@ namespace sensors {
 
         _query() {
             if (this.mode == NXTLightSensorMode.ReflectedLight) {
-                return [this.reflectetLight()];
+                return [this.reflectedLight()];
             } else if (this.mode == NXTLightSensorMode.AmbientLight) {
                 return [this.ambientLight()];
             } else if (this.mode == NXTLightSensorMode.ReflectedLightRaw) {
-                return [this.reflectetLightRaw()];
+                return [this.reflectedLightRaw()];
             } else if (this.mode == NXTLightSensorMode.AmbientLightRaw) {
                 return [this.ambientLightRaw()];
             }
@@ -70,7 +68,20 @@ namespace sensors {
         }
 
         setMode(m: number) {
+            const modeChanged = m != this.mode && this.isActive();
             this._setMode(m);
+            if (modeChanged) {
+                switch (m) {
+                    case NXTLightSensorMode.ReflectedLight:
+                    case NXTLightSensorMode.ReflectedLightRaw:
+                        this.setLedState(true);
+                        break;
+                    case NXTLightSensorMode.AmbientLight:
+                    case NXTLightSensorMode.AmbientLightRaw:
+                        this.setLedState(false);
+                        break;
+                }
+            }
         }
 
         /**
@@ -78,11 +89,6 @@ namespace sensors {
          */
         lightMode() {
             return <NXTLightSensorMode>this.mode;
-        }
-
-        // This pin is not used by the NXT Analog Sensor
-        _readPin6() {
-            return 0;
         }
 
         /**
@@ -105,9 +111,9 @@ namespace sensors {
             this.poke();
             switch (mode) {
                 case NXTLightIntensityMode.ReflectedRaw:
-                    return this.reflectetLightRaw();
+                    return this.reflectedLightRaw();
                 case NXTLightIntensityMode.Reflected:
-                    return this.reflectetLight();
+                    return this.reflectedLight();
                 case NXTLightIntensityMode.AmbientRaw:
                     return this.ambientLightRaw();
                 case NXTLightIntensityMode.Ambient:
@@ -120,8 +126,8 @@ namespace sensors {
         /**
          * Set the range of values for determining dark and light in light reflection mode. This must be done so that the reflection mode defines a value in the range from 0 to 100 percent.
          * @param sensor the color sensor port
-         * @param dark the value of dark, eg: 0
-         * @param bright the value of bright, eg: 4095
+         * @param dark the value of dark, eg: 3372
+         * @param bright the value of bright, eg: 445
          */
         //% help=sensors/nxt-light-sensor/set-reflected-range
         //% block="**nxt light sensor** $this|set reflected range dark $dark|bright $bright"
@@ -143,8 +149,8 @@ namespace sensors {
         /**
          * Set the value range for dark and light detection in ambient light mode. This must be done so that the ambient light mode determines the value in the range from 0 to 100 percent.
          * @param sensor the color sensor port
-         * @param dark the value of dark, eg: 0
-         * @param bright the value of bright, eg: 4095
+         * @param dark the value of dark, eg: 3411
+         * @param bright the value of bright, eg: 633
          */
         //% help=sensors/nxt-light-sensor/set-ambient-range
         //% block="**nxt light sensor** $this|set ambient range dark $dark|bright $bright"
@@ -157,11 +163,17 @@ namespace sensors {
         //% weight=88 blockGap=8
         //% subcategory="NXT"
         //% group="Light Sensor"
-        //% blockHidden=true
         setAmbientLightRange(dark: number, bright: number) {
             if (dark <= bright) return;
             this.darkAmbientLight = Math.constrain(dark, 0, 4095);
             this.brightAmbientLight = Math.constrain(bright, 0, 4095);
+        }
+
+        /**
+         * Enables or disables the built-in illumination LED.
+         */
+        private setLedState(enable: boolean) {
+            this._writeDcm(enable ? "2" : "0");
         }
 
         /**
@@ -176,8 +188,7 @@ namespace sensors {
          * Gets the raw reflection light value.
          */
         //%
-        reflectetLightRaw() {
-            // ToDo: the red LED should be turned off in ambient lighting mode
+        reflectedLightRaw() {
             return this.readValue();
         }
 
@@ -186,7 +197,6 @@ namespace sensors {
          */
         //%
         ambientLightRaw() {
-            // ToDo: the red LED should be turned off in ambient lighting mode
             return this.readValue();
         }
 
@@ -194,7 +204,7 @@ namespace sensors {
          * Gets the normalize reflection light value.
          */
         //%
-        reflectetLight() {
+        reflectedLight() {
             if (!this.isActive()) return 0;
             let reflectedVal = Math.map(this.readValue(), this.darkReflectedLight, this.brightReflectedLight, 0, 100);
             reflectedVal = Math.round(Math.constrain(reflectedVal, 0, 100));
