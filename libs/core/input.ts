@@ -362,13 +362,13 @@ namespace sensors.internal {
 
     export class AnalogSensor extends Sensor {
         protected mode: number; // the mode user asked for
-        protected realmode: number;
+        protected realMode: number;
         protected undetectable: boolean; // not all NXT analog sensors can be detected
 
         constructor(port: number) {
             super(port);
             this.mode = 0;
-            this.realmode = 0;
+            this.realMode = 0;
             this.undetectable = false;
         }
 
@@ -380,9 +380,9 @@ namespace sensors.internal {
             let v = m | 0;
             this.mode = v;
             if (!this.isActive()) return;
-            if (this.realmode != this.mode) {
-                // control.dmesg(`_setMode p=${this._port} m: ${this.realmode} -> ${v}`);
-                this.realmode = v;
+            if (this.realMode != this.mode) {
+                // control.dmesg(`_setMode p=${this._port} m: ${this.realMode} -> ${v}`);
+                this.realMode = v;
                 setAnalogMode(this._port, this._deviceType(), this.mode);
             }
         }
@@ -408,16 +408,16 @@ namespace sensors.internal {
 
     export class UartSensor extends Sensor {
         protected mode: number; // the mode user asked for
-        protected realmode: number; // the mode the hardware is in
+        protected realMode: number; // the mode the hardware is in
 
         constructor(port: number) {
             super(port);
             this.mode = 0;
-            this.realmode = 0;
+            this.realMode = 0;
         }
 
         _activated() {
-            this.realmode = 0;
+            this.realMode = 0;
             this._setMode(this.mode);
         }
 
@@ -429,9 +429,9 @@ namespace sensors.internal {
             let v = m | 0;
             this.mode = v;
             if (!this.isActive()) return;
-            if (this.realmode != this.mode) {
-                control.dmesg(`_setMode p=${this._port} m: ${this.realmode} -> ${v}`);
-                this.realmode = v;
+            if (this.realMode != this.mode) {
+                control.dmesg(`_setMode p=${this._port} m: ${this.realMode} -> ${v}`);
+                this.realMode = v;
                 setUartMode(this._port, v);
             }
         }
@@ -447,24 +447,24 @@ namespace sensors.internal {
 
         reset() {
             if (this.isActive()) uartReset(this._port);
-            this.realmode = -1;
+            this.realMode = -1;
         }
     }
 
     export class I2cSensor extends Sensor {
         protected mode: number; // the mode user asked for
-        protected realmode: number; // the mode the hardware is in
+        protected realMode: number; // the mode the hardware is in
         private readLength: number;
 
         constructor(port: number) {
             super(port);
             this.mode = 0;
-            this.realmode = 0;
+            this.realMode = 0;
             this.readLength = 1;
         }
 
         _activated() {
-            this.realmode = 0;
+            this.realMode = 0;
             this._setMode(this.mode);
         }
 
@@ -472,8 +472,8 @@ namespace sensors.internal {
             let v = m | 0;
             this.mode = v;
             if (!this.isActive()) return;
-            if (this.realmode != this.mode) {
-                this.realmode = v;
+            if (this.realMode != this.mode) {
+                this.realMode = v;
                 setI2cMode(this._port, this._deviceType(), v);
             }
         }
