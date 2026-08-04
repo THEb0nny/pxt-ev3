@@ -15,10 +15,8 @@ enum NXTLightIntensityMode {
     //% block="reflected light"
     Reflected = NXTLightSensorMode.ReflectedLight,
     //% block="ambient light (raw)"
-    //% blockHidden=true
     AmbientRaw = NXTLightSensorMode.AmbientLightRaw,
     //% block="ambient light"
-    //% blockHidden=true
     Ambient = NXTLightSensorMode.AmbientLight
 }
 
@@ -165,7 +163,6 @@ namespace sensors {
         //% weight=88 blockGap=8
         //% subcategory="NXT"
         //% group="Light Sensor"
-        //% blockHidden=true
         setAmbientLightRange(dark: number, bright: number) {
             if (dark <= bright) return;
             this.darkAmbientLight = Math.constrain(dark, 0, 4095);
