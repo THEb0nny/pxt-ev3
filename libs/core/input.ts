@@ -632,9 +632,12 @@ namespace sensors.internal {
     function writeDcm(port: number, value: number) {
         if (port < 0) return;
         const buf = control.createBuffer(DAL.NUM_INPUTS);
+        // '-' keeps the current DCM state for the port
         for (let i = 0; i < DAL.NUM_INPUTS; i++) {
             buf[i] = "-".charCodeAt(0);
         }
+        // '0'..'7' select predefined DCM output configurations
+        // 'f' releases (floats) all DCM-controlled output pins
         buf[port] = value;
         dcmMM.write(buf);
     }
