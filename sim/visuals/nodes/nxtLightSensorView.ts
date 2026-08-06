@@ -26,16 +26,22 @@ namespace pxsim.visuals {
             if (!lightState) return;
             const mode = lightState.getMode();
 
-            if (mode == NXTLightSensorMode.ReflectedLightRaw || mode == NXTLightSensorMode.ReflectedLight) {
-                this.updateSensorLightVisual('#eb0c0c');
+            if (mode == NXTLightSensorMode.ReflectedLightRaw
+                || mode == NXTLightSensorMode.ReflectedLight) {
+                this.updateSensorLightVisual(true);
+            } else {
+                this.updateSensorLightVisual(false);
             }
         }
 
-        private updateSensorLightVisual(color: string) {
+        private updateSensorLightVisual(enable: boolean) {
             const sensorHole = this.content.getElementById(this.normalizeId(NXTLightSensorView.sensor_hole_id)) as SVGCircleElement;
-            sensorHole.style.stroke = color;
-            if (color != '#ffffff') {
+            if (enable) {
+                sensorHole.style.stroke = "#eb0c0c";
                 sensorHole.style.strokeWidth = '2px';
+            } else {
+                sensorHole.style.stroke = "none";
+                sensorHole.style.strokeWidth = "0";
             }
         }
     }
