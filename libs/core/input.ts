@@ -23,8 +23,9 @@ namespace sensors.internal {
 
         poke(): void {
             const now = control.millis();
-            if (now - this.lastQuery >= this.interval * 2)
+            if (now - this.lastQuery >= this.interval * 2) {
                 this.queryAndUpdate(); // sensor poller is not allowed to run
+            }
             control.cooperate(); // allow events to trigger
         }
 
@@ -53,16 +54,17 @@ namespace sensors.internal {
     }
 
     export function bufferToString(buf: Buffer): string {
-        let s = ''
-        for (let i = 0; i < buf.length; i++)
-            s += String.fromCharCode(buf[i])
-
-        return s
+        let s = '';
+        for (let i = 0; i < buf.length; i++) {
+            s += String.fromCharCode(buf[i]);
+        }
+        return s;
     }
 
     let analogMM: MMap;
+    let dcmMM: MMap;
     let uartMM: MMap;
-    let IICMM: MMap;
+    let i2cMM: MMap;
     let powerMM: MMap;
     let devcon: Buffer;
     let devPoller: Poller;
@@ -77,20 +79,20 @@ namespace sensors.internal {
     let batteryVMax: number;
 
     class SensorInfo {
-        port: number
-        sensor: Sensor
-        sensors: Sensor[]
-        connType: number
-        devType: number
-        iicid: string
+        port: number;
+        sensor: Sensor;
+        sensors: Sensor[];
+        connType: number;
+        devType: number;
+        i2cId: string;
         poller: Poller;
 
         constructor(p: number) {
-            this.port = p
-            this.connType = DAL.CONN_NONE
-            this.devType = DAL.DEVICE_TYPE_NONE
-            this.iicid = ''
-            this.sensors = []
+            this.port = p;
+            this.connType = DAL.CONN_NONE;
+            this.devType = DAL.DEVICE_TYPE_NONE;
+            this.i2cId = '';
+            this.sensors = [];
             this.poller = new Poller(25, () => this.query(), (prev, curr) => this.update(prev, curr));
         }
 
@@ -104,26 +106,30 @@ namespace sensors.internal {
         }
 
         private update(prev: number, curr: number) {
-            if (this.sensor) this.sensor._update(prev, curr)
+            if (this.sensor) this.sensor._update(prev, curr);
         }
     }
 
     function init() {
-        if (sensorInfos) return
-        sensorInfos = []
-        for (let i = 0; i < DAL.NUM_INPUTS; ++i) sensorInfos.push(new SensorInfo(i))
-        devcon = output.createBuffer(DevConOff.Size)
+        if (sensorInfos) return;
 
-        analogMM = control.mmap("/dev/lms_analog", AnalogOff.Size, 0)
-        if (!analogMM) control.fail("no analog sensor")
+        sensorInfos = [];
+        for (let i = 0; i < DAL.NUM_INPUTS; ++i) sensorInfos.push(new SensorInfo(i));
+        devcon = output.createBuffer(DevConOff.Size);
 
-        uartMM = control.mmap("/dev/lms_uart", UartOff.Size, 0)
-        if (!uartMM) control.fail("no uart sensor")
+        analogMM = control.mmap("/dev/lms_analog", AnalogOff.Size, 0);
+        if (!analogMM) control.fail("no analog sensor");
 
-        IICMM = control.mmap("/dev/lms_iic", IICOff.Size, 0)
-        if (!IICMM) control.fail("no iic sensor")
+        dcmMM = control.mmap("/dev/lms_dcm", 0, 0);
+        if (!dcmMM) control.fail("no dcm device");
 
-        powerMM = control.mmap("/dev/lms_power", 2, 0)
+        uartMM = control.mmap("/dev/lms_uart", UartOff.Size, 0);
+        if (!uartMM) control.fail("no uart sensor");
+
+        i2cMM = control.mmap("/dev/lms_iic", IICOff.Size, 0);
+        if (!i2cMM) control.fail("no iic sensor");
+
+        powerMM = control.mmap("/dev/lms_power", 2, 0);
 
         devPoller = new Poller(900, () => { return hashDevices(); },
             (prev, curr) => {
@@ -137,32 +143,32 @@ namespace sensors.internal {
         return sensorInfos.filter(si => si.sensor && si.sensor.isActive()).map(si => si.sensor);
     }
 
-    const ADC_REF = 5000                  //!< [mV]  maximal value on ADC
-    const ADC_RES = 4095                  //!< [CNT] maximal count on ADC
+    const ADC_REF = 5000; //!< [mV]  maximal value on ADC
+    const ADC_RES = 4095; //!< [CNT] maximal count on ADC
     // see c_ui.c
-    const SHUNT_IN = 0.11              //  [Ohm]
-    const AMP_CIN = 22.0              //  [Times]
+    const SHUNT_IN = 0.11; //  [Ohm]
+    const AMP_CIN = 22.0; //  [Times]
 
-    const EP2_SHUNT_IN = 0.05              //  [Ohm]
-    const EP2_AMP_CIN = 15.0              //  [Times]
+    const EP2_SHUNT_IN = 0.05; //  [Ohm]
+    const EP2_AMP_CIN = 15.0;  //  [Times]
 
-    const SHUNT_OUT = 0.055             //  [Ohm]
-    const AMP_COUT = 19.0              //  [Times]
+    const SHUNT_OUT = 0.055; //  [Ohm]
+    const AMP_COUT = 19.0; //  [Times]
 
-    const VCE = 0.05              //  [V]
-    const AMP_VIN = 0.5               //  [Times]
+    const VCE = 0.05; //  [V]
+    const AMP_VIN = 0.5; //  [Times]
 
-    const AVR_CIN = 300
-    const AVR_COUT = 30
-    const AVR_VIN = 30
+    const AVR_CIN = 300;
+    const AVR_COUT = 30;
+    const AVR_VIN = 30;
     // lms2012
-    const BATT_INDICATOR_HIGH = 7500          //!< Battery indicator high [mV]
-    const BATT_INDICATOR_LOW = 6200          //!< Battery indicator low [mV]
-    const ACCU_INDICATOR_HIGH = 7500          //!< Rechargeable battery indicator high [mV]
-    const ACCU_INDICATOR_LOW = 7100          //!< Rechargeable battery indicator low [mV]    
+    const BATT_INDICATOR_HIGH = 7500; //!< Battery indicator high [mV]
+    const BATT_INDICATOR_LOW = 6200; //!< Battery indicator low [mV]
+    const ACCU_INDICATOR_HIGH = 7500; //!< Rechargeable battery indicator high [mV]
+    const ACCU_INDICATOR_LOW = 7100; //!< Rechargeable battery indicator low [mV]    
 
     function CNT_V(C: number) {
-        return ((C * ADC_REF) / (ADC_RES * 1000.0))
+        return ((C * ADC_REF) / (ADC_RES * 1000.0));
     }
 
     function updateBatteryInfo() {
@@ -175,7 +181,7 @@ namespace sensors.internal {
             if (powerMM) {
                 const accu = powerMM.getNumber(NumberFormat.UInt8LE, 0);
                 if (accu > 0) {
-                    control.dmesg("rechargeable battery")
+                    control.dmesg("rechargeable battery");
                     batteryVMin = ACCU_INDICATOR_LOW;
                     batteryVMax = ACCU_INDICATOR_HIGH;
                 }
@@ -225,7 +231,7 @@ namespace sensors.internal {
     }
 
     function hashDevices(): number {
-        const conns = analogMM.slice(AnalogOff.InConn, DAL.NUM_INPUTS)
+        const conns = analogMM.slice(AnalogOff.InConn, DAL.NUM_INPUTS);
         let r = 0;
         for (let i = 0; i < conns.length; ++i) {
             r = conns[i] + (r << 6) + (r << 16) - r;
@@ -251,8 +257,8 @@ namespace sensors.internal {
                 updateUartMode(sensorInfo.port, 0);
             } else if (newConn == DAL.CONN_NXT_IIC) {
                 sensorInfo.devType = DAL.DEVICE_TYPE_IIC_UNKNOWN;
-                sensorInfo.iicid = readIICID(sensorInfo.port);
-                control.dmesg(`new IIC connection at port ${sensorInfo.port} with ID ${sensorInfo.iicid.length}`);
+                sensorInfo.i2cId = readI2cId(sensorInfo.port);
+                control.dmesg(`new I2C connection at port ${sensorInfo.port} with ID ${sensorInfo.i2cId.length}`);
             } else if (newConn == DAL.CONN_NXT_DUMB) {
                 sensorInfo.devType = inDcm[sensorInfo.port];
                 control.dmesg(`new NXT DUMB connection at port ${sensorInfo.port} dev type ${sensorInfo.devType}`);
@@ -282,11 +288,11 @@ namespace sensors.internal {
         control.dmesg(`UPDATE SENSOR STATUS`);
         for (const sensorInfo of sensorInfos.filter(si => !si.sensor)) {
             if (sensorInfo.devType == DAL.DEVICE_TYPE_IIC_UNKNOWN) {
-                sensorInfo.sensor = sensorInfo.sensors.filter(s => s._IICId() == sensorInfo.iicid)[0];
+                sensorInfo.sensor = (<I2cSensor[]>sensorInfo.sensors).filter(s => s._i2cId() == sensorInfo.i2cId)[0];
                 if (!sensorInfo.sensor) {
-                    control.dmesg(`sensor not found for iicid=${sensorInfo.iicid} at port ${sensorInfo.port}`);
+                    control.dmesg(`sensor not found for i2cId=${sensorInfo.i2cId} at port ${sensorInfo.port}`);
                 } else {
-                    control.dmesg(`sensor connected iicid=${sensorInfo.iicid} at port ${sensorInfo.port}`);
+                    control.dmesg(`sensor connected i2cId=${sensorInfo.i2cId} at port ${sensorInfo.port}`);
                     sensorInfo.sensor._activated();
                 }
             } else if (sensorInfo.devType != DAL.DEVICE_TYPE_NONE) {
@@ -304,21 +310,23 @@ namespace sensors.internal {
     }
 
     export class Sensor extends control.Component {
-        protected _port: number // this is 0-based
+        protected _port: number; // this is 0-based
 
         constructor(port_: number) {
-            super()
-            if (!(1 <= port_ && port_ <= DAL.NUM_INPUTS))
-                control.panic(120)
-            this._port = port_ - 1
-            init()
-            sensorInfos[this._port].sensors.push(this)
+            super();
+            if (!(1 <= port_ && port_ <= DAL.NUM_INPUTS)) {
+                control.panic(120);
+            }
+            this._port = port_ - 1;
+            init();
+            sensorInfos[this._port].sensors.push(this);
             this.markUsed();
         }
 
         poke() {
-            if (this.isActive())
+            if (this.isActive()) {
                 sensorInfos[this._port].poke();
+            }
         }
 
         markUsed() {
@@ -329,11 +337,11 @@ namespace sensors.internal {
 
         // 1-based
         port() {
-            return this._port + 1
+            return this._port + 1;
         }
 
         isActive() {
-            return sensorInfos[this._port].sensor == this
+            return sensorInfos[this._port].sensor == this;
         }
 
         _query(): number[] {
@@ -348,24 +356,19 @@ namespace sensors.internal {
         }
 
         _deviceType() {
-            return 0
-        }
-
-        _IICId() {
-            return ''
+            return 0;
         }
     }
 
     export class AnalogSensor extends Sensor {
-        
         protected mode: number; // the mode user asked for
-        protected realmode: number;
+        protected realMode: number;
         protected undetectable: boolean; // not all NXT analog sensors can be detected
 
         constructor(port: number) {
             super(port);
             this.mode = 0;
-            this.realmode = 0;
+            this.realMode = 0;
             this.undetectable = false;
         }
 
@@ -377,21 +380,25 @@ namespace sensors.internal {
             let v = m | 0;
             this.mode = v;
             if (!this.isActive()) return;
-            if (this.realmode != this.mode) {
-                // control.dmesg(`_setMode p=${this._port} m: ${this.realmode} -> ${v}`);
-                this.realmode = v;
+            if (this.realMode != this.mode) {
+                // control.dmesg(`_setMode p=${this._port} m: ${this.realMode} -> ${v}`);
+                this.realMode = v;
                 setAnalogMode(this._port, this._deviceType(), this.mode);
             }
         }
 
-        _readPin1() {
+        protected _readPin1() {
             if (!this.undetectable && !this.isActive()) return 0;
             return analogMM.getNumber(NumberFormat.Int16LE, AnalogOff.InPin1 + 2 * this._port);
         }
 
-        _readPin6() {
+        protected _readPin6() {
             if (!this.isActive()) return 0;
             return analogMM.getNumber(NumberFormat.Int16LE, AnalogOff.InPin6 + 2 * this._port);
+        }
+
+        protected _writeDcm(value: string) {
+            writeDcm(this._port, value.charCodeAt(0));
         }
 
         _deviceType() {
@@ -400,17 +407,17 @@ namespace sensors.internal {
     }
 
     export class UartSensor extends Sensor {
-        protected mode: number // the mode user asked for
-        protected realmode: number // the mode the hardware is in
+        protected mode: number; // the mode user asked for
+        protected realMode: number; // the mode the hardware is in
 
         constructor(port: number) {
             super(port);
             this.mode = 0;
-            this.realmode = 0;
+            this.realMode = 0;
         }
 
         _activated() {
-            this.realmode = 0;
+            this.realMode = 0;
             this._setMode(this.mode);
         }
 
@@ -422,80 +429,83 @@ namespace sensors.internal {
             let v = m | 0;
             this.mode = v;
             if (!this.isActive()) return;
-            if (this.realmode != this.mode) {
-                control.dmesg(`_setMode p=${this._port} m: ${this.realmode} -> ${v}`);
-                this.realmode = v;
+            if (this.realMode != this.mode) {
+                control.dmesg(`_setMode p=${this._port} m: ${this.realMode} -> ${v}`);
+                this.realMode = v;
                 setUartMode(this._port, v);
             }
         }
 
         getBytes(): Buffer {
-            return getUartBytes(this.isActive() ? this._port : -1)
+            return getUartBytes(this.isActive() ? this._port : -1);
         }
 
         getNumber(fmt: NumberFormat, off: number) {
-            if (!this.isActive())
-                return 0
-            return getUartNumber(fmt, off, this._port)
+            if (!this.isActive()) return 0;
+            return getUartNumber(fmt, off, this._port);
         }
 
         reset() {
             if (this.isActive()) uartReset(this._port);
-            this.realmode = -1;
+            this.realMode = -1;
         }
     }
 
-    export class IICSensor extends Sensor {
-        protected mode: number // the mode user asked for
-        protected realmode: number // the mode the hardware is in
-        private readLength: number
+    export class I2cSensor extends Sensor {
+        protected mode: number; // the mode user asked for
+        protected realMode: number; // the mode the hardware is in
+        private readLength: number;
 
         constructor(port: number) {
-            super(port)
-            this.mode = 0
-            this.realmode = 0
+            super(port);
+            this.mode = 0;
+            this.realMode = 0;
             this.readLength = 1;
         }
 
         _activated() {
-            this.realmode = 0
-            this._setMode(this.mode)
+            this.realMode = 0;
+            this._setMode(this.mode);
         }
 
         protected _setMode(m: number) {
-            let v = m | 0
-            this.mode = v
-            if (!this.isActive()) return
-            if (this.realmode != this.mode) {
-                this.realmode = v
-                setIICMode(this._port, this._deviceType(), v)
+            let v = m | 0;
+            this.mode = v;
+            if (!this.isActive()) return;
+            if (this.realMode != this.mode) {
+                this.realMode = v;
+                setI2cMode(this._port, this._deviceType(), v);
             }
         }
 
         getBytes(): Buffer {
-            return getIICBytes(this.isActive() ? this._port : -1, this.readLength)
+            return getI2cBytes(this.isActive() ? this._port : -1, this.readLength);
         }
 
         getNumber(fmt: NumberFormat, off: number) {
-            if (!this.isActive())
-                return 0
-            return getIICNumber(this.readLength, fmt, off, this._port)
+            if (!this.isActive()) return 0;
+            return getI2cNumber(this.readLength, fmt, off, this._port);
         }
 
         transaction(deviceAddress: number, write: number[], read: number) {
             this.readLength = read;
-            transactionIIC(this._port, deviceAddress, write, read)
+            transactionI2c(this._port, deviceAddress, write, read);
         }
 
         _deviceType() {
-            return DAL.DEVICE_TYPE_IIC_UNKNOWN
+            return DAL.DEVICE_TYPE_IIC_UNKNOWN;
+        }
+
+        _i2cId() {
+            return '';
         }
     }
 
-    export const i2csensor1 = new IICSensor(1);
-    export const i2csensor2 = new IICSensor(2);
-    export const i2csensor3 = new IICSensor(3);
-    export const i2csensor4 = new IICSensor(4);
+    export const i2cSensor1 = new I2cSensor(1);
+    export const i2cSensor2 = new I2cSensor(2);
+    export const i2cSensor3 = new I2cSensor(3);
+    export const i2cSensor4 = new I2cSensor(4);
+
 
     function readUartInfo(port: number, mode: number) {
         let buf = output.createBuffer(UartCtlOff.Size);
@@ -506,27 +516,18 @@ namespace sensors.internal {
         return buf;
     }
 
-    export function readIICID(port: number) {
-        const buf = output.createBuffer(IICStr.Size);
-        buf[IICStr.Port] = port;
-        IICMM.ioctl(IO.IIC_READ_TYPE_INFO, buf);
-        const manufacturer = bufferToString(buf.slice(IICStr.Manufacturer, 8));
-        const sensorType = bufferToString(buf.slice(IICStr.SensorType, 8));
-        return manufacturer + sensorType;
-    }
-
     function uartReset(port: number) {
-        if (port < 0) return
-        control.dmesg(`UART reset at ${port}`)
-        devcon.setNumber(NumberFormat.Int8LE, DevConOff.Connection + port, DAL.CONN_NONE)
-        devcon.setNumber(NumberFormat.Int8LE, DevConOff.Type + port, 0)
-        devcon.setNumber(NumberFormat.Int8LE, DevConOff.Mode + port, 0)
-        uartMM.ioctl(IO.UART_SET_CONN, devcon)
+        if (port < 0) return;
+        control.dmesg(`UART reset at ${port}`);
+        devcon.setNumber(NumberFormat.Int8LE, DevConOff.Connection + port, DAL.CONN_NONE);
+        devcon.setNumber(NumberFormat.Int8LE, DevConOff.Type + port, 0);
+        devcon.setNumber(NumberFormat.Int8LE, DevConOff.Mode + port, 0);
+        uartMM.ioctl(IO.UART_SET_CONN, devcon);
     }
 
     function getUartStatus(port: number) {
-        if (port < 0) return 0
-        return uartMM.getNumber(NumberFormat.Int8LE, UartOff.Status + port)
+        if (port < 0) return 0;
+        return uartMM.getNumber(NumberFormat.Int8LE, UartOff.Status + port);
     }
 
     function waitNonZeroUartStatus(port: number) {
@@ -543,20 +544,19 @@ namespace sensors.internal {
     function uartClearChange(port: number) {
         control.dmesg(`UART clear change at port ${port}`);
         while (true) {
-            let status = getUartStatus(port)
-            if (port < 0) break
+            let status = getUartStatus(port);
+            if (port < 0) break;
 
-            if ((status & UART_DATA_READY) != 0 && (status & UART_PORT_CHANGED) == 0)
-                break
+            if ((status & UART_DATA_READY) != 0 && (status & UART_PORT_CHANGED) == 0) break;
 
-            devcon.setNumber(NumberFormat.Int8LE, DevConOff.Connection + port, DAL.CONN_INPUT_UART)
-            devcon.setNumber(NumberFormat.Int8LE, DevConOff.Type + port, 0)
-            devcon.setNumber(NumberFormat.Int8LE, DevConOff.Mode + port, 0)
-            control.dmesg(`UART_CLEAR_CHANGED status ${status} ${devcon.toHex()}`)
-            uartMM.ioctl(IO.UART_CLEAR_CHANGED, devcon)
+            devcon.setNumber(NumberFormat.Int8LE, DevConOff.Connection + port, DAL.CONN_INPUT_UART);
+            devcon.setNumber(NumberFormat.Int8LE, DevConOff.Type + port, 0);
+            devcon.setNumber(NumberFormat.Int8LE, DevConOff.Mode + port, 0);
+            control.dmesg(`UART_CLEAR_CHANGED status ${status} ${devcon.toHex()}`);
+            uartMM.ioctl(IO.UART_CLEAR_CHANGED, devcon);
 
-            uartMM.setNumber(NumberFormat.Int8LE, UartOff.Status + port, getUartStatus(port) & 0xfffe)
-            pause(10)
+            uartMM.setNumber(NumberFormat.Int8LE, UartOff.Status + port, getUartStatus(port) & 0xfffe);
+            pause(10);
         }
     }
 
@@ -574,16 +574,17 @@ namespace sensors.internal {
             const port = ports.pop();
             const status = waitNonZeroUartStatus(port);
             control.dmesg(`UART status ${status} at port ${port}`);
-            if (!(status & UART_DATA_READY))
+            if (!(status & UART_DATA_READY)) {
                 setUartMode(port, devcon[DevConOff.Mode + port]);
+            }
         }
     }
 
     function updateUartMode(port: number, mode: number) {
         control.dmesg(`UART update mode to ${mode} at port ${port}`);
-        devcon.setNumber(NumberFormat.Int8LE, DevConOff.Connection + port, DAL.CONN_INPUT_UART)
-        devcon.setNumber(NumberFormat.Int8LE, DevConOff.Type + port, 33)
-        devcon.setNumber(NumberFormat.Int8LE, DevConOff.Mode + port, mode)
+        devcon.setNumber(NumberFormat.Int8LE, DevConOff.Connection + port, DAL.CONN_INPUT_UART);
+        devcon.setNumber(NumberFormat.Int8LE, DevConOff.Type + port, 33);
+        devcon.setNumber(NumberFormat.Int8LE, DevConOff.Mode + port, mode);
     }
     
     function setUartMode(port: number, mode: number) {
@@ -598,26 +599,25 @@ namespace sensors.internal {
                 uartClearChange(port);
             } else {
                 control.dmesg(`UART status ${status} at port ${port}`);
-                if (status & UART_DATA_READY)
-                    break;
+                if (status & UART_DATA_READY) break;
             }
             pause(10);
         }
     }
 
     function getUartBytes(port: number): Buffer {
-        if (port < 0) return output.createBuffer(DAL.MAX_DEVICE_DATALENGTH)
-        let index = uartMM.getNumber(NumberFormat.UInt16LE, UartOff.Actual + port * 2)
+        if (port < 0) return output.createBuffer(DAL.MAX_DEVICE_DATALENGTH);
+        let index = uartMM.getNumber(NumberFormat.UInt16LE, UartOff.Actual + port * 2);
         return uartMM.slice(
             UartOff.Raw + DAL.MAX_DEVICE_DATALENGTH * 300 * port + DAL.MAX_DEVICE_DATALENGTH * index,
-            DAL.MAX_DEVICE_DATALENGTH)
+            DAL.MAX_DEVICE_DATALENGTH);
     }
 
     function getUartNumber(fmt: NumberFormat, off: number, port: number): number {
-        if (port < 0) return 0
-        const index = uartMM.getNumber(NumberFormat.UInt16LE, UartOff.Actual + port * 2)
+        if (port < 0) return 0;
+        const index = uartMM.getNumber(NumberFormat.UInt16LE, UartOff.Actual + port * 2);
         return uartMM.getNumber(fmt,
-            UartOff.Raw + DAL.MAX_DEVICE_DATALENGTH * 300 * port + DAL.MAX_DEVICE_DATALENGTH * index + off)
+            UartOff.Raw + DAL.MAX_DEVICE_DATALENGTH * 300 * port + DAL.MAX_DEVICE_DATALENGTH * index + off);
     }
 
     function setAnalogMode(port: number, type: number, mode: number) {
@@ -629,48 +629,71 @@ namespace sensors.internal {
         analogMM.ioctl(0, devcon);
     }
 
-    export function setIICMode(port: number, type: number, mode: number) {
+    function writeDcm(port: number, value: number) {
         if (port < 0) return;
-        control.dmesg(`iic set type ${type} mode ${mode} at port ${port}`);
+        const buf = control.createBuffer(DAL.NUM_INPUTS);
+        // '-' keeps the current DCM state for the port
+        for (let i = 0; i < DAL.NUM_INPUTS; i++) {
+            buf[i] = "-".charCodeAt(0);
+        }
+        // '0'..'7' select predefined DCM output configurations
+        // 'f' releases (floats) all DCM-controlled output pins
+        buf[port] = value;
+        dcmMM.write(buf);
+    }
+
+    function readI2cId(port: number) {
+        const buf = output.createBuffer(IICStr.Size);
+        buf[IICStr.Port] = port;
+        i2cMM.ioctl(IO.IIC_READ_TYPE_INFO, buf);
+        const manufacturer = bufferToString(buf.slice(IICStr.Manufacturer, 8));
+        const sensorType = bufferToString(buf.slice(IICStr.SensorType, 8));
+        return manufacturer + sensorType;
+    }
+
+    function setI2cMode(port: number, type: number, mode: number) {
+        if (port < 0) return;
+        control.dmesg(`i2c set type ${type} mode ${mode} at port ${port}`);
         devcon.setNumber(NumberFormat.Int8LE, DevConOff.Connection + port, DAL.CONN_NXT_IIC);
         devcon.setNumber(NumberFormat.Int8LE, DevConOff.Type + port, type);
         devcon.setNumber(NumberFormat.Int8LE, DevConOff.Mode + port, mode);
-        IICMM.ioctl(IO.IIC_SET_CONN, devcon);
+        i2cMM.ioctl(IO.IIC_SET_CONN, devcon);
     }
 
-    export function transactionIIC(port: number, deviceAddress: number, writeBuf: number[], readLen: number) {
+    function transactionI2c(port: number, deviceAddress: number, writeBuf: number[], readLen: number) {
         if (port < 0) return;
-        const iicdata = output.createBuffer(IICDat.Size)
-        iicdata.setNumber(NumberFormat.Int8LE, IICDat.Port, port)
-        iicdata.setNumber(NumberFormat.Int8LE, IICDat.Repeat, 0)
-        iicdata.setNumber(NumberFormat.Int16LE, IICDat.Time, 0)
-        iicdata.setNumber(NumberFormat.Int8LE, IICDat.WrLng, writeBuf.length + 1)
-        for (let i = 0; i < writeBuf.length; i++)
-            iicdata.setNumber(NumberFormat.Int8LE, IICDat.WrData + i + 1, writeBuf[i])
-        iicdata.setNumber(NumberFormat.Int8LE, IICDat.WrData, deviceAddress)
-        iicdata.setNumber(NumberFormat.Int8LE, IICDat.RdLng, readLen)
-        IICMM.ioctl(IO.IIC_SETUP, iicdata)
+        const i2cData = output.createBuffer(IICDat.Size);
+        i2cData.setNumber(NumberFormat.Int8LE, IICDat.Port, port);
+        i2cData.setNumber(NumberFormat.Int8LE, IICDat.Repeat, 0);
+        i2cData.setNumber(NumberFormat.Int16LE, IICDat.Time, 0);
+        i2cData.setNumber(NumberFormat.Int8LE, IICDat.WrLng, writeBuf.length + 1);
+        for (let i = 0; i < writeBuf.length; i++) {
+            i2cData.setNumber(NumberFormat.Int8LE, IICDat.WrData + i + 1, writeBuf[i]);
+        }
+        i2cData.setNumber(NumberFormat.Int8LE, IICDat.WrData, deviceAddress);
+        i2cData.setNumber(NumberFormat.Int8LE, IICDat.RdLng, readLen);
+        i2cMM.ioctl(IO.IIC_SETUP, i2cData);
     }
 
-    export function getIICBytes(port: number, length: number) {
+    function getI2cBytes(port: number, length: number) {
         if (port < 0) return output.createBuffer(length);
-        let index = IICMM.getNumber(NumberFormat.UInt16LE, IICOff.Actual + port * 2);
-        let buf = IICMM.slice(
+        let index = i2cMM.getNumber(NumberFormat.UInt16LE, IICOff.Actual + port * 2);
+        let buf = i2cMM.slice(
             IICOff.Raw + DAL.MAX_DEVICE_DATALENGTH * 300 * port + DAL.MAX_DEVICE_DATALENGTH * index,
             length
         );
 
         // Reverse
         for (let i = 0; i < length / 2; i++) {
-            let c = buf[i]
-            buf[i] = buf[length - i - 1]
-            buf[length - i - 1] = c
+            let c = buf[i];
+            buf[i] = buf[length - i - 1];
+            buf[length - i - 1] = c;
         }
         return buf;
     }
 
-    export function getIICNumber(length: number, format: NumberFormat, off: number, port: number) {
-        return getIICBytes(port, length).getNumber(format, off)
+    function getI2cNumber(length: number, format: NumberFormat, off: number, port: number) {
+        return getI2cBytes(port, length).getNumber(format, off);
     }
 
     const enum NxtColOff {
@@ -682,6 +705,7 @@ namespace sensors.internal {
         Padding = 70,
         Size = 72
     }
+
     const enum AnalogOff {
         InPin1 = 0, // int16[4]
         InPin6 = 8, // int16[4]
@@ -850,7 +874,7 @@ namespace sensors {
         }
 
         public setLevel(level: number) {
-            if (this == null) return
+            if (this == null) return;
             this.level = this.clampValue(level);
 
             if (this.level >= this.highThreshold) {
@@ -888,8 +912,7 @@ namespace sensors {
         private clampValue(value: number) {
             if (value < this.min) {
                 return this.min;
-            }
-            else if (value > this.max) {
+            } else if (value > this.max) {
                 return this.max;
             }
             return value;
