@@ -15,7 +15,7 @@ export function bluetoothTryAgainAsync(): Promise<void> {
             <li>{lf("Exit the pop-up windows on the EV3.")}</li>
             <li>{lf("Close EV3 LabView or EV3 Classroom or other MakeCode editor tabs as they may be using the COM port.")}</li>
             <li>{lf("Check your battery level.")}</li>
-            <li>{lf("Try restarting the Makecode editor tab.")}</li>
+            <li>{lf("Try restarting the MakeCode editor tab.")}</li>
         </ul>,
         hasCloseIcon: true,
         hideCancel: false,
