@@ -2,12 +2,10 @@
  * See https://www.lego.com/cdn/cs/set/assets/blt6879b00ae6951482/LEGO_MINDSTORMS_EV3_Communication_Developer_Kit.pdf
  * https://github.com/mindboards/ev3sources/blob/master/lms2012/lms2012/source/bytecodes.h#L146
  */
-import HF2 = pxt.HF2
-import U = pxt.U
 
-function log(msg: string) {
-    pxt.log("SERIAL: " + msg)
-}
+
+import HF2 = pxt.HF2;
+import U = pxt.U;
 
 export interface DirEntry {
     name: string;
@@ -31,6 +29,11 @@ const systemCommandReplyError = 0x05; // Reply type: System command reply ERROR
 
 const rfcommPxtAppPingCommand = 0x0003; // RFCOMM command: ping PXT app
 const rfcommPxtAppStopCommand = 0x0002; // RFCOMM command: stop PXT app
+
+
+function log(msg: string) {
+    pxt.log("SERIAL: " + msg);
+}
 
 
 export class Ev3Wrapper {
@@ -92,24 +95,7 @@ export class Ev3Wrapper {
     }
 
     stopAsync() {
-        // return this.isPxtAppRunningAsync()
-        //     .then(isPxtAppRunning => {
-        //         if (!isPxtAppRunning) {
-        //             log(`PXT app is not running, no need to stop`);
-        //             return false;
-        //         }
-
-        //         log(`PXT app is running, sending stop command`);
-
-        //         const buf = this.allocCustom(rfcommPxtAppStopCommand);
-        //         return this.talkAsync(buf, 0, 1000)
-        //             .then(() => {
-        //                 // log(`PXT app stop command acknowledged`);
-        //                 return pxt.U.delay(500);
-        //             })
-        //             .then(() => true);
-        //     });
-        log(`PXT app is running, sending stop command`);
+        // log(`PXT app is running, sending stop command`);
 
         const buf = this.allocCustom(rfcommPxtAppStopCommand);
         return this.talkAsync(buf, 0, 1000)
@@ -343,11 +329,9 @@ export class Ev3Wrapper {
             this.dumpOutputCmd(buf)
             return this.io.sendPacketAsync(buf)
                 .then(() => {
-                    // log("talkAsync: packet sent, waiting for response")
                     return this.msgs.shiftAsync(timeout)
                 })
                 .then(resp => {
-                    // log("talkAsync: response received")
                     this.dumpInputCmd(resp)
                     if (resp[2] != buf[2] || resp[3] != buf[3])
                         U.userError("msg count de-sync")
