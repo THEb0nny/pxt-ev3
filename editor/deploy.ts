@@ -373,8 +373,7 @@ export async function deployCoreAsync(resp: pxtc.CompileResult) {
 
     const isWebSerial = preferredTransport === DeployTransport.BluetoothWebSerial;
 
-    const deployFolder =
-        isWebSerial && projectPxtJson?.deployFolder ? projectPxtJson.deployFolder : defaultDeployFolder;
+    const deployFolder = isWebSerial && projectPxtJson?.deployFolder ? projectPxtJson.deployFolder : defaultDeployFolder;
 
     const fspath = `../prjs/${deployFolder}/`;
     // console.log(`fspath: ${fspath}`);
@@ -390,11 +389,7 @@ export async function deployCoreAsync(resp: pxtc.CompileResult) {
     HF2.write16(rbfBIN, 4, rbfBIN.length);
 
     // Parse elf
-    const origElfUF2 = UF2.parseFile(
-        pxt.U.stringToUint8Array(
-            ts.pxtc.decodeBase64(resp.outfiles[pxt.outputName()])
-        )
-    );
+    const origElfUF2 = UF2.parseFile(pxt.U.stringToUint8Array(ts.pxtc.decodeBase64(resp.outfiles[pxt.outputName()])));
     
     // USB MODE (UF2 packaging like original pxt-ev3)
     if (!isWebSerial) {
@@ -411,10 +406,7 @@ export async function deployCoreAsync(resp: pxtc.CompileResult) {
             UF2.writeBytes(elfUF2, b.targetAddr, b.data);
         }
 
-        const combined = UF2.concatFiles([
-            elfUF2,
-            mkFile(".rbf", rbfBIN)
-        ]);
+        const combined = UF2.concatFiles([elfUF2, mkFile(".rbf", rbfBIN)]);
 
         const data = UF2.serializeFile(combined);
 
@@ -448,10 +440,7 @@ export async function deployCoreAsync(resp: pxtc.CompileResult) {
             await wrapper.stopAsync();
         }
         await wrapper.rmAsync(elfPath); // Remove old file of the program
-        await wrapper.flashAsync(
-            elfPath,
-            UF2.readBytes(origElfUF2, 0, origElfUF2.length * 256)
-        );
+        await wrapper.flashAsync(elfPath, UF2.readBytes(origElfUF2, 0, origElfUF2.length * 256));
         await wrapper.flashAsync(rbfPath, rbfBIN);
         await wrapper.runAsync(rbfPath);
         pxt.tickEvent("webserial.success");
@@ -461,29 +450,3 @@ export async function deployCoreAsync(resp: pxtc.CompileResult) {
         throw e;
     }
 }
-
-// (pxt.commands as any).getDownloadMenuItems = () => {
-//     return [
-//         {
-//             text: lf("Download as File"),
-//             icon: "download",
-//             value: "usb"
-//         },
-//         {
-//             text: lf("Download via Bluetooth"),
-//             icon: "bluetooth",
-//             value: "webserial"
-//         }
-//     ];
-// };
-
-// (pxt.commands as any).onDownloadMenuItemClick = async (opts: any) => {
-//     console.log("Download menu click:", opts);
-//     const value = opts?.value;
-//     if (value === "webserial") {
-//         preferredTransport = "webserial";
-//     } else {
-//         preferredTransport = undefined;
-//     }
-//     await (window as any).projectView.compile();
-// };
