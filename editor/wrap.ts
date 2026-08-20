@@ -6,7 +6,7 @@ import HF2 = pxt.HF2
 import U = pxt.U
 
 function log(msg: string) {
-    pxt.log("serial: " + msg)
+    pxt.log("SERIAL: " + msg)
 }
 
 export interface DirEntry {
@@ -15,9 +15,23 @@ export interface DirEntry {
     size?: number;
 }
 
-const runTemplate = "C00882010084XX0060640301606400"
-const usbMagic = 0x3d3f
-const DIRECT_COMMAND_NO_REPLY = 0x80
+const runTemplate = "C00882010084XX0060640301606400";
+
+const usbRfcommMagic = 0x3d3f; // Magic value identifying custom packets
+
+const directCommand = 0x00; // Command Type: Direct command, reply required
+const systemCommand = 0x01; // Command Type: System command, reply required
+const directCommandNoReply = 0x80; // Command Type: Direct command, reply not required
+const customCommand = 0x3f; // Command Type: Custom command
+
+const directCommandReply = 0x02; // Reply type: Direct command reply
+const systemCommandReply = 0x03; // Reply type: System command reply OK
+const directCommandReplyError = 0x04; // // Reply type: Direct command reply ERROR
+const systemCommandReplyError = 0x05; // Reply type: System command reply ERROR
+
+const rfcommPxtAppPingCommand = 0x0003; // RFCOMM command: ping PXT app
+const rfcommPxtAppStopCommand = 0x0002; // RFCOMM command: stop PXT app
+
 
 export class Ev3Wrapper {
     msgs = new U.PromiseBuffer<Uint8Array>()
@@ -29,25 +43,28 @@ export class Ev3Wrapper {
     constructor(public io: pxt.packetio.PacketIO) {
         io.onData = buf => {
             buf = buf.slice(0, HF2.read16(buf, 0) + 2)
-            if (HF2.read16(buf, 4) == usbMagic) {
+            if (HF2.read16(buf, 4) == usbRfcommMagic) {
                 let code = HF2.read16(buf, 6)
                 let payload = buf.slice(8)
                 if (code == 1) {
                     let str = U.uint8ArrayToString(payload)
-                    if (U.isNodeJS)
+                    if (U.isNodeJS) {
                         pxt.debug("SERIAL: " + str.replace(/\n+$/, ""))
-                    else
+                    } else {
                         window.postMessage({
-                            type: 'serial',
+                            type: 'SERIAL',
                             id: 'n/a', // TODO?
                             data: str
                         }, "*")
-                } else
-                    pxt.debug("Magic: " + code + ": " + U.toHex(payload))
+                    }
+                } else {
+                    pxt.debug("Magic: " + code + ": " + U.toHex(payload));
+                }
                 return
             }
-            if (this.dataDump)
+            if (this.dataDump) {
                 log("RECV: " + U.toHex(buf))
+            }
             this.msgs.push(buf)
         }
     }
@@ -69,19 +86,71 @@ export class Ev3Wrapper {
 
     private allocCustom(code: number, addSize = 0) {
         let buf = this.allocCore(1 + 2 + addSize, 0)
-        HF2.write16(buf, 4, usbMagic)
+        HF2.write16(buf, 4, usbRfcommMagic)
         HF2.write16(buf, 6, code)
         return buf
     }
 
     stopAsync() {
-        return this.isVmAsync()
-            .then(vm => {
-                if (vm) return Promise.resolve();
-                log(`stopping PXT app`)
-                let buf = this.allocCustom(2)
-                return this.justSendAsync(buf)
-                    .then(() => pxt.U.delay(500))
+        // return this.isPxtAppRunningAsync()
+        //     .then(isPxtAppRunning => {
+        //         if (!isPxtAppRunning) {
+        //             log(`PXT app is not running, no need to stop`);
+        //             return false;
+        //         }
+
+        //         log(`PXT app is running, sending stop command`);
+
+        //         const buf = this.allocCustom(rfcommPxtAppStopCommand);
+        //         return this.talkAsync(buf, 0, 1000)
+        //             .then(() => {
+        //                 // log(`PXT app stop command acknowledged`);
+        //                 return pxt.U.delay(500);
+        //             })
+        //             .then(() => true);
+        //     });
+        log(`PXT app is running, sending stop command`);
+
+        const buf = this.allocCustom(rfcommPxtAppStopCommand);
+        return this.talkAsync(buf, 0, 1000)
+            .then(() => {
+                log(`PXT app stop command acknowledged`);
+                return pxt.U.delay(500);
+            });
+    };
+
+    isEv3ConnectedAsync(): Promise<boolean> {
+        const buf = this.allocCore(3, 0x00);
+        HF2.write16(buf, 5, 0x0000);
+        buf[7] = 0x01; // opNop
+
+        log("PING EV3");
+
+        return this.talkAsync(buf)
+            .then(resp => {
+                if (resp[4] !== 0x02) {
+                    throw new Error("INVALID_EV3_REPLY");
+                }
+
+                log("PING EV3 OK");
+                return true;
+            })
+            .catch(() => {
+                // log("EV3 is not responding");
+                return false;
+            });
+    }
+
+    isPxtAppRunningAsync(): Promise<boolean> {
+        const buf = this.allocCustom(rfcommPxtAppPingCommand);
+        return this.talkAsync(buf)
+            .then(() => {
+                log(`PXT app is responding`);
+                return true;
+            })
+            .catch(() => {
+                log(`PXT app is not responding`);
+                return false;
             })
     }
 
@@ -94,7 +163,7 @@ export class Ev3Wrapper {
     runAsync(path: string) {
         let codeHex = runTemplate.replace("XX", U.toHex(U.stringToUint8Array(path)))
         let code = U.fromHex(codeHex)
-        let pkt = this.allocCore(2 + code.length, DIRECT_COMMAND_NO_REPLY)
+        let pkt = this.allocCore(2 + code.length, directCommandNoReply)
         HF2.write16(pkt, 5, 0x0800)
         U.memcpy(pkt, 7, code)
         log(`run ${path}`)
@@ -111,8 +180,29 @@ export class Ev3Wrapper {
     }
 
     dumpInputCmd(buf : Uint8Array) {
-        log(`Reply size: ${HF2.read16(buf, 0)}, Message counter: ${HF2.read16(buf, 2)}, Reply type: ${buf[4]} (${buf[4] === 0x03 ? "System command reply OK" : buf[4] === 0x05 ? "System command reply ERROR" : "Unknown"})`);
-        switch (buf[6]) {
+        const replySize = HF2.read16(buf, 0);
+        const msgCount = HF2.read16(buf, 2);
+        const replyType = buf[4];
+        const replyStatus = buf[6];
+        let replyTypeMsg = "Unknown";
+
+        switch (replyType) {
+            case directCommandReply:
+                replyTypeMsg = "Direct command reply";
+                break;
+            case systemCommandReply:
+                replyTypeMsg = "System command reply OK";
+                break;
+            case directCommandReplyError:
+                replyTypeMsg = "Direct command reply ERROR";
+                break;
+            case systemCommandReplyError:
+                replyTypeMsg = "System command reply ERROR";
+                break;
+        }
+        log(`Reply size: ${replySize}, Message counter: ${msgCount}, Reply type: ${replyType} (${replyTypeMsg})`);
+        
+        switch (replyStatus) {
             case 0x00:
                 log("Reply Status SUCCESS");
                 break;
@@ -135,7 +225,7 @@ export class Ev3Wrapper {
                 log("Reply Status ILLEGAL_PATH");
                 break;
             case 0x07:
-                log("Reply Status FILE_EXITS");
+                log("Reply Status FILE_EXISTS");
                 break;
             case 0x08:
                 log("Reply Status END_OF_FILE");
@@ -156,8 +246,47 @@ export class Ev3Wrapper {
     }
 
     dumpOutputCmd(buf: Uint8Array) {
-        log(`Command size: ${HF2.read16(buf, 0)}, Message counter: ${HF2.read16(buf, 2)}, Command type: ${buf[4]} (${buf[4] === 0x01 ? "System command, reply required" : buf[4] === 0x81 ? "System command, reply not required" : "Unknown"})`);
-        switch (buf[5]) {
+        const commandSize = HF2.read16(buf, 0);
+        const msgCount = HF2.read16(buf, 2);
+        const commandType = buf[4];
+        const command = buf[5];
+        const magic = HF2.read16(buf, 4);
+        let commandTypeMsg = "Unknown";
+
+        switch (commandType) {
+            case directCommand:
+                commandTypeMsg = "Direct command, reply required";
+                break;
+            case systemCommand:
+                commandTypeMsg = "System command, reply required";
+                break;
+            case directCommandNoReply:
+                commandTypeMsg = "Direct command, reply not required";
+                break;
+            case customCommand:
+                commandTypeMsg = magic == usbRfcommMagic ? "Custom command" : "Unknown";
+                break;
+        }
+
+        log(`Command size: ${commandSize}, Message counter: ${msgCount}, Command type: ${commandType} (${commandTypeMsg})`);
+
+        if (magic == usbRfcommMagic) {
+            const code = HF2.read16(buf, 6);
+            switch (code) {
+                case rfcommPxtAppStopCommand:
+                    log(`RFCOMM command: Stop PXT app`);
+                    break;
+                case rfcommPxtAppPingCommand:
+                    log(`RFCOMM command: Ping PXT app`);
+                    break;
+                default:
+                    log(`RFCOMM command: Unknown (${code})`);
+                    break;
+            }
+            return;
+        }
+
+        switch (command) {
             case 0x92:
                 log("System command: Begin file download");
                 break;
@@ -206,15 +335,19 @@ export class Ev3Wrapper {
         }
     }
 
-    talkAsync(buf: Uint8Array, altResponse = 0) {
+    talkAsync(buf: Uint8Array, altResponse = 0, timeout = 5000) {
         return this.lock.enqueue("talk", () => {
             this.msgs.drain()
             if (this.dataDump)
                 log("TALK: " + U.toHex(buf))
             this.dumpOutputCmd(buf)
             return this.io.sendPacketAsync(buf)
-                .then(() => this.msgs.shiftAsync(5000))
+                .then(() => {
+                    // log("talkAsync: packet sent, waiting for response")
+                    return this.msgs.shiftAsync(timeout)
+                })
                 .then(resp => {
+                    // log("talkAsync: response received")
                     this.dumpInputCmd(resp)
                     if (resp[2] != buf[2] || resp[3] != buf[3])
                         U.userError("msg count de-sync")
@@ -289,14 +422,14 @@ export class Ev3Wrapper {
     }
 
     isVmAsync(): Promise<boolean> {
-        let path = "/no/such/dir"
-        let mkdirReq = this.allocSystem(path.length + 1, 0x9b)
-        U.memcpy(mkdirReq, 6, U.stringToUint8Array(path))
+        let path = "/no/such/dir";
+        let mkdirReq = this.allocSystem(path.length + 1, 0x9b);
+        U.memcpy(mkdirReq, 6, U.stringToUint8Array(path));
         return this.talkAsync(mkdirReq, -1)
             .then(resp => {
-                let isVM = resp[6] == 0x05
-                log(`${isVM ? "PXT app" : "VM"} running`)
-                return isVM
+                let isVM = resp[6] == 0x05; // NO_PERMISSION
+                log(`${isVM ? "VM responded" : "System responded"}`);
+                return isVM;
             })
     }
 

@@ -29,7 +29,7 @@ class WebSerialIO implements pxt.packetio.PacketIO {
     private state: IOState = IOState.Disconnected;
 
     constructor(private port: any) {
-        console.log("serial: New WebSerialIO");
+        console.log("SERIAL: New WebSerialIO");
     }
 
     static supported(): boolean {
@@ -61,7 +61,6 @@ class WebSerialIO implements pxt.packetio.PacketIO {
                 }
                 // Пользователь запретил доступ
                 if (e?.name === "SecurityError") {
-                    
                     throw new Error("PORT_PERMISSION_DENIED");
                 }
                 throw e; // Всё остальное — пробрасываем дальше
@@ -171,6 +170,7 @@ class WebSerialIO implements pxt.packetio.PacketIO {
                     if (buffer.length < size) break;
 
                     const pkt = buffer.slice(0, size);
+                    // console.log("serial RX RAW:", pxt.U.toHex(pkt));
                     this.onData(pkt);
 
                     buffer = buffer.length > size ? buffer.slice(size) : undefined;
@@ -248,6 +248,7 @@ class TransportManager {
             if (!this.wrapper) {
                 this.wrapper = new Ev3Wrapper(this.io);
             }
+
             // this.wrapper = new Ev3Wrapper(this.io);
             this.state = TransportState.Connected;
             return this.wrapper;
@@ -260,6 +261,13 @@ class TransportManager {
             if (e?.message === "PORT_PERMISSION_DENIED") {
                 this.state = TransportState.Idle;
                 throw e;
+            }
+            // Порт открылся, но EV3 не ответил на PING
+            if (e?.message === "Timeout") {
+                console.warn("SERIAL: EV3 PING timeout");
+                console.warn("SERIAL: selected port did not respond to EV3 PING");
+                this.state = TransportState.Unpaired;
+                throw new Error("INVALID_EV3_PORT");
             }
             if (e?.message === "PORT_OPEN_FAILED") {
                 console.warn("Bluetooth connection is stuck. Windows did not release the RFCOMM channel. Please reset Bluetooth or re-enable the COM port.");
@@ -298,23 +306,25 @@ class TransportManager {
         this.wrapper = new Ev3Wrapper(this.io);
     }
 
-    async disconnectAsync() {
+    async disconnectAsync(unpaired: boolean = false) {
         if (!this.io) {
-            this.state = TransportState.Idle;
+            this.state = unpaired ? TransportState.Unpaired : TransportState.Idle;
             return;
         }
+
         this.state = TransportState.Disconnecting;
+
         try {
             await this.io.disconnectAsync();
         } finally {
             this.io = undefined;
             this.wrapper = undefined;
-            this.state = TransportState.Idle;
+            this.state = unpaired ? TransportState.Unpaired : TransportState.Idle;
         }
     }
 
     async hardResetAsync() {
-        console.log("serial: HARD RESET");
+        console.log("SERIAL: HARD RESET");
         try { await this.disconnectAsync(); } catch {}
         this.state = TransportState.Idle;
     }
@@ -367,7 +377,7 @@ export async function deployCoreAsync(resp: pxtc.CompileResult) {
         isWebSerial && projectPxtJson?.deployFolder ? projectPxtJson.deployFolder : defaultDeployFolder;
 
     const fspath = `../prjs/${deployFolder}/`;
-    console.log(`fspath: ${fspath}`);
+    // console.log(`fspath: ${fspath}`);
     const elfPath = fspath + filename + ".elf";
     const rbfPath = fspath + filename + ".rbf";
 
@@ -424,19 +434,20 @@ export async function deployCoreAsync(resp: pxtc.CompileResult) {
     pxt.tickEvent("webserial.flash");
     try {
         const wrapper = await transport.connectAsync();
-        // if (wrapper.isStreaming) pxt.U.userError("Stop program first"); // Data values streaming? Not use
         
-        try {
-            await wrapper.stopAsync();
-        } catch (e: any) {
-            if (/Timeout/i.test(e?.message || "")) {
-                console.warn("Timeout. EV3 is busy. Stop the running program and try again.");
-                await showEv3BusyDialogAsync();
-                return;
-            }
-            throw e;
+        const isEv3Connected = await wrapper.isEv3ConnectedAsync();
+        if (!isEv3Connected) {
+            console.warn("EV3 is not responding.");
+            await transport.disconnectAsync(true);
+            await showEv3BusyDialogAsync();
+            return;
         }
-        await wrapper.rmAsync(elfPath);
+
+        const isPxtAppRunning = await wrapper.isPxtAppRunningAsync();
+        if (isPxtAppRunning) {
+            await wrapper.stopAsync();
+        }
+        await wrapper.rmAsync(elfPath); // Remove old file of the program
         await wrapper.flashAsync(
             elfPath,
             UF2.readBytes(origElfUF2, 0, origElfUF2.length * 256)
