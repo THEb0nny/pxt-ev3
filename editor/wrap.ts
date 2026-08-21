@@ -103,7 +103,7 @@ export class Ev3Wrapper {
         // log(`PXT app is running, sending stop command`);
 
         const buf = this.allocCustom(rfcommPxtAppStopCommand);
-        return this.talkAsync(buf, 0, 1000)
+        return this.talkAsync(buf)
             .then(() => {
                 // log(`PXT app stop command acknowledged`);
                 return pxt.U.delay(500);
