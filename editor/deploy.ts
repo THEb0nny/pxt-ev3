@@ -109,8 +109,12 @@ export async function deployCoreAsync(resp: pxtc.CompileResult) {
             return;
         }
 
-        const ev3Name = await wrapper.getEv3NameAsync();
-        console.log(`Connected to EV3: ${ev3Name}`);
+        try {
+            const ev3Name = await wrapper.getEv3NameAsync();
+            console.log(`Connected to EV3: ${ev3Name}`);
+        } catch (e) {
+            console.warn("Failed to get EV3 name, continuing deployment.", e);
+        }
 
         const isPxtAppRunning = await wrapper.isPxtAppRunningAsync();
         if (isPxtAppRunning) {
