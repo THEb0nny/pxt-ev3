@@ -30,6 +30,8 @@ const systemCommandReplyError = 0x05; // Reply type: System command reply ERROR
 const rfcommPxtAppPingCommand = 0x0003; // RFCOMM command: ping PXT app
 const rfcommPxtAppStopCommand = 0x0002; // RFCOMM command: stop PXT app
 
+const vmBrickNameSize = 120; // Maximum size of the EV3 brick name in VM memory
+
 
 function log(msg: string) {
     pxt.log("SERIAL: " + msg);
@@ -138,6 +140,26 @@ export class Ev3Wrapper {
                 log(`PXT app is not responding`);
                 return false;
             })
+    }
+
+    getEv3NameAsync(): Promise<string> {
+        const req = this.allocCore(7, directCommand);
+        HF2.write16(req, 5, vmBrickNameSize); // Global memory size
+        req[7] = 0xD3; // opCOM_GET
+        req[8] = 0x0D; // GET_BRICKNAME
+        req[9] = 0x81; // LCX(16)
+        req[10] = 0x20;
+        req[11] = 0x60; // GVX(0)
+
+        return this.talkAsync(req)
+            .then(resp => {
+                const nameBytes = resp.slice(5, 5 + vmBrickNameSize);
+                const end = nameBytes.indexOf(0);
+                const name = U.uint8ArrayToString(end >= 0 ? nameBytes.slice(0, end) : nameBytes);
+
+                log(`EV3 name: ${name}`);
+                return name;
+            });
     }
 
     dmesgAsync() {

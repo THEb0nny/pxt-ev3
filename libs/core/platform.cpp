@@ -25,11 +25,15 @@ namespace pxt {
 
 #define EV3_AF_BLUETOOTH 31
 
+#define VM_BRICK_NAME_SIZE 120
+
 int lmsPid;
 static int usbFD;
 static int rfcommFD = -1; // Connected RFCOMM socket shared with LMS2012
 
 static const char *progPath = "/mnt/ramdisk/prjs/BrkProg_SAVE";
+
+static char ev3BrickName[VM_BRICK_NAME_SIZE];
 
 struct UsbPacket {
     uint16_t size;
@@ -253,15 +257,19 @@ static void sendSystemReply(uint16_t msgcount, uint8_t command, uint16_t status)
     write(rfcommFD, reply, sizeof(reply));
 }
 
-static void sendDirectReply(uint16_t msgcount) {
-    uint8_t reply[5] = {
-        3,
-        0,
-        (uint8_t)(msgcount & 0xff),
-        (uint8_t)((msgcount >> 8) & 0xff),
-        0x02
-    };
-    write(rfcommFD, reply, sizeof(reply));
+static void sendDirectReply(uint16_t msgcount, const uint8_t *data = NULL, int dataLen = 0) {
+    const int replySize = 3 + dataLen;
+    uint8_t reply[256] = {};
+    reply[0] = replySize & 0xff;
+    reply[1] = (replySize >> 8) & 0xff;
+    reply[2] = msgcount & 0xff;
+    reply[3] = (msgcount >> 8) & 0xff;
+    reply[4] = 0x02;
+    if (dataLen > 0) {
+        memcpy(reply + 5, data, dataLen);
+    }
+    DMESG("RFCOMM DIRECT REPLY msgcount=%04x size=%d", msgcount, replySize);
+    write(rfcommFD, reply, replySize + 2);
 }
 
 // Parse a complete LEGO communication packet received over RFCOMM.
@@ -282,7 +290,15 @@ static void handleRfcommPacket(const uint8_t *packet, int totalLen) {
 
     // LEGO Direct Command: opNop
     if (packet[4] == 0x00 && totalLen >= 8 && packet[7] == 0x01) {
-        sendDirectReply(msgcount);
+        sendDirectReply(msgcount, NULL, 0);
+        return;
+    }
+
+    // LEGO Direct Command: opCOM_GET / GET_BRICKNAME
+    if (packet[4] == 0x00 && totalLen >= 12 && packet[7] == 0xD3 && packet[8] == 0x0D) {
+        uint8_t name[VM_BRICK_NAME_SIZE] = {};
+        memcpy(name, ev3BrickName, sizeof(name));
+        sendDirectReply(msgcount, name, sizeof(name));
         return;
     }
 
@@ -302,9 +318,7 @@ static void handleRfcommPacket(const uint8_t *packet, int totalLen) {
         return;
     }
 
-    uint8_t replyType = packet[4];
-    uint8_t command = packet[5];
-    // DMESG("RFCOMM SYSTEM msgcount=%04x type=%02x command=%02x", msgcount, replyType, command);
+    // DMESG("RFCOMM SYSTEM msgcount=%04x type=%02x command=%02x", msgcount, packet[4], packet[5]);
 
     int payloadLen = totalLen - 6;
     if (payloadLen > 0) {
@@ -415,6 +429,19 @@ static void startRfcommThread() {
 }
 
 
+static void loadEv3BrickName() {
+    ev3BrickName[0] = 0;
+
+    FILE *file = fopen("./settings/BrickName", "r");
+    if (!file) return;
+
+    fgets(ev3BrickName, sizeof(ev3BrickName), file);
+    fclose(file);
+
+    ev3BrickName[strcspn(ev3BrickName, "\r\n")] = 0;
+}
+
+
 static void *exitThread(void *) {
     int fd = open("/dev/lms_ui", O_RDWR, 0666);
     if (fd < 0) return 0;
@@ -440,6 +467,7 @@ static void startExitThread() {
 }
 
 void target_startup() {
+    loadEv3BrickName();
     stopLMS();
     startUsb();
     rfcommFD = findRfcommSocket();
