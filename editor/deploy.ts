@@ -11,25 +11,28 @@ import { showEv3BusyDialogAsync } from "./dialogs";
 enum DeployTransport {
     FileTransfer,
     BluetoothWebSerial,
-    UsbHid
+    // UsbHid
 }
-
-let preferredTransport = DeployTransport.FileTransfer;
 
 // This comes from aux/pxt.lms
 const defaultDeployFolder = "BrkProg_SAVE";
+// RBF template from aux/pxt.lms.
+// The template contains the launcher code in hexadecimal form.
+// "XX" is replaced with the hexadecimal path of the ELF file to run.
 const rbfTemplate = `
 4c45474f580000006d000100000000001c000000000000000e000000821b038405018130813e8053
 74617274696e672e2e2e0084006080XX00448581644886488405018130813e80427965210084000a
 `;
 
+let preferredTransport = DeployTransport.FileTransfer;
+
 export function canUseWebSerial(): boolean {
     return !!(navigator as any).serial;
 }
 
-export function setUseUsbHID() {
-    preferredTransport = DeployTransport.UsbHid;
-}
+// export function setUseUsbHID() {
+//     preferredTransport = DeployTransport.UsbHid;
+// }
 
 export function setUseBluetoothWebSerial() {
     preferredTransport = DeployTransport.BluetoothWebSerial;
@@ -54,9 +57,7 @@ export async function deployCoreAsync(resp: pxtc.CompileResult) {
     const rbfPath = fspath + filename + ".rbf";
 
     // Build rbf
-    const rbfHex = rbfTemplate
-        .replace(/\s+/g, "")
-        .replace("XX", pxt.U.toHex(pxt.U.stringToUint8Array(elfPath)));
+    const rbfHex = rbfTemplate.replace(/\s+/g, "").replace("XX", pxt.U.toHex(pxt.U.stringToUint8Array(elfPath)));
 
     const rbfBIN = pxt.U.fromHex(rbfHex);
     HF2.write16(rbfBIN, 4, rbfBIN.length);
