@@ -244,17 +244,18 @@ static int findRfcommSocket() {
 }
 
 static void sendSystemReply(uint16_t msgcount, uint8_t command, uint16_t status) {
-    uint8_t reply[8] = {
-        6,
-        0,
-        (uint8_t)(msgcount & 0xff),
-        (uint8_t)((msgcount >> 8) & 0xff),
-        3,
-        command,
-        (uint8_t)(status & 0xff),
-        (uint8_t)((status >> 8) & 0xff)
-    };
-    write(rfcommFD, reply, sizeof(reply));
+    const int replySize = 6;
+    uint8_t reply[8] = {};
+    reply[0] = replySize & 0xff;
+    reply[1] = (replySize >> 8) & 0xff;
+    reply[2] = msgcount & 0xff;
+    reply[3] = (msgcount >> 8) & 0xff;
+    reply[4] = 0x03;
+    reply[5] = command;
+    reply[6] = status & 0xff;
+    reply[7] = (status >> 8) & 0xff;
+    // DMESG("RFCOMM SYSTEM REPLY msgcount=%04x command=%02x status=%04x size=%d", msgcount, command, status, replySize);
+    write(rfcommFD, reply, replySize + 2);
 }
 
 static void sendDirectReply(uint16_t msgcount, const uint8_t *data = NULL, int dataLen = 0) {
@@ -268,7 +269,7 @@ static void sendDirectReply(uint16_t msgcount, const uint8_t *data = NULL, int d
     if (dataLen > 0) {
         memcpy(reply + 5, data, dataLen);
     }
-    DMESG("RFCOMM DIRECT REPLY msgcount=%04x size=%d", msgcount, replySize);
+    // DMESG("RFCOMM DIRECT REPLY msgcount=%04x size=%d", msgcount, replySize);
     write(rfcommFD, reply, replySize + 2);
 }
 
