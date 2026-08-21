@@ -32,7 +32,8 @@ const rfcommPxtAppStopCommand = 0x0002; // RFCOMM command: stop PXT app
 
 const vmBrickNameSize = 120; // Maximum size of the EV3 brick name in VM memory
 
-const opComGet = 0xD3; // System command Get
+const opNop = 0x01; // LEGO VM opcode: No operation
+const opComGet = 0xD3; // System command: Get
 const getBrickName = 0x0D; // GET subcode Get brick name
 
 
@@ -111,9 +112,9 @@ export class Ev3Wrapper {
     };
 
     isEv3ConnectedAsync(): Promise<boolean> {
-        const buf = this.allocCore(3, 0x00);
+        const buf = this.allocCore(3, directCommand);
         HF2.write16(buf, 5, 0x0000);
-        buf[7] = 0x01; // opNop
+        buf[7] = opNop; // opNop
 
         log("PING EV3");
 
