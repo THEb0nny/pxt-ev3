@@ -100,7 +100,7 @@ export class Ev3Wrapper {
         const buf = this.allocCustom(rfcommPxtAppStopCommand);
         return this.talkAsync(buf, 0, 1000)
             .then(() => {
-                log(`PXT app stop command acknowledged`);
+                // log(`PXT app stop command acknowledged`);
                 return pxt.U.delay(500);
             });
     };
@@ -129,7 +129,7 @@ export class Ev3Wrapper {
 
     isPxtAppRunningAsync(): Promise<boolean> {
         const buf = this.allocCustom(rfcommPxtAppPingCommand);
-        return this.talkAsync(buf)
+        return this.talkAsync(buf, 0, 1000)
             .then(() => {
                 log(`PXT app is responding`);
                 return true;
