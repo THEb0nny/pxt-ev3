@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { canUseWebSerial, enableBluetoothWebSerialAsync, setUseBluetoothWebSerial } from "./deploy";
+import { canUseWebSerial, setUseBluetoothWebSerial } from "./deploy";
 import { projectView } from "./extension";
 
 
@@ -8,11 +8,6 @@ let confirmAsync: (options: any) => Promise<number>;
 
 let bluetoothDialogShown = false;
 
-
-async function enableWebSerialAndCompileAsync() {
-    await enableBluetoothWebSerialAsync();
-    return projectView.compile();
-}
 
 export function showUploadDialogAsync(fn: string, url: string, _confirmAsync: (options: any) => Promise<number>): Promise<void> {
     confirmAsync = _confirmAsync;
@@ -92,7 +87,7 @@ export function showUploadDialogAsync(fn: string, url: string, _confirmAsync: (o
                 pxt.tickEvent("bluetooth.enable");
                 setUseBluetoothWebSerial();
                 explainWebSerialPairingAsync()
-                    .then(() => enableWebSerialAndCompileAsync());
+                    .then(() => projectView.compile());
             }
         }, downloadAgain && {
             label: fn,

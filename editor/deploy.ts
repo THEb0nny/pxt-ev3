@@ -38,10 +38,6 @@ export function setUseBluetoothWebSerial() {
     preferredTransport = DeployTransport.BluetoothWebSerial;
 }
 
-export async function enableBluetoothWebSerialAsync(): Promise<void> {
-    preferredTransport = DeployTransport.BluetoothWebSerial;
-}
-
 export async function deployCoreAsync(resp: pxtc.CompileResult) {
     const filename = (resp.downloadFileBaseName || "pxt").replace(/^lego-/, "");
 
