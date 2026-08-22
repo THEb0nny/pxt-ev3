@@ -444,18 +444,6 @@ export class Ev3Wrapper {
             .then(resp => {});
     }
 
-    isVmAsync(): Promise<boolean> {
-        let path = "/no/such/dir";
-        let mkdirReq = this.allocSystem(path.length + 1, 0x9b);
-        U.memcpy(mkdirReq, 6, U.stringToUint8Array(path));
-        return this.talkAsync(mkdirReq, -1)
-            .then(resp => {
-                let isVM = resp[6] == 0x05; // NO_PERMISSION
-                log(`${isVM ? "VM responded" : "System responded"}`);
-                return isVM;
-            });
-    }
-
     private streamFileOnceAsync(path: string, cb: (d: Uint8Array) => void) {
         let fileSize = 0;
         let filePtr = 0;

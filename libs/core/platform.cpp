@@ -442,7 +442,6 @@ static void loadEv3BrickName() {
     ev3BrickName[strcspn(ev3BrickName, "\r\n")] = 0;
 }
 
-
 static void *exitThread(void *) {
     int fd = open("/dev/lms_ui", O_RDWR, 0666);
     if (fd < 0) return 0;
