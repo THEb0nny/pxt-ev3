@@ -75,15 +75,11 @@ export async function deployCoreAsync(resp: pxtc.CompileResult) {
         };
 
         const elfUF2 = mkFile(".elf");
-
         for (const b of origElfUF2) {
             UF2.writeBytes(elfUF2, b.targetAddr, b.data);
         }
-
         const combined = UF2.concatFiles([elfUF2, mkFile(".rbf", rbfBIN)]);
-
         const data = UF2.serializeFile(combined);
-
         resp.outfiles[pxtc.BINARY_UF2] = btoa(data);
 
         if (pxt.commands?.electronDeployAsync) {
