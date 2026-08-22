@@ -3,64 +3,15 @@ import * as React from "react";
 import { canUseWebSerial, enableBluetoothWebSerialAsync, setUseBluetoothWebSerial } from "./deploy";
 import { projectView } from "./extension";
 
+
 let confirmAsync: (options: any) => Promise<number>;
 
 let bluetoothDialogShown = false;
 
-export function bluetoothTryAgainAsync(): Promise<void> {
-    return confirmAsync({
-        header: lf("Bluetooth download failed..."),
-        jsx: <ul>
-            <li>{lf("Make sure you exit the 'Port View' apps or other EV3 apps.")}</li>
-            <li>{lf("Exit the pop-up windows on the EV3.")}</li>
-            <li>{lf("Close EV3 LabView or EV3 Classroom or other MakeCode editor tabs as they may be using the COM port.")}</li>
-            <li>{lf("Try restarting the MakeCode editor tab.")}</li>
-        </ul>,
-        hasCloseIcon: true,
-        hideCancel: false,
-        hideAgree: false,
-        agreeLbl: lf("Try again")
-    }).then(r => {});
-}
-
-export function showEv3BusyDialogAsync(): Promise<void> {
-    return confirmAsync({
-        header: lf("EV3 is busy"),
-        body: lf("The EV3 brick is currently running a program. Please stop it and try again."),
-        hasCloseIcon: false,
-        hideCancel: true,
-        hideAgree: false,
-        agreeLbl: lf("OK")
-    }).then(r => {});
-}
 
 async function enableWebSerialAndCompileAsync() {
     await enableBluetoothWebSerialAsync();
     return projectView.compile();
-}
-
-function explainWebSerialPairingAsync(): Promise<void> {
-    if (!confirmAsync || bluetoothDialogShown) return Promise.resolve();
-
-    bluetoothDialogShown = true;
-    return confirmAsync({
-        header: lf("Bluetooth pairing"),
-        hasCloseIcon: false,
-        hideCancel: true,
-        buttons: [{
-            label: lf("Help"),
-            icon: "question circle",
-            className: "lightgrey",
-            url: "/bluetooth"
-        }],
-        jsx: <p>
-            {lf("You will be prompted to select a serial port.")}
-            {pxt.BrowserUtils.isWindows()
-                ? lf("Look for 'Serial Port' or 'Standard Serial over Bluetooth link'.")
-                : lf("Loop for 'cu.EV3-SerialPort'.")}
-            {lf("If you have paired multiple EV3, you might have to try out multiple ports until you find the correct one.")}
-        </p>
-    }).then(() => { })
 }
 
 export function showUploadDialogAsync(fn: string, url: string, _confirmAsync: (options: any) => Promise<number>): Promise<void> {
@@ -156,5 +107,63 @@ export function showUploadDialogAsync(fn: string, url: string, _confirmAsync: (o
             url: docUrl
         }]
         //timeout: 20000
-    }).then(() => { });
+    }).then(() => {});
+}
+
+function explainWebSerialPairingAsync(): Promise<void> {
+    if (!confirmAsync || bluetoothDialogShown) return Promise.resolve();
+
+    bluetoothDialogShown = true;
+    return confirmAsync({
+        header: lf("Bluetooth pairing"),
+        hasCloseIcon: false,
+        hideCancel: true,
+        buttons: [{
+            label: lf("Help"),
+            icon: "question circle",
+            className: "lightgrey",
+            url: "/bluetooth"
+        }],
+        jsx: <div>
+            <p>{lf("Bluetooth download uses Web Serial. Your browser will ask you to select a serial port.")}</p>
+            <p>{lf("Make sure your EV3 is turned on and already paired with your computer.")}</p>
+            <p>{lf("Close EV3 Lab or EV3 Classroom, Port View, and any other applications that may be using the EV3 Bluetooth connection.")}</p>
+            <p>
+                {pxt.BrowserUtils.isWindows()
+                    ? lf("On Windows, look for 'Serial Port' or 'Standard Serial over Bluetooth link'.")
+                    : lf("On macOS, look for 'cu.EV3-SerialPort'.")}
+            </p>
+            {pxt.BrowserUtils.isWindows() && (
+                <p>{lf("Windows 10 provides the device name to the browser, but Windows 11 does not.")}</p>
+            )}
+            <p>{lf("Try to avoid selecting unrelated COM ports or USB devices.")}</p>
+        </div>
+    }).then(() => {})
+}
+
+export function bluetoothTryAgainAsync(): Promise<void> {
+    return confirmAsync({
+        header: lf("Bluetooth download failed..."),
+        jsx: <ul>
+            <li>{lf("Make sure you exit the 'Port View' apps or other EV3 apps.")}</li>
+            <li>{lf("Exit the pop-up windows on the EV3.")}</li>
+            <li>{lf("Close EV3 Lab or EV3 Classroom or other MakeCode editor tabs as they may be using the COM port.")}</li>
+            <li>{lf("Try restarting the MakeCode editor tab.")}</li>
+        </ul>,
+        hasCloseIcon: true,
+        hideCancel: false,
+        hideAgree: false,
+        agreeLbl: lf("Try again")
+    }).then(r => {});
+}
+
+export function showEv3BusyDialogAsync(): Promise<void> {
+    return confirmAsync({
+        header: lf("EV3 is busy"),
+        body: lf("The EV3 brick is currently running a program. Please stop it and try again."),
+        hasCloseIcon: false,
+        hideCancel: true,
+        hideAgree: false,
+        agreeLbl: lf("OK")
+    }).then(r => {});
 }
