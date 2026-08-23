@@ -4,8 +4,8 @@
 /// <reference path="../node_modules/pxt-core/localtypings/pxteditor.d.ts"/>
 /// <reference path="../node_modules/pxt-core/built/pxtsim.d.ts"/>
 
-import { deployCoreAsync } from "./deploy";
-import { showUploadDialogAsync } from "./dialogs";
+import { deployCoreAsync, isDeployTransportSelected } from "./deploy";
+import { setConfirmAsync, showDownloadDialogAsync } from "./dialogs";
 
 export let projectView: pxt.editor.IProjectView;
 
@@ -28,7 +28,21 @@ pxt.editor.initExtensionsAsync = function (opts: pxt.editor.ExtensionOptions): P
 
     const res: pxt.editor.ExtensionResult = {
         deployAsync: deployCoreAsync,
-        showUploadInstructionsAsync: showUploadDialogAsync
+
+        initAsync: async ({ confirmAsync }) => {
+            setConfirmAsync(confirmAsync);
+        },
+
+        onDownloadButtonClick: async () => {
+            if (isDeployTransportSelected()) {
+                return projectView.compile();
+            }
+
+            const pxtJson = await (window as any).getPxtJson();
+            const projectName = pxtJson?.name || "pxt";
+
+            await showDownloadDialogAsync(projectName);
+        }
     };
 
     /*

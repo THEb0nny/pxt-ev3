@@ -4,9 +4,9 @@
  * https://github.com/mindboards/ev3sources/blob/master/lms2012/lms2012/source/bytecodes.h#L146
  */
 
-
 import HF2 = pxt.HF2;
 import U = pxt.U;
+
 
 export interface DirEntry {
     name: string;

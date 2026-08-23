@@ -5,6 +5,7 @@ import { Ev3Wrapper } from "./wrap";
 import { bluetoothTryAgainAsync } from "./dialogs";
 import { WebSerialIO } from "./webserial";
 
+
 enum TransportState {
     Unpaired,
     Idle,
@@ -71,7 +72,7 @@ class TransportManager {
         } catch (e: any) {
             // Пользователь просто закрыл окно выбора порта
             if (e?.message === "NO_PORT_SELECTED") {
-                this.state = TransportState.Idle;
+                this.state = TransportState.Unpaired;
                 throw e;
             }
             if (e?.message === "PORT_PERMISSION_DENIED") {

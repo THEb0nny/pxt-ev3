@@ -1,22 +1,36 @@
 import * as React from "react";
 
-import { canUseWebSerial, setUseBluetoothWebSerial } from "./deploy";
+import { canUseWebSerial, setUseFileTransfer, setUseBluetoothWebSerial } from "./deploy";
 import { projectView } from "./extension";
 
 
-let confirmAsync: (options: any) => Promise<number>;
+enum UploadMethod {
+    None,
+    FileTransfer,
+    // HID,
+    Bluetooth
+}
 
 let bluetoothDialogShown = false;
 
+let confirmAsync: (options: any) => Promise<number>;
 
-export function showUploadDialogAsync(fn: string, url: string, _confirmAsync: (options: any) => Promise<number>): Promise<void> {
-    confirmAsync = _confirmAsync;
+export function setConfirmAsync(fn: (options: any) => Promise<number>) {
+    confirmAsync = fn;
+}
+
+export function showDownloadDialogAsync(projectName: string): Promise<void> {
+    if (!confirmAsync) {
+        console.error("Download dialog is not initialized.");
+        return Promise.resolve();
+    }
 
     // https://msdn.microsoft.com/en-us/library/cc848897.aspx
     // "For security reasons, data URIs are restricted to downloaded resources.
     // Data URIs cannot be used for navigation, for scripting, or to populate frame or iframe elements"
-    const downloadAgain = !pxt.BrowserUtils.isIE() && !pxt.BrowserUtils.isEdge();
-    const docUrl = (pxt.appTarget.appTheme.usbDocs ? pxt.appTarget.appTheme.usbDocs : false);
+    const downloadFile = !pxt.BrowserUtils.isIE() && !pxt.BrowserUtils.isEdge();
+    const docUrl = pxt.appTarget.appTheme.usbDocs ? pxt.appTarget.appTheme.usbDocs : false;
+    let selectedTransport = UploadMethod.None;
 
     const jsx =
         <div className="ui grid stackable">
@@ -79,36 +93,50 @@ export function showUploadDialogAsync(fn: string, url: string, _confirmAsync: (o
         agreeLbl: lf("I got it"),
         className: 'downloaddialog',
         buttons: [
-        canUseWebSerial() && {
-            label: lf("Bluetooth"),
-            icon: "bluetooth",
-            className: "bluetooth focused",
-            onclick: () => {
-                pxt.tickEvent("bluetooth.enable");
-                setUseBluetoothWebSerial();
-                explainWebSerialPairingAsync()
-                    .then(() => projectView.compile());
+            canUseWebSerial() && {
+                label: lf("Bluetooth"),
+                icon: "bluetooth",
+                className: "bluetooth focused",
+                onclick: () => {
+                    selectedTransport = UploadMethod.Bluetooth;
+                }
+            }, downloadFile && {
+                label: projectName + ".uf2",
+                icon: "download",
+                className: "lightgrey focused",
+                onclick: () => {
+                    selectedTransport = UploadMethod.FileTransfer;
+                }
+            }, docUrl && {
+                label: lf("Help"),
+                icon: "help",
+                className: "lightgrey",
+                url: docUrl
             }
-        }, downloadAgain && {
-            label: fn,
-            icon: "download",
-            className: "lightgrey focused",
-            url,
-            fileName: fn
-        }, docUrl && {
-            label: lf("Help"),
-            icon: "help",
-            className: "lightgrey",
-            url: docUrl
-        }]
+        ]
         //timeout: 20000
-    }).then(() => {});
+    }).then(() => {
+        switch (selectedTransport) {
+            case UploadMethod.FileTransfer:
+                pxt.tickEvent("upload.fileTransfer");
+                setUseFileTransfer();
+                return projectView.compile();
+            case UploadMethod.Bluetooth:
+                pxt.tickEvent("upload.bluetooth");
+                setUseBluetoothWebSerial();
+                return explainWebSerialPairingAsync()
+                    .then(() => projectView.compile());
+            default:
+                return;
+        }
+    });
 }
 
 function explainWebSerialPairingAsync(): Promise<void> {
-    if (!confirmAsync || bluetoothDialogShown) return Promise.resolve();
+    if (bluetoothDialogShown || !confirmAsync) return Promise.resolve();
 
     bluetoothDialogShown = true;
+    
     return confirmAsync({
         header: lf("Bluetooth pairing"),
         hasCloseIcon: false,

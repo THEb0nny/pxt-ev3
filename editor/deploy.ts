@@ -9,6 +9,7 @@ import { showEv3BusyDialogAsync } from "./dialogs";
 
 
 enum DeployTransport {
+    NotSelected,
     FileTransfer,
     BluetoothWebSerial,
     // UsbHid
@@ -24,10 +25,14 @@ const rbfTemplate = `
 74617274696e672e2e2e0084006080XX00448581644886488405018130813e80427965210084000a
 `;
 
-let preferredTransport = DeployTransport.FileTransfer;
+let preferredTransport = DeployTransport.NotSelected;
 
 export function canUseWebSerial(): boolean {
     return !!(navigator as any).serial;
+}
+
+export function setUseFileTransfer() {
+    preferredTransport = DeployTransport.FileTransfer;
 }
 
 // export function setUseUsbHID() {
@@ -38,13 +43,18 @@ export function setUseBluetoothWebSerial() {
     preferredTransport = DeployTransport.BluetoothWebSerial;
 }
 
+export function resetDeployTransport() {
+    preferredTransport = DeployTransport.NotSelected;
+}
+
+export function isDeployTransportSelected(): boolean {
+    return preferredTransport !== DeployTransport.NotSelected;
+}
+
 export async function deployCoreAsync(resp: pxtc.CompileResult) {
     const filename = (resp.downloadFileBaseName || "pxt").replace(/^lego-/, "");
-
     const projectPxtJson = await (window as any).getPxtJson();
-
     const isWebSerial = preferredTransport === DeployTransport.BluetoothWebSerial;
-
     const deployFolder = isWebSerial && projectPxtJson?.deployFolder ? projectPxtJson.deployFolder : defaultDeployFolder;
 
     const fspath = `../prjs/${deployFolder}/`;
@@ -118,6 +128,11 @@ export async function deployCoreAsync(resp: pxtc.CompileResult) {
         await wrapper.runAsync(rbfPath);
         pxt.tickEvent("webserial.success");
     } catch (e: any) {
+        if (e?.message === "NO_PORT_SELECTED") {
+            resetDeployTransport();
+            console.warn("Bluetooth download cancelled: no serial port was selected.");
+            return;
+        }
         pxt.tickEvent("webserial.fail");
         // await transport.hardResetAsync();
         throw e;
