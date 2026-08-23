@@ -11,7 +11,8 @@ enum UploadMethod {
     Bluetooth
 }
 
-let bluetoothDialogShown = false;
+let dontShowBluetoothTransferDialog = false;
+// let dontShowFileTransferDialog = false;
 
 let confirmAsync: (options: any) => Promise<number>;
 
@@ -19,7 +20,15 @@ export function setConfirmAsync(fn: (options: any) => Promise<number>) {
     confirmAsync = fn;
 }
 
-export function showDownloadDialogAsync(projectName: string): Promise<void> {
+// export function setDontShowFileTransferDialog(value: boolean) {
+//     dontShowFileTransferDialog = value;
+// }
+
+// export function shouldShowFileTransferDialog(): boolean {
+//     return !dontShowFileTransferDialog;
+// }
+
+export function showDownloadDialog(projectName: string): Promise<void> {
     if (!confirmAsync) {
         console.error("Download dialog is not initialized.");
         return Promise.resolve();
@@ -132,10 +141,122 @@ export function showDownloadDialogAsync(projectName: string): Promise<void> {
     });
 }
 
-function explainWebSerialPairingAsync(): Promise<void> {
-    if (bluetoothDialogShown || !confirmAsync) return Promise.resolve();
+export function showFileTransferDialog() {
+    return (
+        <div className="ui grid stackable">
+            <div className="column five wide download-hint">
+                <div className="ui header">
+                    {lf("First time here?")}
+                </div>
 
-    bluetoothDialogShown = true;
+                <strong style={{ fontSize: "small" }}>
+                    {lf("You must have version 1.10E or above of the firmware")}
+                </strong>
+
+                <div style={{
+                    justifyContent: "center",
+                    display: "flex",
+                    padding: "1rem"
+                }}>
+                    <img
+                        className="ui image"
+                        src="/static/download/firmware.png"
+                        style={{ height: "100px" }}
+                    />
+                </div>
+
+                <a href="/troubleshoot" target="_blank">
+                    {lf("Check your firmware version here and update if needed")}
+                </a>
+            </div>
+
+            <div className="column eleven wide">
+                <div className="ui grid">
+                    <div className="row">
+                        <div className="column">
+                            <div className="ui two column grid padded">
+                                <div className="column">
+                                    <div className="ui">
+                                        <div className="image">
+                                            <img
+                                                className="ui medium rounded image"
+                                                src="/static/download/connect.svg"
+                                                style={{
+                                                    height: "109px",
+                                                    width: "261px",
+                                                    marginBottom: "1rem"
+                                                }}
+                                            />
+                                        </div>
+
+                                        <div className="content">
+                                            <div className="description">
+                                                <span className="ui yellow circular label">1</span>
+                                                <strong>
+                                                    {lf("Connect the EV3 to your computer with a USB cable")}
+                                                </strong>
+                                                <br />
+                                                <span style={{ fontSize: "small" }}>
+                                                    {lf("Use the miniUSB port on the top of the EV3 Brick")}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="column">
+                                    <div className="ui">
+                                        <div className="image">
+                                            <img
+                                                className="ui medium rounded image"
+                                                src="/static/download/transfer.svg"
+                                                style={{
+                                                    height: "109px",
+                                                    width: "261px",
+                                                    marginBottom: "1rem"
+                                                }}
+                                            />
+                                        </div>
+
+                                        <div className="content">
+                                            <div className="description">
+                                                <span className="ui yellow circular label">2</span>
+                                                <strong>
+                                                    {lf("Move the .uf2 file to the EV3 Brick")}
+                                                </strong>
+                                                <br />
+                                                <span style={{ fontSize: "small" }}>
+                                                    {lf("Locate the downloaded .uf2 file and drag it to the EV3 USB drive")}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {/* <div className="row" style={{ paddingTop: 0 }}>
+                        <div className="column">
+                            <div className="ui toggle checkbox">
+                                <input
+                                    type="checkbox"
+                                    onChange={e => {
+                                        dontShowFileTransferDialog = e.currentTarget.checked;
+                                    }}
+                                />
+                                <label>{lf("Don't show this again")}</label>
+                            </div>
+                        </div>
+                    </div> */}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function explainWebSerialPairingAsync(): Promise<void> {
+    if (dontShowBluetoothTransferDialog || !confirmAsync) return Promise.resolve();
+    if (!dontShowBluetoothTransferDialog) dontShowBluetoothTransferDialog = true;
     
     return confirmAsync({
         header: lf("Bluetooth pairing"),

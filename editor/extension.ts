@@ -4,12 +4,13 @@
 /// <reference path="../node_modules/pxt-core/localtypings/pxteditor.d.ts"/>
 /// <reference path="../node_modules/pxt-core/built/pxtsim.d.ts"/>
 
+
 import { deployCoreAsync, isDeployTransportSelected, resetDeployTransport } from "./deploy";
-import { setConfirmAsync, showDownloadDialogAsync } from "./dialogs";
+import { setConfirmAsync, showDownloadDialog, showFileTransferDialog } from "./dialogs";
 
 export let projectView: pxt.editor.IProjectView;
 
-let projectPxtJson: any = null;
+let projectPxtJson: JSON;
 
 async function loadProjectPxtJson(view: any): Promise<boolean> {
     const mainEditor: any = view.editor || view.blocksEditor;
@@ -39,8 +40,11 @@ pxt.editor.initExtensionsAsync = function (opts: pxt.editor.ExtensionOptions): P
             const pxtJson = await (window as any).getPxtJson();
             const projectName = pxtJson?.name || "pxt";
 
-            await showDownloadDialogAsync(projectName);
+            await showDownloadDialog(projectName);
         },
+        renderBrowserDownloadInstructions: () => {
+            return showFileTransferDialog();
+        }, 
         getDownloadMenuItems: () => [
             // {
             //     text: lf("Download as File"),
@@ -56,9 +60,11 @@ pxt.editor.initExtensionsAsync = function (opts: pxt.editor.ExtensionOptions): P
                 icon: "exchange",
                 onClick: () => {
                     resetDeployTransport();
+
                     const pxtJson = (window as any).getPxtJson();
                     const projectName = pxtJson?.name || "pxt";
-                    return showDownloadDialogAsync(projectName);
+
+                    return showDownloadDialog(projectName);
                 }
             },
             {
