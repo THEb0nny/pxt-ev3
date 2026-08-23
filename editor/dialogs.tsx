@@ -152,9 +152,7 @@ export function showDownloadDialog(projectName: string): Promise<void> {
 }
 
 export function showFileTransferDialog(fn: string, url: string, _confirmAsync: (options: any) => Promise<number>): Promise<void> {
-    if (!confirmAsync || skipFileTransferDialog) {
-        return Promise.resolve();
-    }
+    if (!confirmAsync || skipFileTransferDialog) return Promise.resolve();
 
     const jsx = (
         <div className="ui grid stackable">

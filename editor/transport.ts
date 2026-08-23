@@ -25,13 +25,9 @@ class TransportManager {
 
     async connectAsync(): Promise<Ev3Wrapper> {
         // Уже подключены
-        if (this.state === TransportState.Connected && this.wrapper) {
-            return this.wrapper;
-        }
+        if (this.state === TransportState.Connected && this.wrapper) return this.wrapper;
         // Если уже идёт подключение — возвращаем тот же Promise
-        if (this.connectPromise) {
-            return this.connectPromise;
-        }
+        if (this.connectPromise) return this.connectPromise;
 
         this.connectPromise = this.doConnectAsync();
         try {

@@ -90,12 +90,8 @@ export async function deployCoreAsync(resp: pxtc.CompileResult) {
         const data = UF2.serializeFile(combined);
         resp.outfiles[pxtc.BINARY_UF2] = btoa(data);
 
-        if (pxt.commands?.electronDeployAsync) {
-            return pxt.commands.electronDeployAsync(resp);
-        }
-        if (pxt.commands?.saveOnlyAsync) {
-            return pxt.commands.saveOnlyAsync(resp);
-        }
+        if (pxt.commands?.electronDeployAsync) return pxt.commands.electronDeployAsync(resp);
+        if (pxt.commands?.saveOnlyAsync) return pxt.commands.saveOnlyAsync(resp);
 
         return Promise.resolve();
     }
