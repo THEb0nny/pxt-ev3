@@ -4,7 +4,7 @@
 /// <reference path="../node_modules/pxt-core/localtypings/pxteditor.d.ts"/>
 /// <reference path="../node_modules/pxt-core/built/pxtsim.d.ts"/>
 
-import { deployCoreAsync, isDeployTransportSelected } from "./deploy";
+import { deployCoreAsync, isDeployTransportSelected, resetDeployTransport } from "./deploy";
 import { setConfirmAsync, showDownloadDialogAsync } from "./dialogs";
 
 export let projectView: pxt.editor.IProjectView;
@@ -28,11 +28,9 @@ pxt.editor.initExtensionsAsync = function (opts: pxt.editor.ExtensionOptions): P
 
     const res: pxt.editor.ExtensionResult = {
         deployAsync: deployCoreAsync,
-
         initAsync: async ({ confirmAsync }) => {
             setConfirmAsync(confirmAsync);
         },
-
         onDownloadButtonClick: async () => {
             if (isDeployTransportSelected()) {
                 return projectView.compile();
@@ -42,7 +40,35 @@ pxt.editor.initExtensionsAsync = function (opts: pxt.editor.ExtensionOptions): P
             const projectName = pxtJson?.name || "pxt";
 
             await showDownloadDialogAsync(projectName);
-        }
+        },
+        getDownloadMenuItems: () => [
+            // {
+            //     text: lf("Download as File"),
+            //     icon: "download",
+            //     onClick: () => {
+            //         pxt.tickEvent("upload.fileTransfer");
+            //         setUseFileTransfer();
+            //         return projectView.compile();
+            //     }
+            // },
+            isDeployTransportSelected() && {
+                text: lf("Upload method"),
+                icon: "exchange",
+                onClick: () => {
+                    resetDeployTransport();
+                    const pxtJson = (window as any).getPxtJson();
+                    const projectName = pxtJson?.name || "pxt";
+                    return showDownloadDialogAsync(projectName);
+                }
+            },
+            {
+                text: lf("Help"),
+                icon: "help",
+                onClick: () => {
+                    window.open("/troubleshoot", "_blank");
+                }
+            }
+        ].filter(Boolean)
     };
 
     /*

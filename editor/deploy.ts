@@ -52,6 +52,8 @@ export function isDeployTransportSelected(): boolean {
 }
 
 export async function deployCoreAsync(resp: pxtc.CompileResult) {
+    console.log(`START DEPLOY`);
+
     const filename = (resp.downloadFileBaseName || "pxt").replace(/^lego-/, "");
     const projectPxtJson = await (window as any).getPxtJson();
     const isWebSerial = preferredTransport === DeployTransport.BluetoothWebSerial;
