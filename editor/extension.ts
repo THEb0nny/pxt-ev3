@@ -42,9 +42,9 @@ pxt.editor.initExtensionsAsync = function (opts: pxt.editor.ExtensionOptions): P
 
             await showDownloadDialog(projectName);
         },
-        renderBrowserDownloadInstructions: () => {
-            return showFileTransferDialog();
-        }, 
+        showUploadInstructionsAsync: (fn, url, confirmAsync) => {
+            return showFileTransferDialog(fn, url, confirmAsync);
+        },
         getDownloadMenuItems: () => [
             // {
             //     text: lf("Download as File"),

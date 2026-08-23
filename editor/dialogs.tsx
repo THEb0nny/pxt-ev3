@@ -141,8 +141,8 @@ export function showDownloadDialog(projectName: string): Promise<void> {
     });
 }
 
-export function showFileTransferDialog() {
-    return (
+export function showFileTransferDialog(fn: string, url: string, _confirmAsync: (options: any) => Promise<number>): Promise<void> {
+    const jsx = (
         <div className="ui grid stackable">
             <div className="column five wide download-hint">
                 <div className="ui header">
@@ -252,6 +252,26 @@ export function showFileTransferDialog() {
             </div>
         </div>
     );
+
+    return _confirmAsync({
+        header: lf("Download completed..."),
+        jsx,
+        hasCloseIcon: true,
+        hideCancel: true,
+        hideAgree: false,
+        agreeLbl: lf("Done"),
+        agreeIcon: "checkmark",
+        className: "downloaddialog",
+        buttons: [
+            {
+                label: lf("Download Again"),
+                icon: "download",
+                className: "lightgrey",
+                url,
+                fileName: fn
+            }
+        ]
+    }).then(() => {});
 }
 
 function explainWebSerialPairingAsync(): Promise<void> {
