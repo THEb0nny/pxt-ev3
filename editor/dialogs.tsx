@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { canUseWebSerial, setUseFileTransfer, setUseBluetoothWebSerial } from "./deploy";
+import { canUseWebSerial, setUseFileTransfer, setUseBluetoothWebSerial, resetDeployTransport } from "./deploy";
 import { projectView } from "./extension";
 
 
@@ -134,7 +134,17 @@ export function showDownloadDialog(projectName: string): Promise<void> {
                 pxt.tickEvent("upload.bluetooth");
                 setUseBluetoothWebSerial();
                 return showBluetoothPairingDialog()
-                    .then(() => projectView.compile());
+                    .then(shouldContinue => {
+                    if (!shouldContinue) {
+                        pxt.tickEvent("upload.cancel");
+                        resetDeployTransport();
+                        resetFileTransferDialog();
+                        resetBluetoothPairingDialog();
+                        return;
+                    }
+
+                    return projectView.compile();
+                });
             default:
                 return;
         }
@@ -278,9 +288,9 @@ export function showFileTransferDialog(fn: string, url: string, _confirmAsync: (
     }).then(() => {});
 }
 
-function showBluetoothPairingDialog(): Promise<void> {
+function showBluetoothPairingDialog(): Promise<boolean> {
     if (!confirmAsync || skipBluetoothPairingDialog) {
-        return Promise.resolve();
+        return Promise.resolve(true);
     }
 
     const jsx = (
@@ -311,16 +321,16 @@ function showBluetoothPairingDialog(): Promise<void> {
     
     return confirmAsync({
         header: lf("Bluetooth pairing"),
-        hasCloseIcon: false,
+        jsx,
+        hasCloseIcon: true,
         hideCancel: true,
         buttons: [{
             label: lf("Help"),
             icon: "question circle",
             className: "lightgrey",
             url: "/bluetooth"
-        }],
-        jsx
-    }).then(() => {})
+        }]
+    }).then(result => result === 1);
 }
 
 export function bluetoothTryAgainAsync(): Promise<void> {
