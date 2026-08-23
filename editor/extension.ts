@@ -6,7 +6,7 @@
 
 
 import { deployCoreAsync, isDeployTransportSelected, resetDeployTransport } from "./deploy";
-import { setConfirmAsync, showDownloadDialog, showFileTransferDialog } from "./dialogs";
+import { setConfirmAsync, resetFileTransferDialog, resetBluetoothPairingDialog, showDownloadDialog, showFileTransferDialog } from "./dialogs";
 
 export let projectView: pxt.editor.IProjectView;
 
@@ -60,7 +60,9 @@ pxt.editor.initExtensionsAsync = function (opts: pxt.editor.ExtensionOptions): P
                 icon: "exchange",
                 onClick: () => {
                     resetDeployTransport();
-
+                    resetFileTransferDialog();
+                    resetBluetoothPairingDialog();
+                    
                     const pxtJson = (window as any).getPxtJson();
                     const projectName = pxtJson?.name || "pxt";
 

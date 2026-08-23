@@ -11,8 +11,8 @@ enum UploadMethod {
     Bluetooth
 }
 
-let dontShowBluetoothTransferDialog = false;
-// let dontShowFileTransferDialog = false;
+let skipFileTransferDialog = false;
+let skipBluetoothPairingDialog = false;
 
 let confirmAsync: (options: any) => Promise<number>;
 
@@ -20,13 +20,13 @@ export function setConfirmAsync(fn: (options: any) => Promise<number>) {
     confirmAsync = fn;
 }
 
-// export function setDontShowFileTransferDialog(value: boolean) {
-//     dontShowFileTransferDialog = value;
-// }
+export function resetFileTransferDialog() {
+    skipFileTransferDialog = false;
+}
 
-// export function shouldShowFileTransferDialog(): boolean {
-//     return !dontShowFileTransferDialog;
-// }
+export function resetBluetoothPairingDialog() {
+    skipBluetoothPairingDialog = false;
+}
 
 export function showDownloadDialog(projectName: string): Promise<void> {
     if (!confirmAsync) {
@@ -133,7 +133,7 @@ export function showDownloadDialog(projectName: string): Promise<void> {
             case UploadMethod.Bluetooth:
                 pxt.tickEvent("upload.bluetooth");
                 setUseBluetoothWebSerial();
-                return explainWebSerialPairingAsync()
+                return showBluetoothPairingDialog()
                     .then(() => projectView.compile());
             default:
                 return;
@@ -142,6 +142,10 @@ export function showDownloadDialog(projectName: string): Promise<void> {
 }
 
 export function showFileTransferDialog(fn: string, url: string, _confirmAsync: (options: any) => Promise<number>): Promise<void> {
+    if (!confirmAsync || skipFileTransferDialog) {
+        return Promise.resolve();
+    }
+
     const jsx = (
         <div className="ui grid stackable">
             <div className="column five wide download-hint">
@@ -235,19 +239,19 @@ export function showFileTransferDialog(fn: string, url: string, _confirmAsync: (
                             </div>
                         </div>
                     </div>
-                    {/* <div className="row" style={{ paddingTop: 0 }}>
+                    <div className="row" style={{ paddingTop: 0 }}>
                         <div className="column">
                             <div className="ui toggle checkbox">
                                 <input
                                     type="checkbox"
                                     onChange={e => {
-                                        dontShowFileTransferDialog = e.currentTarget.checked;
+                                        skipFileTransferDialog = e.currentTarget.checked;
                                     }}
                                 />
                                 <label>{lf("Don't show this again")}</label>
                             </div>
                         </div>
-                    </div> */}
+                    </div>
                 </div>
             </div>
         </div>
@@ -274,21 +278,13 @@ export function showFileTransferDialog(fn: string, url: string, _confirmAsync: (
     }).then(() => {});
 }
 
-function explainWebSerialPairingAsync(): Promise<void> {
-    if (dontShowBluetoothTransferDialog || !confirmAsync) return Promise.resolve();
-    if (!dontShowBluetoothTransferDialog) dontShowBluetoothTransferDialog = true;
-    
-    return confirmAsync({
-        header: lf("Bluetooth pairing"),
-        hasCloseIcon: false,
-        hideCancel: true,
-        buttons: [{
-            label: lf("Help"),
-            icon: "question circle",
-            className: "lightgrey",
-            url: "/bluetooth"
-        }],
-        jsx: <div>
+function showBluetoothPairingDialog(): Promise<void> {
+    if (!confirmAsync || skipBluetoothPairingDialog) {
+        return Promise.resolve();
+    }
+
+    const jsx = (
+        <div>
             <p>{lf("Bluetooth download uses Web Serial. Your browser will ask you to select a serial port.")}</p>
             <p>{lf("Make sure your EV3 is turned on and already paired with your computer.")}</p>
             <p>{lf("Close EV3 Lab or EV3 Classroom, Port View, and any other applications that may be using the EV3 Bluetooth connection.")}</p>
@@ -301,7 +297,29 @@ function explainWebSerialPairingAsync(): Promise<void> {
                 <p>{lf("Windows 10 provides the device name to the browser, but Windows 11 does not.")}</p>
             )}
             <p>{lf("Try to avoid selecting unrelated COM ports or USB devices.")}</p>
+            <div className="ui toggle checkbox">
+                <input
+                    type="checkbox"
+                    onChange={e => {
+                        skipBluetoothPairingDialog = e.currentTarget.checked;
+                    }}
+                />
+                <label>{lf("Don't show this again")}</label>
+            </div>
         </div>
+    );
+    
+    return confirmAsync({
+        header: lf("Bluetooth pairing"),
+        hasCloseIcon: false,
+        hideCancel: true,
+        buttons: [{
+            label: lf("Help"),
+            icon: "question circle",
+            className: "lightgrey",
+            url: "/bluetooth"
+        }],
+        jsx
     }).then(() => {})
 }
 
