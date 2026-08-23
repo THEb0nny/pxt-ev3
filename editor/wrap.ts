@@ -383,9 +383,8 @@ export class Ev3Wrapper {
 
         let handle = -1;
         let loopAsync = (pos: number): Promise<void> => {
-            if (pos >= file.length) {
-                return Promise.resolve();
-            }
+            if (pos >= file.length) return Promise.resolve();
+
             let size = file.length - pos;
             if (size > 1000) {
                 size = 1000;
@@ -516,9 +515,8 @@ export class Ev3Wrapper {
 
     reconnectAsync(first = false): Promise<void> {
         this.resetState();
-        if (first) {
-            return this.initAsync();
-        }
+        if (first) return this.initAsync();
+        
         log(`Reconnect`);
         return this.io.reconnectAsync()
             .then(() => this.initAsync());

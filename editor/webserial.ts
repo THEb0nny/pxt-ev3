@@ -78,10 +78,7 @@ export class WebSerialIO implements pxt.packetio.PacketIO {
         //     try { await this.disconnectAsync(); } catch {}
         // }
 
-        if (this.state === IOState.Connected) {
-            // Порт уже открыт — не трогаем, т.к. Timeout не означает разрыв
-            return;
-        }
+        if (this.state === IOState.Connected) return; // Порт уже открыт — не трогаем, т.к. Timeout не означает разрыв
 
         if (this.state === IOState.Connecting) {
             throw new Error("CONNECT_IN_PROGRESS");
@@ -108,9 +105,7 @@ export class WebSerialIO implements pxt.packetio.PacketIO {
     }
 
     async disconnectAsync(): Promise<void> {
-        if (this.state === IOState.Disconnected) {
-            return;
-        }
+        if (this.state === IOState.Disconnected) return;
 
         this.state = IOState.Disconnected;
 

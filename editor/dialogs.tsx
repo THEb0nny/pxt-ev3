@@ -289,9 +289,7 @@ export function showFileTransferDialog(fn: string, url: string, _confirmAsync: (
 }
 
 function showBluetoothPairingDialog(): Promise<boolean> {
-    if (!confirmAsync || skipBluetoothPairingDialog) {
-        return Promise.resolve(true);
-    }
+    if (!confirmAsync || skipBluetoothPairingDialog) return Promise.resolve(true);
 
     const jsx = (
         <div>
