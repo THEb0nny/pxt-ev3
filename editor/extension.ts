@@ -21,6 +21,17 @@ async function loadProjectPxtJson(view: any): Promise<boolean> {
     return false;
 }
 
+async function getDownloadFileName(): Promise<string> {
+    const pxtJson = await (window as any).getPxtJson();
+    const projectName = pxtJson?.name || "Untitled";
+
+    const filter = pxt.appTarget.appTheme.fileNameExclusiveFilter;
+
+    if (filter && new RegExp(filter).test(projectName)) return "Untitled";
+
+    return projectName;
+}
+
 pxt.editor.initExtensionsAsync = function (opts: pxt.editor.ExtensionOptions): Promise<pxt.editor.ExtensionResult> {
     pxt.debug('loading pxt-ev3 target extensions...')
     projectView = opts.projectView;
@@ -37,10 +48,7 @@ pxt.editor.initExtensionsAsync = function (opts: pxt.editor.ExtensionOptions): P
                 return projectView.compile();
             }
 
-            const pxtJson = await (window as any).getPxtJson();
-            const projectName = pxtJson?.name || "pxt";
-
-            await showDownloadDialog(projectName);
+            await showDownloadDialog(await getDownloadFileName());
         },
         showUploadInstructionsAsync: (fn, url, confirmAsync) => {
             return showFileTransferDialog(fn, url, confirmAsync);
@@ -58,15 +66,12 @@ pxt.editor.initExtensionsAsync = function (opts: pxt.editor.ExtensionOptions): P
             isDeployTransportSelected() && {
                 text: lf("Upload method"),
                 icon: "exchange",
-                onClick: () => {
+                onClick: async () => {
                     resetDeployTransport();
                     resetFileTransferDialog();
                     resetBluetoothPairingDialog();
-                    
-                    const pxtJson = (window as any).getPxtJson();
-                    const projectName = pxtJson?.name || "pxt";
 
-                    return showDownloadDialog(projectName);
+                    return showDownloadDialog(await getDownloadFileName());
                 }
             },
             {
