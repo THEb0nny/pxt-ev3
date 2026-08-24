@@ -330,6 +330,8 @@ function showBluetoothPairingDialog(): Promise<boolean> {
 }
 
 export function bluetoothTryAgainAsync(): Promise<void> {
+    if (!confirmAsync) return Promise.resolve();
+
     return confirmAsync({
         header: lf("Bluetooth download failed..."),
         jsx: <ul>
@@ -346,6 +348,8 @@ export function bluetoothTryAgainAsync(): Promise<void> {
 }
 
 export function showEv3BusyDialogAsync(): Promise<void> {
+    if (!confirmAsync) return Promise.resolve();
+
     return confirmAsync({
         header: lf("EV3 is busy"),
         body: lf("The EV3 brick is currently running a program. Please stop it and try again."),
@@ -354,4 +358,22 @@ export function showEv3BusyDialogAsync(): Promise<void> {
         hideAgree: false,
         agreeLbl: lf("OK")
     }).then(r => {});
+}
+
+export function showBluetoothConnectionStuckDialogAsync(): Promise<void> {
+    if (!confirmAsync) return Promise.resolve();
+
+    return confirmAsync({
+        header: lf("Bluetooth connection stuck"),
+        hasCloseIcon: true,
+        hideCancel: true,
+        hideAgree: false,
+        agreeLbl: lf("Try again"),
+        jsx: (
+            <div>
+                <p>{lf("Windows did not release the RFCOMM channel.")}</p>
+                <p>{lf("Please reset Bluetooth or re-enable the COM port, then try again.")}</p>
+            </div>
+        )
+    }).then(() => {});
 }

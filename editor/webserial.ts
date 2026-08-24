@@ -13,7 +13,7 @@ export class WebSerialIO implements pxt.packetio.PacketIO {
     onData = (v: Uint8Array) => {};
     onEvent = (v: Uint8Array) => {};
     onError = (e: Error) => {};
-    error: (msg: string) => void;
+    error = (msg: string) => {};
     onConnectionChanged = () => {};
     onDeviceConnectionChanged = () => {};
 
@@ -30,9 +30,17 @@ export class WebSerialIO implements pxt.packetio.PacketIO {
         return !!(navigator as any).serial;
     }
 
+    isConnected() {
+        return this.state === IOState.Connected;
+    }
+
+    isConnecting() {
+        return this.state === IOState.Connecting;
+    }
+
     static async createAsync(forceRequest: boolean): Promise<WebSerialIO> {
         const serial = (navigator as any).serial;
-        if (!serial) throw new Error("WebSerial not supported");
+        if (!serial) throw new Error("WEBSERIAL_NOT_SUPPORTED");
 
         let port: any;
 
@@ -57,32 +65,16 @@ export class WebSerialIO implements pxt.packetio.PacketIO {
                 if (e?.name === "SecurityError") {
                     throw new Error("PORT_PERMISSION_DENIED");
                 }
-                throw e; // Всё остальное — пробрасываем дальше
+                throw e;
             }
         }
 
         return new WebSerialIO(port);
     }
 
-    isConnected() {
-        return this.state === IOState.Connected;
-    }
-
-    isConnecting() {
-        return this.state === IOState.Connecting;
-    }
-
     async reconnectAsync(): Promise<void> {
-        // if (this.isOpen) return;
-        // if (this.isOpen) {
-        //     try { await this.disconnectAsync(); } catch {}
-        // }
-
         if (this.state === IOState.Connected) return; // Порт уже открыт — не трогаем, т.к. Timeout не означает разрыв
-
-        if (this.state === IOState.Connecting) {
-            throw new Error("CONNECT_IN_PROGRESS");
-        }
+        if (this.state === IOState.Connecting) throw new Error("CONNECT_IN_PROGRESS");
 
         this.state = IOState.Connecting;
 
@@ -93,11 +85,10 @@ export class WebSerialIO implements pxt.packetio.PacketIO {
             this.startReader();
         } catch (e: any) {
             this.state = IOState.Disconnected;
-            const name = e?.name || "";
-            if (name === "NetworkError") {
+            if (e?.name === "NetworkError") {
                 throw new Error("PORT_OPEN_FAILED");
             }
-            if (name === "SecurityError") {
+            if (e?.name === "SecurityError") {
                 throw new Error("PORT_PERMISSION_DENIED");
             }
             throw e;
@@ -121,7 +112,7 @@ export class WebSerialIO implements pxt.packetio.PacketIO {
             }
             await this.port.close();
         } catch (e) {
-            console.warn("serial close error", e);
+            console.warn("SERIAL: close error", e);
         }
         this.onConnectionChanged();
     }
@@ -159,7 +150,6 @@ export class WebSerialIO implements pxt.packetio.PacketIO {
                     if (buffer.length < size) break;
 
                     const pkt = buffer.slice(0, size);
-                    // console.log("serial RX RAW:", pxt.U.toHex(pkt));
                     this.onData(pkt);
 
                     buffer = buffer.length > size ? buffer.slice(size) : undefined;

@@ -4,7 +4,6 @@
 /// <reference path="../node_modules/pxt-core/localtypings/pxteditor.d.ts"/>
 /// <reference path="../node_modules/pxt-core/built/pxtsim.d.ts"/>
 
-
 import { deployCoreAsync, isDeployTransportSelected, resetDeployTransport } from "./deploy";
 import { setConfirmAsync, resetFileTransferDialog, resetBluetoothPairingDialog, showDownloadDialog, showFileTransferDialog } from "./dialogs";
 
@@ -68,6 +67,7 @@ pxt.editor.initExtensionsAsync = function (opts: pxt.editor.ExtensionOptions): P
                 icon: "exchange",
                 onClick: async () => {
                     resetDeployTransport();
+                    
                     resetFileTransferDialog();
                     resetBluetoothPairingDialog();
 

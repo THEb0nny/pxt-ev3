@@ -43,8 +43,9 @@ export function setUseBluetoothWebSerial() {
     preferredTransport = DeployTransport.BluetoothWebSerial;
 }
 
-export function resetDeployTransport() {
+export async function resetDeployTransport() {
     preferredTransport = DeployTransport.NotSelected;
+    await transport.disconnectAsync(true);
 }
 
 export function isDeployTransportSelected(): boolean {
@@ -78,7 +79,9 @@ export async function deployCoreAsync(resp: pxtc.CompileResult) {
         const mkFile = (ext: string, data?: Uint8Array) => {
             const f = UF2.newBlockFile();
             f.filename = "Projects/" + filename + ext;
-            if (data) UF2.writeBytes(f, 0, data);
+            if (data) {
+                UF2.writeBytes(f, 0, data);
+            }
             return f;
         };
 
@@ -86,6 +89,7 @@ export async function deployCoreAsync(resp: pxtc.CompileResult) {
         for (const b of origElfUF2) {
             UF2.writeBytes(elfUF2, b.targetAddr, b.data);
         }
+
         const combined = UF2.concatFiles([elfUF2, mkFile(".rbf", rbfBIN)]);
         const data = UF2.serializeFile(combined);
         resp.outfiles[pxtc.BINARY_UF2] = btoa(data);
@@ -105,7 +109,7 @@ export async function deployCoreAsync(resp: pxtc.CompileResult) {
         if (!isEv3Connected) {
             console.warn("EV3 is not responding.");
             await transport.disconnectAsync(true);
-            await showEv3BusyDialogAsync();
+            await showEv3BusyDialogAsync(); // Replace it with the fact that it is not EV3
             return;
         }
 
@@ -127,7 +131,7 @@ export async function deployCoreAsync(resp: pxtc.CompileResult) {
         pxt.tickEvent("webserial.success");
     } catch (e: any) {
         if (e?.message === "NO_PORT_SELECTED") {
-            resetDeployTransport();
+            await resetDeployTransport();
             console.warn("Bluetooth download cancelled: no serial port was selected.");
             return;
         }

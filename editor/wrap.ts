@@ -117,8 +117,6 @@ export class Ev3Wrapper {
         HF2.write16(buf, 5, 0x0000);
         buf[7] = opNop; // opNop
 
-        log("PING EV3");
-
         return this.talkAsync(buf)
             .then(resp => {
                 if (resp[4] !== 0x02) {
@@ -162,7 +160,7 @@ export class Ev3Wrapper {
                 const end = nameBytes.indexOf(0);
                 const name = U.uint8ArrayToString(end >= 0 ? nameBytes.slice(0, end) : nameBytes);
 
-                log(`EV3 name: ${name}`);
+                // log(`EV3 name: ${name}`);
                 return name;
             });
     }
