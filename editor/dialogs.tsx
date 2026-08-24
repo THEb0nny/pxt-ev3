@@ -368,7 +368,7 @@ export function showBluetoothConnectionStuckDialogAsync(): Promise<void> {
         hasCloseIcon: true,
         hideCancel: true,
         hideAgree: false,
-        agreeLbl: lf("Try again"),
+        agreeLbl: lf("OK"),
         jsx: (
             <div>
                 <p>{lf("Windows did not release the RFCOMM channel.")}</p>
