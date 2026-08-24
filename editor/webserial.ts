@@ -46,23 +46,19 @@ export class WebSerialIO implements pxt.packetio.PacketIO {
 
         if (!forceRequest) {
             const ports = await serial.getPorts();
-            // Используем ранее разрешённый порт
-            if (ports && ports.length > 0) {
+            if (ports && ports.length > 0) { // Use the previously allowed port
                 port = ports[0];
             }
         }
 
-        // Если порт не найден ИЛИ forceRequest = true
-        if (!port) {
+        if (!port) { // If the port is not found
             try {
                 port = await serial.requestPort({});
             } catch (e: any) {
-                // Пользователь закрыл окно выбора порта
-                if (e?.name === "NotFoundError") {
+                if (e?.name === "NotFoundError") { // User closed the port selection window
                     throw new Error("NO_PORT_SELECTED");
                 }
-                // Пользователь запретил доступ
-                if (e?.name === "SecurityError") {
+                if (e?.name === "SecurityError") { // Access to the serial port was denied
                     throw new Error("PORT_PERMISSION_DENIED");
                 }
                 throw e;
@@ -73,17 +69,25 @@ export class WebSerialIO implements pxt.packetio.PacketIO {
     }
 
     async reconnectAsync(): Promise<void> {
-        if (this.state === IOState.Connected) return; // Порт уже открыт — не трогаем, т.к. Timeout не означает разрыв
+        if (this.state === IOState.Connected) return; // Port is already open
         if (this.state === IOState.Connecting) throw new Error("CONNECT_IN_PROGRESS");
 
         this.state = IOState.Connecting;
 
         try {
             await this.port.open({ baudRate: 460800, bufferSize: 4096 });
+            
+            console.log("SERIAL: port.open() succeeded");
+
             this.state = IOState.Connected;
             this.onConnectionChanged();
             this.startReader();
         } catch (e: any) {
+             console.warn(
+                "SERIAL: port.open() failed:",
+                e?.name,
+                e?.message
+            );
             this.state = IOState.Disconnected;
             if (e?.name === "NetworkError") {
                 throw new Error("PORT_OPEN_FAILED");
