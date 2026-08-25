@@ -22,8 +22,8 @@ enum NXTLightIntensityMode {
 
 namespace sensors {
 
-    const DCM_LED_OFF = "0";
-    const DCM_LED_ON = "2";
+    const dcmLedOff = "0";
+    const dcmLedOn = "2";
 
     //% fixedInstances
     export class NXTLightSensor extends internal.AnalogSensor {
@@ -68,6 +68,7 @@ namespace sensors {
         _update(prev: number, curr: number) {
             // Intentionally left empty
             // This sensor does not generate threshold or change events
+            // Pass
         }
 
         _deviceType() {
@@ -106,7 +107,7 @@ namespace sensors {
          */
         //% help=sensors/nxt-light-sensor/set-reflected-range
         //% block="**nxt light sensor** $this|set reflected range dark $dark|bright $bright"
-        //% blockId=setReflectedLightRange
+        //% blockId=nxtLightSensorSetReflectedLightRange
         //% parts="nxtlightsensor"
         //% blockNamespace=sensors
         //% this.fieldEditor="images"
@@ -129,7 +130,7 @@ namespace sensors {
          */
         //% help=sensors/nxt-light-sensor/set-ambient-range
         //% block="**nxt light sensor** $this|set ambient range dark $dark|bright $bright"
-        //% blockId=setAmbientLightRange
+        //% blockId=nxtLightSensorSetAmbientLightRange
         //% parts="nxtlightsensor"
         //% blockNamespace=sensors
         //% this.fieldEditor="images"
@@ -146,7 +147,7 @@ namespace sensors {
 
         // Enables or disables the built-in illumination LED
         private _setLedState(enable: boolean) {
-            this._writeDcm(enable ? DCM_LED_ON : DCM_LED_OFF);
+            this._writeDcm(enable ? dcmLedOn : dcmLedOff);
         }
 
         // Gets the raw light value
@@ -168,7 +169,7 @@ namespace sensors {
          */
         //% help=sensors/nxt-light-sensor/light
         //% block="**nxt light sensor** $this|$mode"
-        //% blockId=nxtLight
+        //% blockId=nxtLightSensorLight
         //% parts="nxtlightsensor"
         //% blockNamespace=sensors
         //% this.fieldEditor="images"
