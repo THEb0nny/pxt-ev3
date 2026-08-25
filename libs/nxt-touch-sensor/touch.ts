@@ -1,100 +1,103 @@
 namespace sensors {
 
-    // Keep TouchSensorEvent in sync with ButtonEvent
-
     //% fixedInstances
-    export class TouchSensor extends internal.AnalogSensor {
+    export class NXTTouchSensor extends internal.AnalogSensor {
         private button: brick.Button;
 
         constructor(port: number) {
-            super(port)
+            super(port);
             this.button = new brick.Button();
         }
 
         _query() {
-            return [this._readPin6() > 2500 ? 1 : 0];
+            return [this._readPin1() < 2400 ? 1 : 0];
         }
 
         _info() {
-            return [this._query()[0] ? "pres" : "rel"];
+            return [`${this._query()[0]}`];
         }
 
         _update(prev: number, curr: number) {
-            this.button._update(curr > 0)
+            this.button._update(curr > 0);
         }
 
         _deviceType() {
-            return DAL.DEVICE_TYPE_TOUCH
+            return DAL.DEVICE_TYPE_NXT_TOUCH;
         }
 
         /**
-         * Do something when a touch sensor is touched...
-         * @param sensor the touch sensor that needs to be clicked or used
-         * @param event the kind of button gesture that needs to be detected
-         * @param body code to run when the event is raised
+         * Run some code when the NXT touch sensor is pressed, released, or bumped.
+         * @param event the touch sensor event to listen for
+         * @param body the code to run when the event occurs
          */
-        //% help=sensors/touch-sensor/on-event
-        //% blockId=touchEvent block="on **touch** %this|%event"
-        //% parts="touch"
+        //% block="on **nxt touch sensor** %this|%event"
+        //% blockId=nxtTouchSensorOnEvent
+        //% parts="nxttouchsensor"
         //% blockNamespace=sensors
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
-        //% weight=99 blockGap=8
+        //% weight=60 blockGap=8
+        //% subcategory="NXT"
         //% group="Touch Sensor"
         onEvent(ev: ButtonEvent, body: () => void) {
-            this.button.onEvent(ev, body)
+            this.button.onEvent(ev, body);
         }
 
         /**
-         * Wait until the touch sensor is touched
+         * Wait until the NXT touch sensor is touched.
          * @param sensor the touch sensor that needs to be clicked or used
          * @param event the kind of button gesture that needs to be detected
          */
-        //% help=sensors/touch-sensor/pause-until
-        //% blockId=touchWaitUntil block="pause until **touch** %this|%event"
-        //% parts="touch"
+        //% help=sensors/nxt-touch-sensor/pause-until
+        //% block="pause until **nxt touch sensor** %this|%event"
+        //% blockId=nxtTouchSensorPauseUntil
+        //% parts="nxttouchsensor"
         //% blockNamespace=sensors
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
         //% weight=98 blockGap=8
+        //% subcategory="NXT"
         //% group="Touch Sensor"
         pauseUntil(ev: ButtonEvent) {
             this.button.pauseUntil(<ButtonEvent><number>ev);
         }
 
         /**
-         * Check if touch sensor is touched.
-         * @param sensor the port to query the request
+         * Check if the NXT touch sensor is currently pressed.
+         * @returns true if the sensor is pressed, false otherwise
          */
-        //% help=sensors/touch-sensor/is-pressed
-        //% blockId=touchIsPressed block="**touch** %this|is pressed"
-        //% parts="touch"
+        //% block="**nxt touch sensor** %this|is pressed"
+        //% blockId=nxtTouchSensorIsPressed
+        //% parts="nxttouchsensor"
         //% blockNamespace=sensors
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
-        //% weight=81 blockGap=8
+        //% weight=50 blockGap=8
+        //% subcategory="NXT"
         //% group="Touch Sensor"
-        isPressed() {
+        isPressed(): boolean {
             this.poke();
             return this.button.isPressed();
         }
 
         /**
-         * Check if touch sensor is touched since it was last checked.
+         * Check if NXT touch sensor is touched since it was last checked.
          * @param sensor the port to query the request
          */
-        //% help=sensors/touch-sensor/was-pressed
-        //% blockId=touchWasPressed block="**touch** %this|was pressed"
+        //% help=sensors/nxt-touch-sensor/was-pressed
+        //% block="**nxt touch sensor** %this|was pressed"
+        //% blockId=nxtTouchSensorWasPressed
         //% blockHidden=true
-        //% parts="touch"
+        //% parts="nxttouchsensor"
         //% blockNamespace=sensors
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
         //% weight=80
+        //% subcategory="NXT"
         //% group="Touch Sensor"
         wasPressed() {
             this.poke();
@@ -103,14 +106,14 @@ namespace sensors {
     }
 
     //% whenUsed block="1" weight=95 fixedInstance jres=icons.port1
-    export const touch1: TouchSensor = new TouchSensor(1)
+    export const nxtTouch1 = new NXTTouchSensor(1);
 
     //% whenUsed block="2" weight=95 fixedInstance jres=icons.port2
-    export const touch2: TouchSensor = new TouchSensor(2)
+    export const nxtTouch2 = new NXTTouchSensor(2);
 
     //% whenUsed block="3" weight=95 fixedInstance jres=icons.port3
-    export const touch3: TouchSensor = new TouchSensor(3)
-    
+    export const nxtTouch3 = new NXTTouchSensor(3);
+
     //% whenUsed block="4" weight=95 fixedInstance jres=icons.port4
-    export const touch4: TouchSensor = new TouchSensor(4)
+    export const nxtTouch4 = new NXTTouchSensor(4);
 }
