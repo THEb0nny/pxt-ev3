@@ -1,6 +1,6 @@
-// keep TouchSensorEvent in sync with ButtonEvent
-
 namespace sensors {
+
+    // Keep TouchSensorEvent in sync with ButtonEvent
 
     //% fixedInstances
     export class TouchSensor extends internal.AnalogSensor {
@@ -104,10 +104,13 @@ namespace sensors {
 
     //% whenUsed block="1" weight=95 fixedInstance jres=icons.port1
     export const touch1: TouchSensor = new TouchSensor(1)
+
     //% whenUsed block="2" weight=95 fixedInstance jres=icons.port2
     export const touch2: TouchSensor = new TouchSensor(2)
+
     //% whenUsed block="3" weight=95 fixedInstance jres=icons.port3
     export const touch3: TouchSensor = new TouchSensor(3)
+    
     //% whenUsed block="4" weight=95 fixedInstance jres=icons.port4
     export const touch4: TouchSensor = new TouchSensor(4)
 }
