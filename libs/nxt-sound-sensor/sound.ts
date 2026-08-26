@@ -22,12 +22,8 @@ namespace sensors {
 
         _query() {
             const raw = this._readPin1(); // Read the raw 12-bit ADC value (0-4095) from Pin 1
-            
-            // Map the raw value to a percentage (0-100)
-            // Assuming silence gives max voltage (~4095) and loud sound drops the voltage
-            let level = Math.map(raw, 4095, 0, 0, 100);
+            let level = Math.map(raw, 4095, 0, 0, 100); // Map the raw value to a percentage (0-100)
             level = Math.clamp(0, 100, level); // Clamp the values to ensure they stay within 0-100%
-            
             return [level];
         }
 
