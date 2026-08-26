@@ -23,7 +23,7 @@ namespace sensors {
         _query() {
             const raw = this._readPin1(); // Read the raw 12-bit ADC value (0-4095) from Pin 1
             let level = Math.map(raw, 4095, 0, 0, 100); // Map the raw value to a percentage (0-100)
-            level = Math.clamp(0, 100, level); // Clamp the values to ensure they stay within 0-100%
+            level = Math.round(Math.clamp(0, 100, level)); // Clamp the values and round to integer
             return [level];
         }
 
@@ -50,7 +50,7 @@ namespace sensors {
         /**
          * Get the current sound level measured by the NXT sound sensor.
          * @returns a number between 0 and 100 representing the sound volume.
-         * @param mode the measurement mode (dB or dBA), eg: dBA
+         * @param mode the measurement mode (dB or dBA), eg: NxtSoundSensorMode.dBA
          */
         //% block="**nxt sound sensor** %this|sound level $mode"
         //% blockId=nxtSoundSensorLevel
