@@ -1,4 +1,4 @@
-enum NxtSoundSensorMode {
+enum NXTSoundSensorMode {
     //% block="dB"
     Db = 0,
     //% block="dBA"
@@ -39,18 +39,18 @@ namespace sensors {
             return DAL.DEVICE_TYPE_NXT_SOUND;
         }
         
-        setMode(m: NxtSoundSensorMode) {
+        setMode(m: NXTSoundSensorMode) {
             const modeChanged = this.isActive() && this.mode != m;
             this._setMode(m);
             if (modeChanged) {
-                this._writeDcm(this.mode === NxtSoundSensorMode.DbA ? dcmModeDbA : dcmModeDb);
+                this._writeDcm(this.mode === NXTSoundSensorMode.DbA ? dcmModeDbA : dcmModeDb);
             }
         }
 
         /**
          * Get the current sound level measured by the NXT sound sensor.
          * @returns a number between 0 and 100 representing the sound volume.
-         * @param mode the measurement mode (dB or dBA), eg: NxtSoundSensorMode.dBA
+         * @param mode the measurement mode (dB or dBA), eg: NXTSoundSensorMode.dBA
          */
         //% block="**nxt sound sensor** %this|sound level $mode"
         //% blockId=nxtSoundSensorLevel
@@ -62,9 +62,9 @@ namespace sensors {
         //% weight=50 blockGap=8
         //% subcategory="NXT"
         //% group="Sound Sensor"
-        soundLevel(mode: NxtSoundSensorMode): number {
+        soundLevel(mode: NXTSoundSensorMode): number {
             if (!this.isActive()) return 0;
-            this.setMode(<NxtSoundSensorMode><number>mode);
+            this.setMode(<NXTSoundSensorMode><number>mode);
             this.poke();
             return this._query()[0];
         }
