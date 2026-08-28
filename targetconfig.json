@@ -1,10 +1,5 @@
 {
     "packages": {
-        "approvedOrgs": [
-            "Microsoft",
-            "LEGO",
-            "pxt-ev3-community"
-        ],
         "approvedRepoLib": {
             "theb0nny/pxt-automation": {
                 "tags": [ "Control" ],
