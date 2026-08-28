@@ -9,6 +9,7 @@
         "test.ts"
     ],
     "public": true,
+    "hidden": true,
     "dependencies": {
             "core": "file:../core"
     }
