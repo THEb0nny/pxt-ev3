@@ -1,6 +1,6 @@
 {
     "name": "nxt-touch-sensor",
-    "description": "LEGO® MINDSTORMS® NXT Touch Sensor support",
+    "description": "LEGO® MINDSTORMS® NXT Touch Sensor support - beta",
     "files": [
         "README.md",
         "touch.ts"

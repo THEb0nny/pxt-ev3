@@ -17,6 +17,7 @@
         "libs/gyro-sensor",
         "libs/nxt-light-sensor",
         "libs/nxt-touch-sensor",
+        "libs/nxt-sound-sensor",
         "libs/screen",
         "libs/ev3",
         "libs/storage",
