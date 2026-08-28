@@ -118,8 +118,8 @@ namespace sensors {
         //% group="Light Sensor"
         setReflectedLightRange(dark: number, bright: number) {
             if (dark <= bright) return;
-            this.darkReflectedLight = Math.constrain(dark, 0, 4095);
-            this.brightReflectedLight = Math.constrain(bright, 0, 4095);
+            this.darkReflectedLight = Math.clamp(0, 4095, dark);
+            this.brightReflectedLight = Math.clamp(0, 4095, bright);
         }
 
         /**
@@ -141,8 +141,8 @@ namespace sensors {
         //% group="Light Sensor"
         setAmbientLightRange(dark: number, bright: number) {
             if (dark <= bright) return;
-            this.darkAmbientLight = Math.constrain(dark, 0, 4095);
-            this.brightAmbientLight = Math.constrain(bright, 0, 4095);
+            this.darkAmbientLight = Math.clamp(0, 4095, dark);
+            this.brightAmbientLight = Math.clamp(0, 4095, bright);
         }
 
         // Enables or disables the built-in illumination LED
@@ -158,7 +158,7 @@ namespace sensors {
         // Normalizes the raw light value to a percentage based on the dark and bright reference values
         private _normalize(value: number, dark: number, bright: number) {
             let normalized = Math.map(value, dark, bright, 0, 100);
-            normalized = Math.round(Math.constrain(normalized, 0, 100));
+            normalized = Math.round(Math.clamp(0, 100, normalized));
             return normalized;
         }
 
