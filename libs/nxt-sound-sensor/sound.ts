@@ -49,8 +49,8 @@ namespace sensors {
 
         /**
          * Get the current sound level measured by the NXT sound sensor.
-         * @returns a number between 0 and 100 representing the sound volume.
-         * @param mode the measurement mode (dB or dBA), eg: NXTSoundSensorMode.dBA
+         * Returns a number between 0 and 100 representing the sound volume.
+         * @param mode mode dB (raw volume, all frequencies) or dBA (human ear sensitivity), eg: NXTSoundSensorMode.dBA
          */
         //% block="**nxt sound sensor** %this|sound level $mode"
         //% blockId=nxtSoundSensorLevel
