@@ -17,7 +17,7 @@ namespace sensors {
 
         constructor(port: number) {
             super(port);
-            this.setMode(NxtSoundSensorMode.DbA);
+            this.setMode(NXTSoundSensorMode.DbA);
         }
 
         _query() {
