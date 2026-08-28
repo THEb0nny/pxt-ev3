@@ -3,7 +3,7 @@
     "description": "LEGO® MINDSTORMS® NXT Sound Sensor support - beta",
     "public": true,
     "icon": "./static/packages/nxt-sound-sensor/icon.png",
-    "weight": 8,
+    "weight": 67,
     "searchOnly": false,
     "dependencies": {
         "core": "file:../core"
