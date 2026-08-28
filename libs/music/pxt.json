@@ -18,6 +18,7 @@
         "test.ts"
     ],
     "public": true,
+    "hidden": true,
     "additionalFilePath": "../../node_modules/pxt-common-packages/libs/music",
     "dependencies": {
         "core": "file:../core"

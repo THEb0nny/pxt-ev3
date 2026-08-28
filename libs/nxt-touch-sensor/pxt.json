@@ -1,18 +1,18 @@
 {
     "name": "nxt-touch-sensor",
     "description": "LEGO® MINDSTORMS® NXT Touch Sensor support - beta",
+    "public": true,
+    "icon": "./static/packages/nxt-touch-sensor/icon.png",
+    "weight": 68,
+    "searchOnly": false,
+    "dependencies": {
+        "core": "file:../core"
+    },
     "files": [
         "README.md",
         "touch.ts"
     ],
     "testFiles": [
         "test.ts"
-    ],
-    "weight": 9,
-    "searchOnly": false,
-    "icon": "./static/packages/nxt-touch-sensor/icon.png",
-    "public": true,
-    "dependencies": {
-        "core": "file:../core"
-    }
+    ]
 }
