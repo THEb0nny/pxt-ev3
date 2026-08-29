@@ -9,7 +9,6 @@ enum IOState {
 }
 
 export class WebSerialIO implements pxt.packetio.PacketIO {
-
     onData = (v: Uint8Array) => {};
     onEvent = (v: Uint8Array) => {};
     onError = (e: Error) => {};
@@ -76,18 +75,11 @@ export class WebSerialIO implements pxt.packetio.PacketIO {
 
         try {
             await this.port.open({ baudRate: 460800, bufferSize: 4096 });
-            
-            console.log("SERIAL: port.open() succeeded");
-
             this.state = IOState.Connected;
             this.onConnectionChanged();
             this.startReader();
         } catch (e: any) {
-             console.warn(
-                "SERIAL: port.open() failed:",
-                e?.name,
-                e?.message
-            );
+            console.warn("SERIAL: port.open() failed:", e?.name, e?.message);
             this.state = IOState.Disconnected;
             if (e?.name === "NetworkError") {
                 throw new Error("PORT_OPEN_FAILED");
@@ -168,5 +160,4 @@ export class WebSerialIO implements pxt.packetio.PacketIO {
             this.onConnectionChanged();
         }
     }
-    
 }
