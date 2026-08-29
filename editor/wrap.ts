@@ -134,7 +134,7 @@ export class Ev3Wrapper {
 
     isPxtAppRunningAsync(): Promise<boolean> {
         const buf = this.allocCustom(rfcommPxtAppPingCommand);
-        return this.talkAsync(buf, 0, 1000)
+        return this.talkAsync(buf, 0, 500)
             .then(() => {
                 log(`PXT app is responding`);
                 return true;
