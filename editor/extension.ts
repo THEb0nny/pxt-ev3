@@ -5,7 +5,7 @@
 /// <reference path="../node_modules/pxt-core/built/pxtsim.d.ts"/>
 
 import { deployCoreAsync, isDeployTransportSelected, resetDeployTransport } from "./deploy";
-import { setConfirmAsync, resetFileTransferDialog, resetBluetoothPairingDialog, showDownloadDialog, showFileTransferDialog } from "./dialogs";
+import { setConfirmAsync, resetFileTransferDialog, resetBluetoothPairingDialog, showDownloadDialogAsync, showFileTransferDialogAsync } from "./dialogs";
 
 export let projectView: pxt.editor.IProjectView;
 
@@ -47,10 +47,10 @@ pxt.editor.initExtensionsAsync = function (opts: pxt.editor.ExtensionOptions): P
                 return projectView.compile();
             }
 
-            await showDownloadDialog(await getDownloadFileName());
+            await showDownloadDialogAsync(await getDownloadFileName());
         },
         showUploadInstructionsAsync: (fn, url, confirmAsync) => {
-            return showFileTransferDialog(fn, url, confirmAsync);
+            return showFileTransferDialogAsync(fn, url, confirmAsync);
         },
         getDownloadMenuItems: () => [
             // {
@@ -71,7 +71,7 @@ pxt.editor.initExtensionsAsync = function (opts: pxt.editor.ExtensionOptions): P
                     resetFileTransferDialog();
                     resetBluetoothPairingDialog();
 
-                    return showDownloadDialog(await getDownloadFileName());
+                    return showDownloadDialogAsync(await getDownloadFileName());
                 }
             },
             {

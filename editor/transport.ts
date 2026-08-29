@@ -3,7 +3,7 @@
 
 import { Ev3Wrapper } from "./wrap";
 import { WebSerialIO } from "./webserial";
-import { bluetoothTryAgainAsync, showBluetoothConnectionStuckDialogAsync } from "./dialogs";
+import { showBluetoothConnectionStuckDialogAsync } from "./dialogs";
 
 
 enum TransportState {

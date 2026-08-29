@@ -28,7 +28,7 @@ export function resetBluetoothPairingDialog() {
     skipBluetoothPairingDialog = false;
 }
 
-export function showDownloadDialog(projectName: string): Promise<void> {
+export function showDownloadDialogAsync(projectName: string): Promise<void> {
     if (!confirmAsync) return Promise.resolve();
 
     // https://msdn.microsoft.com/en-us/library/cc848897.aspx
@@ -130,7 +130,7 @@ export function showDownloadDialog(projectName: string): Promise<void> {
             case UploadMethod.Bluetooth:
                 pxt.tickEvent("upload.bluetooth");
                 setUseBluetoothWebSerial();
-                return showBluetoothPairingDialog()
+                return showBluetoothPairingDialogAsync()
                     .then(shouldContinue => {
                     if (!shouldContinue) {
                         pxt.tickEvent("upload.cancel");
@@ -148,7 +148,7 @@ export function showDownloadDialog(projectName: string): Promise<void> {
     });
 }
 
-export function showFileTransferDialog(fn: string, url: string, _confirmAsync: (options: any) => Promise<number>): Promise<void> {
+export function showFileTransferDialogAsync(fn: string, url: string, _confirmAsync: (options: any) => Promise<number>): Promise<void> {
     if (!confirmAsync || skipFileTransferDialog) return Promise.resolve();
 
     const jsx = (
@@ -283,7 +283,7 @@ export function showFileTransferDialog(fn: string, url: string, _confirmAsync: (
     }).then(() => {});
 }
 
-function showBluetoothPairingDialog(): Promise<boolean> {
+function showBluetoothPairingDialogAsync(): Promise<boolean> {
     if (!confirmAsync || skipBluetoothPairingDialog) return Promise.resolve(true);
 
     const jsx = (
