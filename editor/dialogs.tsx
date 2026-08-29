@@ -29,10 +29,7 @@ export function resetBluetoothPairingDialog() {
 }
 
 export function showDownloadDialog(projectName: string): Promise<void> {
-    if (!confirmAsync) {
-        console.error("Download dialog is not initialized.");
-        return Promise.resolve();
-    }
+    if (!confirmAsync) return Promise.resolve();
 
     // https://msdn.microsoft.com/en-us/library/cc848897.aspx
     // "For security reasons, data URIs are restricted to downloaded resources.
@@ -371,8 +368,8 @@ export function showBluetoothConnectionStuckDialogAsync(): Promise<void> {
         agreeLbl: lf("OK"),
         jsx: (
             <div>
-                <p>{lf("Windows did not release the RFCOMM channel.")}</p>
-                <p>{lf("Please reset Bluetooth or re-enable the COM port, then try again.")}</p>
+                <p>{lf("Windows did not release the RFCOMM channel. This can happen if a program is still running on the EV3, especially after restarting the editor.")}</p>
+                <p>{lf("Stop the program on the EV3 and try again. If the problem persists, reset Bluetooth or re-enable the COM port.")}</p>
             </div>
         )
     }).then(() => {});
