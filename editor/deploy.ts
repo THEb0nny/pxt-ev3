@@ -94,6 +94,8 @@ export async function deployCoreAsync(resp: pxtc.CompileResult) {
         const data = UF2.serializeFile(combined);
         resp.outfiles[pxtc.BINARY_UF2] = btoa(data);
 
+        console.log("DEPLOY FILE READY");
+
         if (pxt.commands?.electronDeployAsync) return pxt.commands.electronDeployAsync(resp);
         if (pxt.commands?.saveOnlyAsync) return pxt.commands.saveOnlyAsync(resp);
 
@@ -128,6 +130,9 @@ export async function deployCoreAsync(resp: pxtc.CompileResult) {
         await wrapper.flashAsync(elfPath, UF2.readBytes(origElfUF2, 0, origElfUF2.length * 256));
         await wrapper.flashAsync(rbfPath, rbfBIN);
         await wrapper.runAsync(rbfPath);
+
+        console.log("DEPLOY FINISHED");
+
         pxt.tickEvent("webserial.success");
     } catch (e: any) {
         if (e?.message === "NO_PORT_SELECTED") {
