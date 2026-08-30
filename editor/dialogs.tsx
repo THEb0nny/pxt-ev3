@@ -283,23 +283,28 @@ export function showFileTransferDialogAsync(fn: string, url: string, _confirmAsy
     }).then(() => {});
 }
 
-function showBluetoothPairingDialogAsync(): Promise<boolean> {
+async function showBluetoothPairingDialogAsync(): Promise<boolean> {
     if (!confirmAsync || skipBluetoothPairingDialog) return Promise.resolve(true);
+
+    const isWindows11 = await isWindows11Async();
 
     const jsx = (
         <div>
             <p>{lf("Bluetooth download uses Web Serial. Your browser will ask you to select a serial port.")}</p>
-            <p>{lf("Make sure your EV3 is turned on and already paired with your computer.")}</p>
-            <p>{lf("Close EV3 Lab or EV3 Classroom, Port View, and any other applications that may be using the EV3 Bluetooth connection.")}</p>
+            <p>{lf("Before continuing, make sure your EV3 is turned on and already paired with your computer. Close other applications that may be using the EV3 Bluetooth connection, such as 'EV3 Lab', 'EV3 Classroom', other BrickCode (MakeCode) editor tabs, or other applications using the EV3 Bluetooth serial connection.")}</p>
+            <p>{lf("If 'Port View' is open on the EV3, close it before downloading. The program may download successfully, but it will not start.")}</p>
+            <p>{lf("When the browser asks you to select a serial port, choose the Bluetooth serial port for your EV3. Your EV3 may appear as two Bluetooth serial ports: an incoming port and an outgoing port. Select the outgoing port for the EV3 connection.")}</p>
+            {pxt.BrowserUtils.isWindows() && (
+                <p>{lf("On Windows, you can check the Bluetooth settings and open the COM Ports tab to identify the ports assigned to your EV3. Look for the port associated with your EV3 device name and select the outgoing port.")}</p>
+            )}
             <p>
                 {pxt.BrowserUtils.isWindows()
-                    ? lf("On Windows, look for 'Serial Port' or 'Standard Serial over Bluetooth link'.")
+                    ? isWindows11
+                        ? lf("On Windows 11, look for 'Serial Port' or 'Standard Serial over Bluetooth link'.")
+                        : lf("On Windows 10, select the port that displays the name of your EV3.")
                     : lf("On macOS, look for 'cu.EV3-SerialPort'.")}
             </p>
-            {pxt.BrowserUtils.isWindows() && (
-                <p>{lf("Windows 10 provides the device name to the browser, but Windows 11 does not.")}</p>
-            )}
-            <p>{lf("Try to avoid selecting unrelated COM ports or USB devices.")}</p>
+            <p>{lf("Do not select unrelated COM ports, USB devices, or serial ports belonging to other hardware. If the EV3 does not respond after selecting a port, try selecting a different Bluetooth serial port.")}</p>
             <div className="ui toggle checkbox">
                 <input
                     type="checkbox"
@@ -326,41 +331,28 @@ function showBluetoothPairingDialogAsync(): Promise<boolean> {
     }).then(result => result === 1);
 }
 
-export function bluetoothTryAgainAsync(): Promise<void> {
+export function showEv3ConnectionFailedDialogAsync(): Promise<void> {
     if (!confirmAsync) return Promise.resolve();
 
     return confirmAsync({
-        header: lf("Bluetooth download failed..."),
-        jsx: <ul>
-            <li>{lf("Make sure you exit the 'Port View' apps or other EV3 apps.")}</li>
-            <li>{lf("Exit the pop-up windows on the EV3.")}</li>
-            <li>{lf("Close EV3 Lab or EV3 Classroom or other MakeCode editor tabs as they may be using the COM port.")}</li>
-            <li>{lf("Try restarting the MakeCode editor tab.")}</li>
-        </ul>,
+        header: lf("Could not connect to EV3"),
         hasCloseIcon: true,
-        hideCancel: false,
-        hideAgree: false,
-        agreeLbl: lf("Try again")
-    }).then(r => {});
-}
-
-export function showEv3BusyDialogAsync(): Promise<void> {
-    if (!confirmAsync) return Promise.resolve();
-
-    return confirmAsync({
-        header: lf("EV3 is busy"),
-        body: lf("The EV3 brick is currently running a program. Please stop it and try again."),
-        hasCloseIcon: false,
         hideCancel: true,
         hideAgree: false,
-        agreeLbl: lf("OK")
-    }).then(r => {});
+        agreeLbl: lf("OK"),
+        jsx: (
+            <div>
+                <p>{lf("The selected serial port did not respond as an EV3 device.")}</p>
+                <p>{lf("Make sure your EV3 is turned on and paired with your computer, then select the correct Bluetooth serial port and try again.")}</p>
+            </div>
+        )
+    }).then(() => {});
 }
 
-export function showBluetoothConnectionStuckDialogAsync(): Promise<void> {
+export async function showBluetoothConnectionStuckDialogAsync(): Promise<void> {
     if (!confirmAsync) return Promise.resolve();
 
-    return confirmAsync({
+    await confirmAsync({
         header: lf("Bluetooth connection stuck"),
         hasCloseIcon: true,
         hideCancel: true,
@@ -372,5 +364,17 @@ export function showBluetoothConnectionStuckDialogAsync(): Promise<void> {
                 <p>{lf("Stop the program on the EV3 and try again. If the problem persists, reset Bluetooth or re-enable the COM port.")}</p>
             </div>
         )
-    }).then(() => {});
+    });
+}
+
+async function isWindows11Async(): Promise<boolean> {
+    if (!pxt.BrowserUtils.isWindows()) return false;
+
+    const userAgentData = (navigator as any).userAgentData;
+    if (!userAgentData?.getHighEntropyValues) return false;
+
+    const values = await userAgentData.getHighEntropyValues(["platformVersion"]);
+    const majorVersion = parseInt(values.platformVersion.split(".")[0], 10);
+
+    return majorVersion >= 13;
 }

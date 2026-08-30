@@ -5,7 +5,7 @@ import HF2 = pxt.HF2;
 import UF2 = pxtc.UF2;
 
 import { transport } from "./transport";
-import { showEv3BusyDialogAsync } from "./dialogs";
+import { showEv3ConnectionFailedDialogAsync } from "./dialogs";
 
 
 enum DeployTransport {
@@ -111,7 +111,7 @@ export async function deployCoreAsync(resp: pxtc.CompileResult) {
         if (!isEv3Connected) {
             console.warn("EV3 is not responding.");
             await transport.disconnectAsync(true);
-            await showEv3BusyDialogAsync(); // Replace it with the fact that it is not EV3
+            await showEv3ConnectionFailedDialogAsync();
             return;
         }
 
