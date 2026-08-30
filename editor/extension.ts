@@ -5,7 +5,13 @@
 /// <reference path="../node_modules/pxt-core/built/pxtsim.d.ts"/>
 
 import { deployCoreAsync, isDeployTransportSelected, resetDeployTransport } from "./deploy";
-import { setConfirmAsync, resetFileTransferDialog, resetBluetoothPairingDialog, showDownloadDialogAsync, showFileTransferDialogAsync } from "./dialogs";
+import { 
+    setConfirmAsync, 
+    resetFileTransferDialog, 
+    resetBluetoothPairingDialog, 
+    showDownloadDialogAsync, 
+    showFileTransferDialogAsync
+} from "./dialogs";
 
 export let projectView: pxt.editor.IProjectView;
 
