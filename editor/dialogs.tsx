@@ -297,13 +297,15 @@ async function showBluetoothPairingDialogAsync(): Promise<boolean> {
             {pxt.BrowserUtils.isWindows() && (
                 <p>{lf("On Windows, you can check the Bluetooth settings and open the COM Ports tab to identify the ports assigned to your EV3. Look for the port associated with your EV3 device name and select the outgoing port.")}</p>
             )}
-            <p>
-                {pxt.BrowserUtils.isWindows()
-                    ? isWindows11
-                        ? lf("On Windows 11, look for 'Serial Port' or 'Standard Serial over Bluetooth link'.")
-                        : lf("On Windows 10, select the port that displays the name of your EV3.")
-                    : lf("On macOS, look for 'cu.EV3-SerialPort'.")}
-            </p>
+            {isWindows11 === true && (
+                <p>{lf("On Windows 11, look for 'Serial Port' or 'Standard Serial over Bluetooth link'.")}</p>
+            )}
+            {isWindows11 === false && (
+                <p>{lf("On Windows 10, select the port that displays the name of your EV3.")}</p>
+            )}
+            {isWindows11 === undefined && (
+                <p>{lf("On Windows 10, select the port that displays the name of your EV3. On Windows 11, look for 'Serial Port' or 'Standard Serial over Bluetooth link'.")}</p>
+            )}
             <p>{lf("Do not select unrelated COM ports, USB devices, or serial ports belonging to other hardware. If the EV3 does not respond after selecting a port, try selecting a different Bluetooth serial port.")}</p>
             <div className="ui toggle checkbox">
                 <input
@@ -368,14 +370,18 @@ export async function showBluetoothConnectionStuckDialogAsync(): Promise<void> {
     });
 }
 
-async function isWindows11Async(): Promise<boolean> {
-    if (!pxt.BrowserUtils.isWindows()) return false;
+async function isWindows11Async(): Promise<boolean | undefined> {
+    if (!pxt.BrowserUtils.isWindows()) return undefined;
 
     const userAgentData = (navigator as any).userAgentData;
-    if (!userAgentData?.getHighEntropyValues) return false;
+    if (!userAgentData?.getHighEntropyValues) return undefined;
 
-    const values = await userAgentData.getHighEntropyValues(["platformVersion"]);
-    const majorVersion = parseInt(values.platformVersion.split(".")[0], 10);
+    try {
+        const values = await userAgentData.getHighEntropyValues(["platformVersion"]);
+        const majorVersion = parseInt(values.platformVersion.split(".")[0], 10);
 
-    return majorVersion >= 13;
+        return majorVersion >= 13;
+    } catch {
+        return undefined;
+    }
 }
