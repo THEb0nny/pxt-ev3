@@ -53,15 +53,17 @@ pxt.editor.initExtensionsAsync = function (opts: pxt.editor.ExtensionOptions): P
             return showFileTransferDialogAsync(fn, url, confirmAsync);
         },
         getDownloadMenuItems: () => [
-            // {
-            //     text: lf("Download as File"),
-            //     icon: "download",
-            //     onClick: () => {
-            //         pxt.tickEvent("upload.fileTransfer");
-            //         setUseFileTransfer();
-            //         return projectView.compile();
-            //     }
-            // },
+            /*
+            {
+                text: lf("Download as File"),
+                icon: "download",
+                onClick: () => {
+                    pxt.tickEvent("upload.fileTransfer");
+                    setUseFileTransfer();
+                    return projectView.compile();
+                }
+            },
+            */
             isDeployTransportSelected() && {
                 text: lf("Upload method"),
                 icon: "exchange",
