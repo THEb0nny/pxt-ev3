@@ -31,8 +31,8 @@ class TransportManager {
      * If another connection attempt is already in progress, the same Promise is returned instead of starting a second connection.
      */
     async connectAsync(): Promise<Ev3Wrapper> {
-        if (this.state === TransportState.Connected && this.wrapper) return this.wrapper; // Уже подключены
-        if (this.connectPromise) return this.connectPromise; // Если уже идёт подключение — возвращаем тот же Promise
+        if (this.state === TransportState.Connected && this.wrapper) return this.wrapper; // Already connected
+        if (this.connectPromise) return this.connectPromise; // If a connection is already in progress, we return the same Promise
 
         this.connectPromise = this.doConnectAsync();
         try {
@@ -59,7 +59,7 @@ class TransportManager {
         // }
 
         try {
-            // Не создаём новый IO если он уже существует
+            // Don't create a new IO if it already exists
             if (!this.io) {
                 const force = this.state === TransportState.Unpaired;
                 this.io = await WebSerialIO.createAsync(force);
@@ -67,20 +67,19 @@ class TransportManager {
 
             this.state = TransportState.Connecting;
             await this.io.reconnectAsync();
-            if (!this.wrapper) { // Если wrapper ещё отсутствует — создаём его
+            if (!this.wrapper) { // If the wrapper is not yet available, create it
                 this.wrapper = new Ev3Wrapper(this.io);
             }
 
             this.state = TransportState.Connected;
             return this.wrapper;
         } catch (e: any) {
-            if (e?.message === "Timeout") { // Порт открылся, но EV3 не ответил на PING
+            if (e?.message === "Timeout") { // The port opened, but the EV3 did not respond to PING
                 console.warn("SERIAL: EV3 PING timeout. Selected port did not respond.");
                 this.state = TransportState.Unpaired;
                 throw new Error("EV3_RESPONSE_TIMEOUT");
             }
-            // Пользователь просто закрыл окно выбора порта
-            if (e?.message === "NO_PORT_SELECTED") {
+            if (e?.message === "NO_PORT_SELECTED") { // The user closed the port selection window
                 this.state = TransportState.Unpaired;
                 throw e;
             }
@@ -92,7 +91,7 @@ class TransportManager {
             if (e?.message === "PORT_OPEN_FAILED") {
                 console.warn("Bluetooth connection is stuck. Windows did not release the RFCOMM channel. Please reset Bluetooth or re-enable the COM port.");
                 
-                if (this.io) { // Уничтожаем старый IO если он есть
+                if (this.io) { // Destroy the old IO if it exists
                     try {
                         await this.io.disconnectAsync();
                     } catch {}
