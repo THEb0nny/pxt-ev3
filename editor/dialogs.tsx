@@ -295,15 +295,15 @@ async function showBluetoothPairingDialogAsync(): Promise<boolean> {
             <p>{lf("If 'Port View' is open on the EV3, close it before downloading. The program may download successfully, but it will not start.")}</p>
             <p>{lf("When the browser asks you to select a serial port, choose the Bluetooth serial port for your EV3. Your EV3 may appear as two Bluetooth serial ports: an incoming port and an outgoing port. Select the outgoing port for the EV3 connection.")}</p>
             {pxt.BrowserUtils.isWindows() && (
-                <p>{lf("On Windows, you can check the Bluetooth settings and open the COM Ports tab to identify the ports assigned to your EV3. Look for the port associated with your EV3 device name and select the outgoing port.")}</p>
+                <p>{lf("On Windows, you can check the Bluetooth settings and open the COM Ports tab to identify the ports assigned to your EV3. Select the outgoing port.")}</p>
             )}
-            {isWindows11 === true && (
+            {pxt.BrowserUtils.isWindows() && isWindows11 === true && (
                 <p>{lf("On Windows 11, look for 'Serial Port' or 'Standard Serial over Bluetooth link'.")}</p>
             )}
-            {isWindows11 === false && (
+            {pxt.BrowserUtils.isWindows() && isWindows11 === false && (
                 <p>{lf("On Windows 10, select the port that displays the name of your EV3.")}</p>
             )}
-            {isWindows11 === undefined && (
+            {pxt.BrowserUtils.isWindows() && isWindows11 === undefined && (
                 <p>{lf("On Windows 10, select the port that displays the name of your EV3. On Windows 11, look for 'Serial Port' or 'Standard Serial over Bluetooth link'.")}</p>
             )}
             <p>{lf("Do not select unrelated COM ports, USB devices, or serial ports belonging to other hardware. If the EV3 does not respond after selecting a port, try selecting a different Bluetooth serial port.")}</p>
