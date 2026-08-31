@@ -16,7 +16,7 @@ enum DeployTransport {
 }
 
 // This comes from aux/pxt.lms
-const defaultDeployFolder = "BrkProg_SAVE";
+const defaultUploadProjectFolder = "BrkProg_SAVE";
 // RBF template from aux/pxt.lms.
 // The template contains the launcher code in hexadecimal form.
 // "XX" is replaced with the hexadecimal path of the ELF file to run.
@@ -58,9 +58,9 @@ export async function deployCoreAsync(resp: pxtc.CompileResult) {
     const filename = (resp.downloadFileBaseName || "pxt").replace(/^lego-/, "");
     const projectPxtJson = await (window as any).getPxtJson();
     const isWebSerial = preferredTransport === DeployTransport.BluetoothWebSerial;
-    const deployFolder = isWebSerial && projectPxtJson?.deployFolder ? projectPxtJson.deployFolder : defaultDeployFolder;
+    const uploadProjectFolder = isWebSerial && projectPxtJson?.uploadProjectFolder ? projectPxtJson.uploadProjectFolder : defaultUploadProjectFolder;
 
-    const fspath = `../prjs/${deployFolder}/`;
+    const fspath = `../prjs/${uploadProjectFolder}/`;
     // console.log(`fspath: ${fspath}`);
     const elfPath = fspath + filename + ".elf";
     const rbfPath = fspath + filename + ".rbf";

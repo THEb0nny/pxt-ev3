@@ -219,8 +219,8 @@
         "shareHomepageContent": true,
         "pxtJsonOptions": [
             {   
-                "property": "deployFolder",
-                "label": "Deploy custom project folder",
+                "property": "uploadProjectFolder",
+                "label": "Use custom project folder when uploading to the EV3",
                 "type": "checkbox"
             }
         ]
