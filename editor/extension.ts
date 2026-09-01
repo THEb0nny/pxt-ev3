@@ -63,6 +63,7 @@ pxt.editor.initExtensionsAsync = function (opts: pxt.editor.ExtensionOptions): P
             {
                 text: lf("Download as File"),
                 icon: "download",
+                className: "file-download",
                 onClick: () => {
                     pxt.tickEvent("upload.fileTransfer");
                     setUseFileTransfer();
