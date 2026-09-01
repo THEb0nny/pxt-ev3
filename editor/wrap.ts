@@ -379,6 +379,7 @@ export class Ev3Wrapper {
                             U.userError("cmd error: " + resp[6]);
                         }
                     }
+                    
                     return resp;
                 });
         })
