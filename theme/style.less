@@ -567,9 +567,9 @@ body.pxt-theme-root .modal>.closeIcon {
    from the Settings menu. This is a workaround for getDownloadMenuItems()
    being rendered in the Settings menu and may be removed once pxt-core
    provides a proper way to control where extension menu items are shown. */
-#settings-menuitem-menu .upload-method,
 #settings-menuitem-menu .upload-help,
-#settings-menuitem-menu .common-menu-dropdown-separator:has(+ .upload-method) {
+#settings-menuitem-menu .upload-method,
+#settings-menuitem-menu .upload-help + .common-menu-dropdown-separator {
     display: none;
 }
 
