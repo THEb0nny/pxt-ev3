@@ -5,7 +5,7 @@ import HF2 = pxt.HF2;
 import UF2 = pxtc.UF2;
 
 import { transport } from "./transport";
-import { showEv3ConnectionFailedDialogAsync } from "./dialogs";
+import { resetBluetoothPairingDialog, showEv3ConnectionFailedDialogAsync } from "./dialogs";
 
 
 enum DeployTransport {
@@ -137,9 +137,15 @@ export async function deployCoreAsync(resp: pxtc.CompileResult) {
     } catch (e: any) {
         if (e?.message === "NO_PORT_SELECTED") {
             await resetDeployTransport();
+            resetBluetoothPairingDialog();
             console.warn("Bluetooth download cancelled: no serial port was selected.");
             return;
         }
+        if (e?.message === "PORT_OPEN_FAILED") {
+            await resetDeployTransport();
+            resetBluetoothPairingDialog();
+        }
+        
         pxt.tickEvent("webserial.fail");
         // await transport.hardResetAsync();
         throw e;
