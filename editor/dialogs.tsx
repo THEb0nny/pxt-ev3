@@ -48,42 +48,27 @@ export function showDownloadDialogAsync(projectName: string): Promise<void> {
                 </div>
                 <a href="/troubleshoot" target="_blank">{lf("Check your firmware version here and update if needed")}</a>
             </div>
-            <div className="column eleven wide">
+            <div className="eleven wide column">
                 <div className="ui grid">
                     <div className="row">
-                        <div className="column">
-                            <div className="ui two column grid padded">
-                                <div className="column">
-                                    <div className="ui">
-                                        <div className="image">
-                                            <img className="ui medium rounded image" src="/static/download/connect.svg" style={{ height: "109px", width: "261px", marginBottom: "1rem" }} />
-                                        </div>
-                                        <div className="content">
-                                            <div className="description">
-                                                <span className="ui yellow circular label">1</span>
-                                                <strong>{lf("Connect the EV3 to your computer with a USB cable")}</strong>
-                                                <br />
-                                                <span style={{ fontSize: "small" }}>{lf("Use the miniUSB port on the top of the EV3 Brick")}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="column">
-                                    <div className="ui">
-                                        <div className="image">
-                                            <img className="ui medium rounded image" src="/static/download/transfer.svg" style={{ height: "109px", width: "261px", marginBottom: "1rem" }} />
-                                        </div>
-                                        <div className="content">
-                                            <div className="description">
-                                                <span className="ui yellow circular label">2</span>
-                                                <strong>{lf("Move the .uf2 file to the EV3 Brick")}</strong>
-                                                <br />
-                                                <span style={{ fontSize: "small" }}>{lf("Locate the downloaded .uf2 file and drag it to the EV3 USB drive")}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div className="sixteen wide column">
+                            <span className="ui yellow circular label" style={{ marginRight: "0.75em" }}>1</span>
+                            <strong>{lf("File Transfer")}</strong>
+                            <p>{lf("This is the standard way to transfer a program to your EV3. Download the program as a file and transfer it to the EV3 manually.")}</p>
+                        </div>
+                    </div>
+                    <div className="row">
+                        <div className="sixteen wide column">
+                            <span className="ui yellow circular label" style={{ marginRight: "0.75em" }}>2</span>
+                            <strong>{lf("Bluetooth")}</strong>
+                            <p>{lf("Upload the program directly to your EV3 over a Bluetooth connection using Web Serial.")}</p>
+                        </div>
+                    </div>
+                    <div className="row">
+                        <div className="sixteen wide column">
+                            <span className="ui green circular label" style={{ marginRight: "0.75em" }}>!</span>
+                            <strong>{lf("Note")}</strong>
+                            <p>{lf("To change the upload method, click the '...' button next to Download and select 'Upload method'.")}</p>
                         </div>
                     </div>
                 </div>
