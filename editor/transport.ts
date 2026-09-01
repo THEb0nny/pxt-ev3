@@ -118,6 +118,7 @@ class TransportManager {
     async disconnectAsync(unpaired: boolean) {
         if (!this.io) {
             this.state = unpaired ? TransportState.Unpaired : TransportState.Idle;
+            
             return;
         }
 
