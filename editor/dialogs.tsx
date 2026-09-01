@@ -250,7 +250,7 @@ export function showFileTransferDialogAsync(fn: string, url: string, _confirmAsy
     );
 
     return _confirmAsync({
-        header: lf("Download completed..."),
+        header: lf("File Transfer"),
         jsx,
         hasCloseIcon: true,
         hideCancel: true,
