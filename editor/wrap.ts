@@ -408,8 +408,9 @@ export class Ev3Wrapper {
         return this.lock.enqueue("file", () =>
             this.talkAsync(begin)
                 .then(resp => {
-                    handle = resp[7]
-                    return loopAsync(0)
+                    handle = resp[7];
+
+                    return loopAsync(0);
                 }));
     }
 
@@ -533,7 +534,7 @@ export class Ev3Wrapper {
 
     disconnectAsync() {
         log(`Disconnect`);
-        
+
         return this.io.disconnectAsync();
     }
 }
