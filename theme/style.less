@@ -563,6 +563,16 @@ body.pxt-theme-root .modal>.closeIcon {
     fill: url(#legoColorNonePattern) !important;
 }
 
+/* Temporary workaround: hide the upload help item and its preceding separator
+   from the Settings menu. This is a workaround for getDownloadMenuItems()
+   being rendered in the Settings menu and may be removed once pxt-core
+   provides a proper way to control where extension menu items are shown. */
+#settings-menuitem-menu .upload-method,
+#settings-menuitem-menu .upload-help,
+#settings-menuitem-menu .common-menu-dropdown-separator:has(+ .upload-method) {
+    display: none;
+}
+
 /* Beta ver site text in logo */
 .ev3beta .ui.item.logo.brand:after {
     content: "beta";

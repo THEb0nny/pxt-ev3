@@ -73,6 +73,7 @@ pxt.editor.initExtensionsAsync = function (opts: pxt.editor.ExtensionOptions): P
             isDeployTransportSelected() && {
                 text: lf("Upload method"),
                 icon: "exchange",
+                className: "upload-method",
                 onClick: async () => {
                     resetDeployTransport();
                     
@@ -85,6 +86,7 @@ pxt.editor.initExtensionsAsync = function (opts: pxt.editor.ExtensionOptions): P
             {
                 text: lf("Help"),
                 icon: "help",
+                className: "upload-help",
                 onClick: () => {
                     window.open("/troubleshoot", "_blank");
                 }
