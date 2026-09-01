@@ -220,7 +220,7 @@
         "pxtJsonOptions": [
             {   
                 "property": "uploadProjectFolder",
-                "label": "Use custom project folder when uploading to the EV3",
+                "label": "Custom folder for Bluetooth upload",
                 "type": "checkbox"
             }
         ]
