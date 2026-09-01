@@ -52,7 +52,7 @@ export class Ev3Wrapper {
 
     constructor(public io: pxt.packetio.PacketIO) {
         io.onData = buf => {
-            buf = buf.slice(0, HF2.read16(buf, 0) + 2)
+            buf = buf.slice(0, HF2.read16(buf, 0) + 2);
             if (HF2.read16(buf, 4) == usbRfcommMagic) {
                 let code = HF2.read16(buf, 6);
                 let payload = buf.slice(8);
@@ -70,6 +70,7 @@ export class Ev3Wrapper {
                 } else {
                     pxt.debug("Magic: " + code + ": " + U.toHex(payload));
                 }
+
                 return;
             }
             if (this.dataDump) {
@@ -85,6 +86,7 @@ export class Ev3Wrapper {
         HF2.write16(buf, 0, len - 2); // pktLen
         HF2.write16(buf, 2, this.cmdSeq++); // msgCount
         buf[4] = replyType;
+
         return buf;
     }
 
@@ -379,7 +381,7 @@ export class Ev3Wrapper {
                             U.userError("cmd error: " + resp[6]);
                         }
                     }
-                    
+
                     return resp;
                 });
         })
