@@ -102,5 +102,6 @@ pxt.editor.initExtensionsAsync = function (opts: pxt.editor.ExtensionOptions): P
 (window as any).reloadProjectPxtJson = async () => await loadProjectPxtJson(projectView);
 (window as any).getPxtJson = async (): Promise<any> => {
     await (window as any).reloadProjectPxtJson();
+    
     return projectPxtJson;
 };
