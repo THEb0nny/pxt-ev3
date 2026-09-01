@@ -77,7 +77,6 @@ pxt.editor.initExtensionsAsync = function (opts: pxt.editor.ExtensionOptions): P
                 className: "upload-method",
                 onClick: async () => {
                     resetDeployTransport();
-                    
                     resetFileTransferDialog();
                     resetBluetoothPairingDialog();
 
