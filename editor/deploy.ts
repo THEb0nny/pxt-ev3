@@ -145,9 +145,8 @@ export async function deployCoreAsync(resp: pxtc.CompileResult) {
             await resetDeployTransport();
             resetBluetoothPairingDialog();
         }
-        
+
         pxt.tickEvent("webserial.fail");
-        // await transport.hardResetAsync();
         throw e;
     }
 }
