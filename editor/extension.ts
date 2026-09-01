@@ -13,6 +13,7 @@ import {
     showFileTransferDialogAsync
 } from "./dialogs";
 
+
 export let projectView: pxt.editor.IProjectView;
 
 let projectPxtJson: JSON;
@@ -21,8 +22,10 @@ async function loadProjectPxtJson(view: any): Promise<boolean> {
     const mainEditor: any = view.editor || view.blocksEditor;
     if (mainEditor?.currFile?.epkg?.files?.["pxt.json"]) {
         projectPxtJson = JSON.parse(mainEditor.currFile.epkg.files["pxt.json"].content);
+        
         return true;
     }
+
     return false;
 }
 
@@ -49,9 +52,7 @@ pxt.editor.initExtensionsAsync = function (opts: pxt.editor.ExtensionOptions): P
             setConfirmAsync(confirmAsync);
         },
         onDownloadButtonClick: async () => {
-            if (isDeployTransportSelected()) {
-                return projectView.compile();
-            }
+            if (isDeployTransportSelected()) return projectView.compile();
 
             await showDownloadDialogAsync(await getDownloadFileName());
         },
@@ -102,6 +103,6 @@ pxt.editor.initExtensionsAsync = function (opts: pxt.editor.ExtensionOptions): P
 (window as any).reloadProjectPxtJson = async () => await loadProjectPxtJson(projectView);
 (window as any).getPxtJson = async (): Promise<any> => {
     await (window as any).reloadProjectPxtJson();
-    
+
     return projectPxtJson;
 };
