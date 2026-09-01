@@ -126,10 +126,12 @@ export function showDownloadDialogAsync(projectName: string): Promise<void> {
             case UploadMethod.FileTransfer:
                 pxt.tickEvent("upload.fileTransfer");
                 setUseFileTransfer();
+
                 return projectView.compile();
             case UploadMethod.Bluetooth:
                 pxt.tickEvent("upload.bluetooth");
                 setUseBluetoothWebSerial();
+                
                 return showBluetoothPairingDialogAsync()
                     .then(shouldContinue => {
                     if (!shouldContinue) {
