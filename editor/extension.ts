@@ -92,12 +92,6 @@ pxt.editor.initExtensionsAsync = function (opts: pxt.editor.ExtensionOptions): P
         ].filter(Boolean)
     };
 
-    /*
-    initAsync().catch(e => {
-        // probably no HID - we'll try this again upon deployment
-    })
-    initAsync().catch(console.error);
-    */
     return Promise.resolve<pxt.editor.ExtensionResult>(res);
 };
 
