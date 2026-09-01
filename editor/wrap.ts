@@ -91,6 +91,7 @@ export class Ev3Wrapper {
     private allocSystem(addSize: number, cmd: number, replyType = 1) {
         let buf = this.allocCore(addSize + 1, replyType);
         buf[5] = cmd;
+
         return buf;
     }
 
@@ -98,6 +99,7 @@ export class Ev3Wrapper {
         let buf = this.allocCore(1 + 2 + addSize, 0);
         HF2.write16(buf, 4, usbRfcommMagic);
         HF2.write16(buf, 6, code);
+
         return buf;
     }
 
@@ -124,6 +126,7 @@ export class Ev3Wrapper {
                 }
 
                 log("PING EV3 OK");
+
                 return true;
             })
             .catch(() => {
@@ -137,10 +140,12 @@ export class Ev3Wrapper {
         return this.talkAsync(buf, 0, 500)
             .then(() => {
                 log(`PXT app is responding`);
+
                 return true;
             })
             .catch(() => {
                 log(`PXT app is not responding`);
+
                 return false;
             })
     }
@@ -168,6 +173,7 @@ export class Ev3Wrapper {
     dmesgAsync() {
         log(`asking for DMESG buffer over serial`);
         let buf = this.allocCustom(3);
+
         return this.justSendAsync(buf);
     }
 
@@ -178,6 +184,7 @@ export class Ev3Wrapper {
         HF2.write16(pkt, 5, 0x0800);
         U.memcpy(pkt, 7, code);
         log(`run ${path}`);
+
         return this.justSendAsync(pkt);
     }
 
@@ -187,6 +194,7 @@ export class Ev3Wrapper {
             if (this.dataDump) {
                 log("SEND: " + U.toHex(buf));
             }
+
             return this.io.sendPacketAsync(buf);
         })
     }
@@ -449,6 +457,7 @@ export class Ev3Wrapper {
         let resp = (buf: Uint8Array): Promise<void> => {
             if (buf[6] == 2) { // Handle not ready - file is missing
                 this.isStreaming = false;
+
                 return Promise.resolve();
             }
 
@@ -470,6 +479,7 @@ export class Ev3Wrapper {
 
             if (buf[6] == 8) { // End of file
                 this.isStreaming = false;
+
                 return this.rmAsync(path);
             }
 
@@ -484,6 +494,7 @@ export class Ev3Wrapper {
         let getFileReq = this.allocSystem(2 + path.length + 1, 0x96);
         HF2.write16(getFileReq, 6, 1000); // maxRead
         U.memcpy(getFileReq, 8, U.stringToUint8Array(path));
+
         return this.talkAsync(getFileReq, -1).then(resp);
     }
 
@@ -493,6 +504,7 @@ export class Ev3Wrapper {
                 this.streamFileOnceAsync(path, cb))
                 .then(() => pxt.U.delay(500))
                 .then(loop);
+
         return loop();
     }
 
@@ -514,12 +526,14 @@ export class Ev3Wrapper {
         if (first) return this.initAsync();
         
         log(`Reconnect`);
+
         return this.io.reconnectAsync()
             .then(() => this.initAsync());
     }
 
     disconnectAsync() {
         log(`Disconnect`);
+        
         return this.io.disconnectAsync();
     }
 }
