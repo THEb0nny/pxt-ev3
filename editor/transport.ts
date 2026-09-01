@@ -109,20 +109,6 @@ class TransportManager {
         }
     }
 
-    // private async openConnectionAsync(forceRequest: boolean): Promise<void> {
-    //     this.io = await WebSerialIO.createAsync(forceRequest);
-    
-    //     try {
-    //         await this.io.reconnectAsync();
-    //     } catch (e) {
-    //         // Если reconnect не удался — чистим io
-    //         this.io = undefined;
-    //         throw e;
-    //     }
-    
-    //     this.wrapper = new Ev3Wrapper(this.io);
-    // }
-
     /**
      * Disconnects the current Web Serial connection and releases all transport resources.
      *
@@ -145,16 +131,6 @@ class TransportManager {
             this.state = unpaired ? TransportState.Unpaired : TransportState.Idle;
         }
     }
-
-    // async hardResetAsync() {
-    //     console.log("SERIAL: HARD RESET");
-
-    //     try {
-    //         await this.disconnectAsync(false);
-    //     } catch {}
-        
-    //     this.state = TransportState.Idle;
-    // }
 
 }
 
