@@ -3,365 +3,153 @@
 
 import HF2 = pxt.HF2;
 import UF2 = pxtc.UF2;
-import { Ev3Wrapper } from "./wrap";
-import { bluetoothTryAgainAsync } from "./dialogs";
 
-export let ev3: Ev3Wrapper;
+import { transport } from "./transport";
+import { resetBluetoothPairingDialog, showEv3ConnectionFailedDialogAsync } from "./dialogs";
 
-export function debug() {
-    return initHidAsync()
-        .then(w => w.downloadFileAsync("/tmp/dmesg.txt", v => console.log(pxt.Util.uint8ArrayToString(v))))
+
+enum DeployTransport {
+    NotSelected,
+    FileTransfer,
+    BluetoothWebSerial,
+    // UsbHid
 }
 
-// Web Serial API https://wicg.github.io/serial/
-// https://www.npmjs.com/package/@types/web-bluetooth
-// chromium bug https://bugs.chromium.org/p/chromium/issues/detail?id=884928
-// Under experimental features in Chrome Desktop 77+
-enum ParityType {
-    "none",
-    "even",
-    "odd",
-    "mark",
-    "space"
-}
-
-declare interface SerialOptions {
-    baudRate?: number;
-    databits?: number;
-    stopbits?: number;
-    parity?: ParityType;
-    buffersize?: number;
-    rtscts?: boolean;
-    xon?: boolean;
-    xoff?: boolean;
-    xany?: boolean;
-}
-
-type SerialPortInfo = pxt.Map<string>;
-type SerialPortRequestOptions = any;
-
-declare class SerialPort {
-    open(options?: SerialOptions): Promise<void>;
-    close(): void;
-    readonly readable: any;
-    readonly writable: any;
-    // getInfo(): SerialPortInfo;
-}
-
-declare interface Serial extends EventTarget {
-    onconnect: any;
-    ondisconnect: any;
-    getPorts(): Promise<SerialPort[]>
-    requestPort(options: SerialPortRequestOptions): Promise<SerialPort>;
-}
-
-class WebSerialPackageIO implements pxt.packetio.PacketIO {
-    onData: (v: Uint8Array) => void;
-    onError: (e: Error) => void;
-    onEvent: (v: Uint8Array) => void;
-    onSerial: (v: Uint8Array, isErr: boolean) => void;
-    sendSerialAsync: (buf: Uint8Array, useStdErr: boolean) => Promise<void>;
-    private _reader: any;
-    private _writer: any;
-
-    constructor(private port: SerialPort, private options: SerialOptions) {
-        console.log(`serial: New io`)
-    }
-
-    bufferSize(buffer: Uint8Array) {
-        return HF2.read16(buffer, 0) + 2;
-    }
-
-    async readSerialAsync() {
-        this._reader = this.port.readable.getReader();
-        let buffer: Uint8Array;
-        const reader = this._reader;
-        while (reader === this._reader) { // will change if we recycle the connection
-            const { done, value } = await this._reader.read();
-            if (!buffer) buffer = value;
-            else { // concat
-                let tmp = new Uint8Array(buffer.length + value.byteLength);
-                tmp.set(buffer, 0);
-                tmp.set(value, buffer.length);
-                buffer = tmp;
-            }
-            if (buffer) {
-                let size = this.bufferSize(buffer);
-                if (buffer.length == size) {
-                    this.onData(new Uint8Array(buffer));
-                    buffer = undefined;
-                } else if (buffer.length > size) {
-                    console.warn(`Received larger buffer than command command: ${buffer.length} received but waiting for ${size}`);
-                    let tmp = buffer.slice(0, size - 1);
-                    this.onData(new Uint8Array(tmp));
-                    tmp = buffer.slice(size, buffer.length - 1);
-                    buffer = tmp;
-                    console.debug(`Next buffer size: ${this.bufferSize(buffer)}`);
-                } else {
-                    console.warn(`Incomplete command: ${buffer.length} received but waiting for ${size}. Keep waiting...`);
-                }
-            }
-        }
-    }
-
-    static isSupported(): boolean {
-        return !!(<any>navigator).serial;
-    }
-
-    static portIos: WebSerialPackageIO[] = [];
-
-    static async mkPacketIOAsync(): Promise<pxt.packetio.PacketIO> {
-        const serial = (<any>navigator).serial;
-        if (serial) {
-            try {
-                const requestOptions: SerialPortRequestOptions = {
-                    // filters: [{ usbVendorId: 0x0694, usbProductId: 0x0005 }],
-                };
-                const port = await serial.requestPort(requestOptions);
-
-                let io = WebSerialPackageIO.portIos.filter(i => i.port == port)[0];
-                if (!io) {
-                    const options: SerialOptions = {
-                        baudRate: 460800,
-                        buffersize: 4096
-                    };
-                    io = new WebSerialPackageIO(port, options);
-                    WebSerialPackageIO.portIos.push(io);
-                }
-                return io;
-            } catch (e) {
-                console.log(`Connection error`, e)
-            }
-        }
-        throw new Error("could not open serial port");
-    }
-
-    error(msg: string): any {
-        console.error(msg);
-        throw new Error(lf("error on brick ({0})", msg))
-    }
-
-    private openAsync() {
-        console.log(`serial: Opening port`);
-        // this.io.onConnectionChanged();
-        if (!!this._reader) return Promise.resolve();
-        this._reader = undefined;
-        this._writer = undefined;
-        return this.port.open(this.options)
-            .then(() => {
-                this.readSerialAsync();
-                return Promise.resolve();
-            });
-    }
-
-    private async closeAsync() {
-        // don't close port
-        return pxt.U.delay(500);
-    }
-
-    reconnectAsync(): Promise<void> {
-        return this.openAsync();
-    }
-
-    disconnectAsync(): Promise<void> {
-        return this.closeAsync();
-    }
-
-    sendPacketAsync(pkt: Uint8Array): Promise<void> {
-        if (!this._writer)
-            this._writer = this.port.writable.getWriter();
-        return this._writer.write(pkt);
-    }
-
-    onDeviceConnectionChanged(connect: boolean) {
-        throw new Error("onDeviceConnectionChanged not implemented");
-    }
-
-    onConnectionChanged() {
-        throw new Error("onConnectionChanged not implemented");
-    }
-
-    isConnecting() {
-        throw new Error("isConnecting not implemented");
-        return false;
-    }
-
-    isConnected() {
-        throw new Error("isConnected not implemented");
-        return false;
-    }
-
-    disposeAsync() {
-        return Promise.reject("disposeAsync not implemented")
-    }
-}
-
-function hf2Async() {
-    const pktIOAsync: Promise<pxt.packetio.PacketIO> = useWebSerial
-        ? WebSerialPackageIO.mkPacketIOAsync() : pxt.packetio.mkPacketIOAsync()
-    return pktIOAsync.then(h => {
-        let w = new Ev3Wrapper(h)
-        ev3 = w
-        return w.reconnectAsync(true)
-            .then(() => w)
-    })
-}
-
-let useHID = false;
-let useWebSerial = false;
-
-export function initAsync(): Promise<void> {
-    if (pxt.U.isNodeJS) {
-        // doesn't seem to work ATM
-        useHID = false
-    } else {
-        const nodehid = /nodehid/i.test(window.location.href);
-        if (pxt.BrowserUtils.isLocalHost() && pxt.Cloud.localToken && nodehid)
-            useHID = true;
-    }
-
-    if (WebSerialPackageIO.isSupported())
-        pxt.tickEvent("webserial.supported");
-
-    return Promise.resolve();
-}
-
-export function canUseWebSerial() {
-    return WebSerialPackageIO.isSupported();
-}
-
-export function enableWebSerialAsync() {
-    initPromise = undefined;
-    useWebSerial = WebSerialPackageIO.isSupported();
-    useHID = useWebSerial;
-    if (useWebSerial)
-        return initHidAsync().then(() => { });
-    else return Promise.resolve();
-}
-
-async function cleanupAsync() {
-    if (ev3) {
-        console.log('cleanup previous port')
-        try {
-            await ev3.disconnectAsync()
-        }
-        catch (e) {
-
-        }
-        finally {
-            ev3 = undefined;
-        }
-    }
-}
-
-let initPromise: Promise<Ev3Wrapper>
-
-function initHidAsync() { // needs to run within a click handler
-    if (initPromise)
-        return initPromise
-    if (useHID) {
-        initPromise = cleanupAsync()
-            .then(() => hf2Async())
-            .catch((err: any) => {
-                console.error(err);
-                initPromise = null
-                useHID = false;
-                useWebSerial = false;
-                return Promise.reject(err);
-            })
-    } else {
-        useHID = false
-        useWebSerial = false;
-        initPromise = Promise.reject(new Error("no HID"))
-    }
-    return initPromise;
-}
-
-// this comes from aux/pxt.lms
-const fspath = "../prjs/BrkProg_SAVE/"
+// This comes from aux/pxt.lms
+const defaultUploadProjectFolder = "BrkProg_SAVE";
+// RBF template from aux/pxt.lms.
+// The template contains the launcher code in hexadecimal form.
+// "XX" is replaced with the hexadecimal path of the ELF file to run.
 const rbfTemplate = `
 4c45474f580000006d000100000000001c000000000000000e000000821b038405018130813e8053
 74617274696e672e2e2e0084006080XX00448581644886488405018130813e80427965210084000a
-`
+`;
 
-export function deployCoreAsync(resp: pxtc.CompileResult) {
-    let filename = resp.downloadFileBaseName || "pxt"
-    filename = filename.replace(/^lego-/, "")
+let preferredTransport = DeployTransport.NotSelected;
 
-    let elfPath = fspath + filename + ".elf"
-    let rbfPath = fspath + filename + ".rbf"
+export function canUseWebSerial(): boolean {
+    return !!(navigator as any).serial;
+}
 
-    let rbfHex = rbfTemplate
-        .replace(/\s+/g, "")
-        .replace("XX", pxt.U.toHex(pxt.U.stringToUint8Array(elfPath)))
-    let rbfBIN = pxt.U.fromHex(rbfHex)
-    pxt.HF2.write16(rbfBIN, 4, rbfBIN.length)
+export function setUseFileTransfer() {
+    preferredTransport = DeployTransport.FileTransfer;
+}
 
-    let origElfUF2 = UF2.parseFile(pxt.U.stringToUint8Array(ts.pxtc.decodeBase64(resp.outfiles[pxt.outputName()])))
+// export function setUseUsbHID() {
+//     preferredTransport = DeployTransport.UsbHid;
+// }
 
-    let mkFile = (ext: string, data: Uint8Array = null) => {
-        let f = UF2.newBlockFile()
-        f.filename = "Projects/" + filename + ext
-        if (data)
-            UF2.writeBytes(f, 0, data)
-        return f
-    }
+export function setUseBluetoothWebSerial() {
+    preferredTransport = DeployTransport.BluetoothWebSerial;
+}
 
-    let elfUF2 = mkFile(".elf")
-    for (let b of origElfUF2) {
-        UF2.writeBytes(elfUF2, b.targetAddr, b.data)
-    }
+export async function resetDeployTransport() {
+    preferredTransport = DeployTransport.NotSelected;
+    await transport.disconnectAsync(true);
+}
 
-    let r = UF2.concatFiles([elfUF2, mkFile(".rbf", rbfBIN)])
-    let data = UF2.serializeFile(r)
+export function isDeployTransportSelected(): boolean {
+    return preferredTransport !== DeployTransport.NotSelected;
+}
 
-    resp.outfiles[pxtc.BINARY_UF2] = btoa(data)
+export async function deployCoreAsync(resp: pxtc.CompileResult) {
+    console.log(`START DEPLOY`);
 
-    let saveUF2Async = () => {
-        if (pxt.commands && pxt.commands.electronDeployAsync) {
-            return pxt.commands.electronDeployAsync(resp);
+    const filename = (resp.downloadFileBaseName || "pxt").replace(/^lego-/, "");
+    const projectPxtJson = await (window as any).getPxtJson();
+    const isWebSerial = preferredTransport === DeployTransport.BluetoothWebSerial;
+    const uploadProjectFolder = isWebSerial && projectPxtJson?.uploadProjectFolder ? projectPxtJson.uploadProjectFolder : defaultUploadProjectFolder;
+
+    const fspath = `../prjs/${uploadProjectFolder}/`;
+    // console.log(`fspath: ${fspath}`);
+    const elfPath = fspath + filename + ".elf";
+    const rbfPath = fspath + filename + ".rbf";
+
+    // Build rbf
+    const rbfHex = rbfTemplate.replace(/\s+/g, "").replace("XX", pxt.U.toHex(pxt.U.stringToUint8Array(elfPath)));
+
+    const rbfBIN = pxt.U.fromHex(rbfHex);
+    HF2.write16(rbfBIN, 4, rbfBIN.length);
+
+    // Parse elf
+    const origElfUF2 = UF2.parseFile(pxt.U.stringToUint8Array(ts.pxtc.decodeBase64(resp.outfiles[pxt.outputName()])));
+    
+    // USB MODE (UF2 packaging like original pxt-ev3)
+    if (!isWebSerial) {
+        const mkFile = (ext: string, data?: Uint8Array) => {
+            const f = UF2.newBlockFile();
+            f.filename = "Projects/" + filename + ext;
+            if (data) {
+                UF2.writeBytes(f, 0, data);
+            }
+
+            return f;
+        };
+
+        const elfUF2 = mkFile(".elf");
+        for (const b of origElfUF2) {
+            UF2.writeBytes(elfUF2, b.targetAddr, b.data);
         }
-        if (pxt.commands && pxt.commands.saveOnlyAsync) {
-            return pxt.commands.saveOnlyAsync(resp);
-        }
+
+        const combined = UF2.concatFiles([elfUF2, mkFile(".rbf", rbfBIN)]);
+        const data = UF2.serializeFile(combined);
+        resp.outfiles[pxtc.BINARY_UF2] = btoa(data);
+
+        console.log("DEPLOY FILE READY");
+
+        if (pxt.commands?.electronDeployAsync) return pxt.commands.electronDeployAsync(resp);
+        if (pxt.commands?.saveOnlyAsync) return pxt.commands.saveOnlyAsync(resp);
+
         return Promise.resolve();
     }
 
-    if (!useHID) return saveUF2Async()
-
+    // WEBSERIAL MODE
     pxt.tickEvent("webserial.flash");
-    let w: Ev3Wrapper;
-    return initHidAsync()
-        .then(w_ => {
-            w = w_
-            if (w.isStreaming)
-                pxt.U.userError("please stop the program first")
-            return w.reconnectAsync(false)
-                .catch(e => {
-                    // user easily forgets to stop robot
-                    bluetoothTryAgainAsync().then(() => w.disconnectAsync())
-                        .then(() => pxt.U.delay(1000))
-                        .then(() => w.reconnectAsync());
+    try {
+        const wrapper = await transport.connectAsync();
+        
+        const isEv3Connected = await wrapper.isEv3ConnectedAsync();
+        if (!isEv3Connected) {
+            console.warn("EV3 is not responding.");
+            await transport.disconnectAsync(true);
+            await showEv3ConnectionFailedDialogAsync();
 
-                    // nothing we can do
-                    return Promise.reject(e);
-                })
-        })
-        .then(() => w.stopAsync())
-        .then(() => w.rmAsync(elfPath))
-        .then(() => w.flashAsync(elfPath, UF2.readBytes(origElfUF2, 0, origElfUF2.length * 256)))
-        .then(() => w.flashAsync(rbfPath, rbfBIN))
-        .then(() => w.runAsync(rbfPath))
-        .then(() => pxt.U.delay(500))
-        .then(() => {
-            pxt.tickEvent("webserial.success");
-            return w.disconnectAsync()
-            //return Promise.delay(1000).then(() => w.dmesgAsync())
-        }).catch(e => {
-            pxt.tickEvent("webserial.fail");
-            useHID = false;
-            useWebSerial = false;
-            // if we failed to initalize, tell the user to retry
-            return Promise.reject(e)
-        })
+            return;
+        }
+
+        try {
+            const ev3Name = await wrapper.getEv3NameAsync();
+            console.log(`Connected to EV3: ${ev3Name}`);
+        } catch (e) {
+            console.warn("Failed to get EV3 name, continuing deployment.", e);
+        }
+
+        const isPxtAppRunning = await wrapper.isPxtAppRunningAsync();
+        if (isPxtAppRunning) {
+            await wrapper.stopAsync();
+        }
+        await wrapper.rmAsync(elfPath); // Remove old file of the program
+        await wrapper.flashAsync(elfPath, UF2.readBytes(origElfUF2, 0, origElfUF2.length * 256));
+        await wrapper.flashAsync(rbfPath, rbfBIN);
+        await wrapper.runAsync(rbfPath);
+
+        console.log("DEPLOY FINISHED");
+
+        pxt.tickEvent("webserial.success");
+    } catch (e: any) {
+        if (e?.message === "NO_PORT_SELECTED") {
+            await resetDeployTransport();
+            resetBluetoothPairingDialog();
+            console.warn("Bluetooth download cancelled: no serial port was selected.");
+            
+            return;
+        }
+        if (e?.message === "PORT_OPEN_FAILED") {
+            await resetDeployTransport();
+            resetBluetoothPairingDialog();
+        }
+
+        pxt.tickEvent("webserial.fail");
+        throw e;
+    }
 }

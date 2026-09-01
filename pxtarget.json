@@ -218,7 +218,14 @@
         "timeMachine": true,
         "timeMachineDiffInterval": 600000,
         "timeMachineSnapshotInterval": 1800000,
-        "shareHomepageContent": true
+        "shareHomepageContent": true,
+        "pxtJsonOptions": [
+            {   
+                "property": "uploadProjectFolder",
+                "label": "Custom folder for Bluetooth upload",
+                "type": "text"
+            }
+        ]
     },
     "ignoreDocsErrors": true,
     "uploadDocs": true
