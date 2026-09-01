@@ -364,6 +364,7 @@ export class Ev3Wrapper {
                 log("TALK: " + U.toHex(buf));
             }
             this.dumpOutputCmd(buf);
+
             return this.io.sendPacketAsync(buf)
                 .then(() => {
                     return this.msgs.shiftAsync(timeout);
@@ -401,6 +402,7 @@ export class Ev3Wrapper {
             let upl = this.allocSystem(1 + size, 0x93, 0x1);
             upl[6] = handle;
             U.memcpy(upl, 6 + 1, file, pos, size);
+
             return this.talkAsync(upl, 8) // 8=EOF
                 .then(() => loopAsync(pos + size));
         }
@@ -408,6 +410,7 @@ export class Ev3Wrapper {
         let begin = this.allocSystem(4 + path.length + 1, 0x92);
         HF2.write32(begin, 6, file.length); // fileSize
         U.memcpy(begin, 10, U.stringToUint8Array(path));
+
         return this.lock.enqueue("file", () =>
             this.talkAsync(begin)
                 .then(resp => {
@@ -490,6 +493,7 @@ export class Ev3Wrapper {
             let contFileReq = this.allocSystem(1 + 2, 0x97);
             HF2.write16(contFileReq, 7, 1000); // maxRead
             contFileReq[6] = handle;
+            
             return pxt.U.delay(data.length > 0 ? 0 : 500)
                 .then(() => this.talkAsync(contFileReq, -1))
                 .then(resp);
