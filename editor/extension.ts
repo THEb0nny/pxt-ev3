@@ -97,6 +97,8 @@ pxt.editor.initExtensionsAsync = function (opts: pxt.editor.ExtensionOptions): P
     return Promise.resolve<pxt.editor.ExtensionResult>(res);
 };
 
+// Expose helpers for retrieving the latest project pxt.json from the editor.
+// The project configuration is cached in projectPxtJson and must be reloaded before it is returned.
 (window as any).reloadProjectPxtJson = async () => await loadProjectPxtJson(projectView);
 (window as any).getPxtJson = async (): Promise<any> => {
     await (window as any).reloadProjectPxtJson();
