@@ -82,6 +82,7 @@ export async function deployCoreAsync(resp: pxtc.CompileResult) {
             if (data) {
                 UF2.writeBytes(f, 0, data);
             }
+
             return f;
         };
 
@@ -112,6 +113,7 @@ export async function deployCoreAsync(resp: pxtc.CompileResult) {
             console.warn("EV3 is not responding.");
             await transport.disconnectAsync(true);
             await showEv3ConnectionFailedDialogAsync();
+
             return;
         }
 
@@ -139,6 +141,7 @@ export async function deployCoreAsync(resp: pxtc.CompileResult) {
             await resetDeployTransport();
             resetBluetoothPairingDialog();
             console.warn("Bluetooth download cancelled: no serial port was selected.");
+            
             return;
         }
         if (e?.message === "PORT_OPEN_FAILED") {
