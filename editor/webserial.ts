@@ -79,7 +79,6 @@ export class WebSerialIO implements pxt.packetio.PacketIO {
             this.onConnectionChanged();
             this.startReader();
         } catch (e: any) {
-            console.warn("SERIAL: port.open() failed:", e?.name, e?.message);
             this.state = IOState.Disconnected;
             if (e?.name === "NetworkError") {
                 throw new Error("PORT_OPEN_FAILED");
