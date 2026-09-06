@@ -273,25 +273,14 @@ export function showFileTransferDialogAsync(fn: string, url: string, _confirmAsy
 async function showBluetoothPairingDialogAsync(): Promise<boolean> {
     if (!confirmAsync || skipBluetoothPairingDialog) return Promise.resolve(true);
 
-    const isWindows11 = await isWindows11Async();
-
     const jsx = (
         <div>
             <p>{lf("Bluetooth download uses Web Serial. Your browser will ask you to select a serial port.")}</p>
             <p>{lf("Before continuing, make sure your EV3 is turned on and already paired with your computer. Close other applications that may be using the EV3 Bluetooth connection, such as 'EV3 Lab', 'EV3 Classroom', other BrickCode (MakeCode) editor tabs, or other applications using the EV3 Bluetooth serial connection.")}</p>
             <p>{lf("If 'Port View' is open on the EV3, close it before downloading. The program may download successfully, but it will not start.")}</p>
-            <p>{lf("When the browser asks you to select a serial port, choose the Bluetooth serial port for your EV3. Your EV3 may appear as two Bluetooth serial ports: an incoming port and an outgoing port. Select the outgoing port for the EV3 connection.")}</p>
+            <p>{lf("When the browser asks you to select a serial port, select the port with the name of your EV3. This is the name you set on your EV3 controller.")}</p>
             {pxt.BrowserUtils.isWindows() && (
-                <p>{lf("On Windows, you can check the Bluetooth settings and open the COM Ports tab to identify the ports assigned to your EV3. Select the outgoing port.")}</p>
-            )}
-            {pxt.BrowserUtils.isWindows() && isWindows11 === true && (
-                <p>{lf("On Windows 11, look for 'Serial Port' or 'Standard Serial over Bluetooth link'.")}</p>
-            )}
-            {pxt.BrowserUtils.isWindows() && isWindows11 === false && (
-                <p>{lf("On Windows 10, select the port that displays the name of your EV3.")}</p>
-            )}
-            {pxt.BrowserUtils.isWindows() && isWindows11 === undefined && (
-                <p>{lf("On Windows 10, select the port that displays the name of your EV3. On Windows 11, look for 'Serial Port' or 'Standard Serial over Bluetooth link'.")}</p>
+                <p>{lf("On some Windows computers, the browser may not display your EV3 by name. The exact cause of this issue has not yet been determined. In this case, select the outgoing Bluetooth COM port assigned to your EV3. You can check the Bluetooth settings and open the COM Ports tab to identify the ports assigned to your EV3.")}</p>
             )}
             <p>{lf("Do not select unrelated COM ports, USB devices, or serial ports belonging to other hardware. If the EV3 does not respond after selecting a port, try selecting a different Bluetooth serial port.")}</p>
             <div className="ui toggle checkbox">
@@ -355,20 +344,4 @@ export async function showBluetoothConnectionStuckDialogAsync(): Promise<void> {
             </div>
         )
     });
-}
-
-async function isWindows11Async(): Promise<boolean | undefined> {
-    if (!pxt.BrowserUtils.isWindows()) return undefined;
-
-    const userAgentData = (navigator as any).userAgentData;
-    if (!userAgentData?.getHighEntropyValues) return undefined;
-
-    try {
-        const values = await userAgentData.getHighEntropyValues(["platformVersion"]);
-        const majorVersion = parseInt(values.platformVersion.split(".")[0], 10);
-
-        return majorVersion >= 13;
-    } catch {
-        return undefined;
-    }
 }
