@@ -338,8 +338,8 @@ export async function showBluetoothConnectionStuckDialogAsync(): Promise<void> {
         agreeLbl: lf("OK"),
         jsx: (
             <div>
-                <p>{lf("Windows did not release the RFCOMM channel.")}</p>
-                <p>{lf("This can also happen after restarting the editor while a program is still running on the EV3. In that case, the previous Bluetooth connection may remain unavailable to the newly opened editor.")}</p>
+                <p>{lf("The Bluetooth connection could not be established.")}</p>
+                <p>{lf("This can happen if a previous Bluetooth connection is still active or if the Bluetooth connection is temporarily unavailable.")}</p>
                 <p>{lf("Stop the program on the EV3 and try again. If the problem persists, turn Bluetooth off and on again, then try again.")}</p>
             </div>
         )
