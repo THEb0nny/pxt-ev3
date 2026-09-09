@@ -14,7 +14,7 @@ namespace sensors {
         }
 
         _info() {
-            return [`${this._query()[0]}`];
+            return [this._query()[0] ? "pres" : "rel"];
         }
 
         _update(prev: number, curr: number) {
@@ -30,6 +30,7 @@ namespace sensors {
          * @param event the touch sensor event to listen for
          * @param body the code to run when the event occurs
          */
+        //% help=sensors/nxt-touch-sensor/on-event
         //% block="on **nxt touch sensor** %this|%event"
         //% blockId=nxtTouchSensorOnEvent
         //% parts="nxttouchsensor"
@@ -37,7 +38,7 @@ namespace sensors {
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
-        //% weight=60 blockGap=8
+        //% weight=99 blockGap=8
         //% subcategory="NXT"
         //% group="Touch Sensor"
         onEvent(ev: ButtonEvent, body: () => void) {
@@ -68,6 +69,7 @@ namespace sensors {
          * Check if the NXT touch sensor is currently pressed.
          * @returns true if the sensor is pressed, false otherwise
          */
+        //% help=sensors/nxt-touch-sensor/is-pressed
         //% block="**nxt touch sensor** %this|is pressed"
         //% blockId=nxtTouchSensorIsPressed
         //% parts="nxttouchsensor"
@@ -75,7 +77,7 @@ namespace sensors {
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
-        //% weight=50 blockGap=8
+        //% weight=81 blockGap=8
         //% subcategory="NXT"
         //% group="Touch Sensor"
         isPressed(): boolean {
@@ -106,14 +108,14 @@ namespace sensors {
     }
 
     //% whenUsed block="1" weight=95 fixedInstance jres=icons.port1
-    export const nxtTouch1 = new NXTTouchSensor(1);
+    export const nxtTouch1: NXTTouchSensor = new NXTTouchSensor(1);
 
     //% whenUsed block="2" weight=95 fixedInstance jres=icons.port2
-    export const nxtTouch2 = new NXTTouchSensor(2);
+    export const nxtTouch2: NXTTouchSensor = new NXTTouchSensor(2);
 
     //% whenUsed block="3" weight=95 fixedInstance jres=icons.port3
-    export const nxtTouch3 = new NXTTouchSensor(3);
+    export const nxtTouch3: NXTTouchSensor = new NXTTouchSensor(3);
 
     //% whenUsed block="4" weight=95 fixedInstance jres=icons.port4
-    export const nxtTouch4 = new NXTTouchSensor(4);
+    export const nxtTouch4: NXTTouchSensor = new NXTTouchSensor(4);
 }
