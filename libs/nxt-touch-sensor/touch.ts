@@ -108,14 +108,14 @@ namespace sensors {
     }
 
     //% whenUsed block="1" weight=95 fixedInstance jres=icons.port1
-    export const nxtTouch1 = new NXTTouchSensor(1);
+    export const nxtTouch1: NXTTouchSensor = new NXTTouchSensor(1);
 
     //% whenUsed block="2" weight=95 fixedInstance jres=icons.port2
-    export const nxtTouch2 = new NXTTouchSensor(2);
+    export const nxtTouch2: NXTTouchSensor = new NXTTouchSensor(2);
 
     //% whenUsed block="3" weight=95 fixedInstance jres=icons.port3
-    export const nxtTouch3 = new NXTTouchSensor(3);
+    export const nxtTouch3: NXTTouchSensor = new NXTTouchSensor(3);
 
     //% whenUsed block="4" weight=95 fixedInstance jres=icons.port4
-    export const nxtTouch4 = new NXTTouchSensor(4);
+    export const nxtTouch4: NXTTouchSensor = new NXTTouchSensor(4);
 }
