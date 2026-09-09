@@ -38,7 +38,7 @@ namespace sensors {
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
-        //% weight=60 blockGap=8
+        //% weight=99 blockGap=8
         //% subcategory="NXT"
         //% group="Touch Sensor"
         onEvent(ev: ButtonEvent, body: () => void) {
@@ -77,7 +77,7 @@ namespace sensors {
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
-        //% weight=50 blockGap=8
+        //% weight=81 blockGap=8
         //% subcategory="NXT"
         //% group="Touch Sensor"
         isPressed(): boolean {
