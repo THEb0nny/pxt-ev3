@@ -14,7 +14,7 @@ namespace sensors {
         }
 
         _info() {
-            return [`${this._query()[0]}`];
+            return [this._query()[0] ? "pres" : "rel"];
         }
 
         _update(prev: number, curr: number) {
