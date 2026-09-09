@@ -30,6 +30,7 @@ namespace sensors {
          * @param event the touch sensor event to listen for
          * @param body the code to run when the event occurs
          */
+        //% help=sensors/nxt-touch-sensor/on-event
         //% block="on **nxt touch sensor** %this|%event"
         //% blockId=nxtTouchSensorOnEvent
         //% parts="nxttouchsensor"
@@ -68,6 +69,7 @@ namespace sensors {
          * Check if the NXT touch sensor is currently pressed.
          * @returns true if the sensor is pressed, false otherwise
          */
+        //% help=sensors/nxt-touch-sensor/is-pressed
         //% block="**nxt touch sensor** %this|is pressed"
         //% blockId=nxtTouchSensorIsPressed
         //% parts="nxttouchsensor"
