@@ -23,8 +23,7 @@ namespace pxsim {
 
         public getValue() {
             if (this.pressed.length) {
-                if (this.pressed.pop())
-                    return TOUCH_SENSOR_ANALOG_PRESSED;
+                if (this.pressed.pop()) return TOUCH_SENSOR_ANALOG_PRESSED;
             }
             return 0;
         }
