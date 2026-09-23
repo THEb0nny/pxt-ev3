@@ -2,7 +2,7 @@
 
 namespace pxsim.visuals {
     export class NXTTouchSensorView extends ModuleView implements LayoutElement {
-        private shadowElement: SVGElement;
+        private shadowElement: SVGElement | undefined;
 
         constructor(port: number) {
             super(NXT_TOUCH_SENSOR_SVG, "nxt-touch-sensor", NodeType.NXTTouchSensor, port);
