@@ -1,15 +1,14 @@
 namespace pxsim {
 
-    export const TOUCH_SENSOR_ANALOG_PRESSED = 2600;
+    export class NXTTouchSensorNode extends AnalogSensorNode {
+        private static readonly RAW_RELEASED = 4800;
 
-    export class TouchSensorNode extends AnalogSensorNode {
-        id = NodeType.TouchSensor;
+        id = NodeType.NXTTouchSensor;
 
-        private pressed: boolean[];
+        private pressed: boolean[] = [false];
 
         constructor(port: number) {
             super(port);
-            this.pressed = [];
         }
 
         public setPressed(pressed: boolean) {
@@ -23,18 +22,25 @@ namespace pxsim {
 
         public getValue() {
             if (this.pressed.length) {
-                if (this.pressed.pop()) return TOUCH_SENSOR_ANALOG_PRESSED;
+                if (this.pressed.pop()) return 0;
             }
-            return 0;
+            return NXTTouchSensorNode.RAW_RELEASED;
         }
 
         getDeviceType() {
-            return DAL.DEVICE_TYPE_TOUCH;
+            return DAL.DEVICE_TYPE_NXT_TOUCH;
         }
 
         public hasData() {
             return this.pressed.length > 0;
         }
+
+        getAnalogReadPin() {
+            return AnalogOff.InPin1;
+        }
+
+        isNXT() {
+            return true;
+        }
     }
 }
-

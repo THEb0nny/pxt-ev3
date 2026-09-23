@@ -33,7 +33,7 @@ namespace sensors {
         //% help=sensors/nxt-touch-sensor/on-event
         //% block="on **nxt touch sensor** %this|%event"
         //% blockId=nxtTouchSensorOnEvent
-        //% parts="nxttouchsensor"
+        //% parts="nxt-touch-sensor"
         //% blockNamespace=sensors
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
@@ -53,7 +53,7 @@ namespace sensors {
         //% help=sensors/nxt-touch-sensor/pause-until
         //% block="pause until **nxt touch sensor** %this|%event"
         //% blockId=nxtTouchSensorPauseUntil
-        //% parts="nxttouchsensor"
+        //% parts="nxt-touch-sensor"
         //% blockNamespace=sensors
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
@@ -72,7 +72,7 @@ namespace sensors {
         //% help=sensors/nxt-touch-sensor/is-pressed
         //% block="**nxt touch sensor** %this|is pressed"
         //% blockId=nxtTouchSensorIsPressed
-        //% parts="nxttouchsensor"
+        //% parts="nxt-touch-sensor"
         //% blockNamespace=sensors
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
@@ -93,7 +93,7 @@ namespace sensors {
         //% block="**nxt touch sensor** %this|was pressed"
         //% blockId=nxtTouchSensorWasPressed
         //% blockHidden=true
-        //% parts="nxttouchsensor"
+        //% parts="nxt-touch-sensor"
         //% blockNamespace=sensors
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
