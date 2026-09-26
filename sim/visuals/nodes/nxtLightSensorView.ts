@@ -3,16 +3,13 @@
 namespace pxsim.visuals {
     export class NXTLightSensorView extends SensorView implements LayoutElement {
 
-        private control: LightWheelControl;
-
-        private static sensor_hole_id = 'led';
-
         constructor(port: number) {
-            super(NXT_LIGHT_SENSOR_SVG, "color", NodeType.NXTLightSensor, port);
+            super(NXT_LIGHT_SENSOR_SVG, "nxt-light-sensor", NodeType.NXTLightSensor, port);
         }
 
         protected optimizeForLightMode() {
-            (this.content.getElementById(this.normalizeId('box')) as SVGElement).style.fill = '#a8aaa8';
+            const box = this.content ? this.content.getElementById(this.normalizeId('box')) as SVGElement : null;
+            if (box) box.style.fill = '#a8aaa8';
         }
 
         public getPaddingRatio() {
@@ -24,8 +21,8 @@ namespace pxsim.visuals {
 
             const lightState = ev3board().getInputNodes()[this.port];
             if (!lightState) return;
-            const mode = lightState.getMode();
 
+            const mode = lightState.getMode();
             if (mode == NXTLightSensorMode.ReflectedLightRaw
                 || mode == NXTLightSensorMode.ReflectedLight) {
                 this.updateSensorLightVisual(true);
@@ -35,10 +32,10 @@ namespace pxsim.visuals {
         }
 
         private updateSensorLightVisual(enable: boolean) {
-            const sensorHole = this.content.getElementById(this.normalizeId(NXTLightSensorView.sensor_hole_id)) as SVGCircleElement;
+            const sensorHole = this.content.getElementById(this.normalizeId('led')) as SVGCircleElement;
             if (enable) {
                 sensorHole.style.stroke = "#eb0c0c";
-                sensorHole.style.strokeWidth = '2px';
+                sensorHole.style.strokeWidth = '10px';
             } else {
                 sensorHole.style.stroke = "none";
                 sensorHole.style.strokeWidth = "0";

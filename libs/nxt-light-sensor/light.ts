@@ -37,7 +37,6 @@ namespace sensors {
 
         constructor(port: number) {
             super(port);
-            this.setMode(NXTLightSensorMode.ReflectedLight);
         }
 
         _query() {
@@ -76,9 +75,8 @@ namespace sensors {
         }
 
         setMode(m: number) {
-            const modeChanged = this.isActive() && this.mode != m;
-            this._setMode(m);
-            if (modeChanged) {
+            if (m != this.mode) {
+                this._setMode(m);
                 switch (m) {
                     case NXTLightSensorMode.ReflectedLight:
                     case NXTLightSensorMode.ReflectedLightRaw:
@@ -89,6 +87,8 @@ namespace sensors {
                         this._setLedState(false);
                         break;
                 }
+            } else {
+                this._setMode(m);
             }
         }
 
@@ -108,8 +108,8 @@ namespace sensors {
         //% help=sensors/nxt-light-sensor/set-reflected-range
         //% block="**nxt light sensor** $this|set reflected range dark $dark|bright $bright"
         //% blockId=nxtLightSensorSetReflectedLightRange
-        //% parts="nxtlightsensor"
-        //% blockNamespace=sensors
+        //% parts="nxt-light-sensor"
+        //% blockNamespace="sensors"
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
@@ -131,8 +131,8 @@ namespace sensors {
         //% help=sensors/nxt-light-sensor/set-ambient-range
         //% block="**nxt light sensor** $this|set ambient range dark $dark|bright $bright"
         //% blockId=nxtLightSensorSetAmbientLightRange
-        //% parts="nxtlightsensor"
-        //% blockNamespace=sensors
+        //% parts="nxt-light-sensor"
+        //% blockNamespace="sensors"
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
@@ -170,8 +170,8 @@ namespace sensors {
         //% help=sensors/nxt-light-sensor/light
         //% block="**nxt light sensor** $this|$mode"
         //% blockId=nxtLightSensorLight
-        //% parts="nxtlightsensor"
-        //% blockNamespace=sensors
+        //% parts="nxt-light-sensor"
+        //% blockNamespace="sensors"
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
@@ -179,7 +179,6 @@ namespace sensors {
         //% subcategory="NXT"
         //% group="Light Sensor"
         light(mode: NXTLightIntensityMode) {
-            if (!this.isActive()) return 0;
             this.setMode(<NXTLightSensorMode><number>mode);
             this.poke();
             return this._query()[0];
