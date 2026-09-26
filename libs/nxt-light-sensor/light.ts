@@ -107,7 +107,7 @@ namespace sensors {
          */
         //% help=sensors/nxt-light-sensor/set-reflected-range
         //% block="**nxt light sensor** $this|set reflected range dark $dark|bright $bright"
-        //% blockId=nxtLightSensorSetReflectedLightRange
+        //% blockId="nxtLightSensorSetReflectedLightRange"
         //% parts="nxt-light-sensor"
         //% blockNamespace="sensors"
         //% this.fieldEditor="images"
@@ -130,7 +130,7 @@ namespace sensors {
          */
         //% help=sensors/nxt-light-sensor/set-ambient-range
         //% block="**nxt light sensor** $this|set ambient range dark $dark|bright $bright"
-        //% blockId=nxtLightSensorSetAmbientLightRange
+        //% blockId="nxtLightSensorSetAmbientLightRange"
         //% parts="nxt-light-sensor"
         //% blockNamespace="sensors"
         //% this.fieldEditor="images"
@@ -169,7 +169,7 @@ namespace sensors {
          */
         //% help=sensors/nxt-light-sensor/light
         //% block="**nxt light sensor** $this|$mode"
-        //% blockId=nxtLightSensorLight
+        //% blockId="nxtLightSensorLight"
         //% parts="nxt-light-sensor"
         //% blockNamespace="sensors"
         //% this.fieldEditor="images"
