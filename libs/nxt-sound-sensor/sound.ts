@@ -69,9 +69,9 @@ namespace sensors {
          * @param mode mode dB (raw volume, all frequencies) or dBA (human ear sensitivity), eg: NXTSoundSensorMode.dBA
          */
         //% block="**nxt sound sensor** %this|sound level $mode"
-        //% blockId=nxtSoundSensorLevel
-        //% parts="nxtsoundsensor"
-        //% blockNamespace=sensors
+        //% blockId="nxtSoundSensorLevel"
+        //% parts="nxt-sound-sensor"
+        //% blockNamespace="sensors"
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
@@ -92,9 +92,9 @@ namespace sensors {
          * @param mode mode dB (raw volume, all frequencies) or dBA (human ear sensitivity), eg: NXTSoundSensorMode.dBA
          */
         //% block="**nxt sound sensor** %this|raw value $mode"
-        //% blockId=nxtSoundSensorRawValue
-        //% parts="nxtsoundsensor"
-        //% blockNamespace=sensors
+        //% blockId="nxtSoundSensorRawValue"
+        //% parts="nxt-sound-sensor"
+        //% blockNamespace="sensors"
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
