@@ -1,8 +1,8 @@
 namespace pxsim {
 
-    export class NXTTouchSensorNode extends AnalogSensorNode {
+    const NXT_TOUCH_SENSOR_ANALOG_RELEASED = 4800;
 
-        private static readonly RAW_RELEASED = 4800;
+    export class NXTTouchSensorNode extends AnalogSensorNode {
 
         id = NodeType.NXTTouchSensor;
 
@@ -28,7 +28,7 @@ namespace pxsim {
             if (this.pressed.length) {
                 if (this.pressed.pop()) return 0;
             }
-            return NXTTouchSensorNode.RAW_RELEASED;
+            return NXT_TOUCH_SENSOR_ANALOG_RELEASED;
         }
 
         public setPressed(pressed: boolean) {
