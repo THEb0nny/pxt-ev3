@@ -1,5 +1,3 @@
-
-
 namespace pxsim.visuals {
 
     export class DistanceSliderControl extends ControlView<UltrasonicSensorNode> {
