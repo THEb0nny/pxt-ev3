@@ -49,9 +49,8 @@ namespace pxsim.visuals {
         }
 
         updateState() {
-            if (!this.visible) {
-                return;
-            }
+            if (!this.visible) return;
+
             const node = this.state;
             const value = node.getValue();
             let inverseValue = this.getMaxValue(node) - value + this.getMinValue(node);
@@ -91,18 +90,21 @@ namespace pxsim.visuals {
 
             const reporterGroup = pxsim.svg.child(this.group, "g");
             reporterGroup.setAttribute("transform", `translate(${this.getWidth() / 2}, 20)`);
-            this.reporter = pxsim.svg.child(reporterGroup, "text", { 'text-anchor': 'middle', 'x': 0, 'y': '0', 'class': 'sim-text number large inverted' }) as SVGTextElement;
+            this.reporter = pxsim.svg.child(reporterGroup, "text", { 
+                'text-anchor': 'middle', 
+                'x': 0, 
+                'y': 0, 
+                'class': 'sim-text number large inverted'
+            }) as SVGTextElement;
 
             const sliderGroup = pxsim.svg.child(this.group, "g");
             sliderGroup.setAttribute("transform", `translate(${this.getWidth() / 2 - this.getSliderWidth() / 2}, ${this.getReporterHeight()})`);
 
-            const rect = pxsim.svg.child(sliderGroup, "rect",
-                {
-                    "width": this.getSliderWidth(),
-                    "height": this.getSliderHeight(),
-                    "style": `fill: url(#${gc})`
-                }
-            )
+            const rect = pxsim.svg.child(sliderGroup, "rect", {
+                "width": this.getSliderWidth(),
+                "height": this.getSliderHeight(),
+                "style": `fill: url(#${gc})`
+            });
             this.rect = rect;
 
             let pt = parent.createSVGPoint();
