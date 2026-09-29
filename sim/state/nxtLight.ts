@@ -1,6 +1,7 @@
 /// <reference path="./sensor.ts"/>
 
 namespace pxsim {
+
     export enum NXTLightSensorMode {
         None = -1,
         ReflectedLightRaw = 0,
@@ -10,6 +11,7 @@ namespace pxsim {
     }
 
     export class NXTLightSensorNode extends AnalogSensorNode {
+        
         id = NodeType.NXTLightSensor;
 
         private value: number = 0;
@@ -23,25 +25,16 @@ namespace pxsim {
             this.mode = -1;
         }
 
-        isNXT() {
-            return true;
-        }
-
         getDeviceType() {
             return DAL.DEVICE_TYPE_NXT_LIGHT;
         }
 
-        getAnalogReadPin() {
+        isNXT() {
+            return true;
+        }
+
+        getAnalogPin() {
             return AnalogOff.InPin1;
-        }
-
-        setValue(value: number) {
-            this.value = value;
-            this.setChangedState();
-        }
-
-        getValue() {
-            return this.value;
         }
 
         setMode(mode: number) {
@@ -51,6 +44,15 @@ namespace pxsim {
             else this.value = 2048;
             this.changed = true;
             this.modeChanged = true;
+        }
+
+        setValue(value: number) {
+            this.value = value;
+            this.setChangedState();
+        }
+
+        getValue() {
+            return this.value;
         }
     }
 }

@@ -5,10 +5,14 @@ namespace pxsim {
         protected mode: number;
         protected valueChanged: boolean;
         protected modeChanged: boolean;
-        protected modeReturnArr: boolean;
+        protected modeReturnsArray: boolean;
 
         constructor(port: number) {
             super(port);
+        }
+
+        getDeviceType() {
+            return DAL.DEVICE_TYPE_NONE;
         }
 
         public isUart() {
@@ -23,8 +27,23 @@ namespace pxsim {
             return false;
         }
 
-        public isModeReturnArr() {
-            return this.modeReturnArr;
+        public getAnalogPin() {
+            return AnalogOff.InPin6; // Deflault for EV3 sensor
+        }
+
+        setMode(mode: number) {
+            this.mode = mode;
+            this.changed = true;
+            this.modeChanged = true;
+            this.modeReturnsArray = false;
+        }
+
+        getMode() {
+            return this.mode;
+        }
+
+        public returnsArray() {
+            return this.modeReturnsArray;
         }
 
         public getValue() {
@@ -32,26 +51,7 @@ namespace pxsim {
         }
 
         public getValues() {
-            return [0];
-        }
-
-        public getAnalogReadPin() {
-            return AnalogOff.InPin6; // Defl for ev3 sensor
-        }
-
-        setMode(mode: number) {
-            this.mode = mode;
-            this.changed = true;
-            this.modeChanged = true;
-            this.modeReturnArr = false;
-        }
-
-        getMode() {
-            return this.mode;
-        }
-
-        getDeviceType() {
-            return DAL.DEVICE_TYPE_NONE;
+            return [this.getValue()];
         }
 
         public hasData() {
@@ -101,5 +101,4 @@ namespace pxsim {
             return this.changed;
         }
     }
-
 }

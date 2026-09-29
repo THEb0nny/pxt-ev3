@@ -40,7 +40,7 @@ namespace pxsim {
                             data[AnalogOff.InConn + port] = node.isUart() ? DAL.CONN_INPUT_UART : (!node.isNXT() ? DAL.CONN_INPUT_DUMB : DAL.CONN_NXT_DUMB);
                             if (node.isAnalog() && node.hasData()) {
                                 //data[AnalogOff.InPin6 + 2 * port] = node.getValue();
-                                util.map16Bit(data, node.getAnalogReadPin() + 2 * port, Math.floor(node.getValue()));
+                                util.map16Bit(data, node.getAnalogPin() + 2 * port, Math.floor(node.getValue()));
                             }
                         }
                     }
