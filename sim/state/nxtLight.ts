@@ -1,7 +1,6 @@
 /// <reference path="./sensor.ts"/>
 
 namespace pxsim {
-
     export enum NXTLightSensorMode {
         None = -1,
         ReflectedLightRaw = 0,
