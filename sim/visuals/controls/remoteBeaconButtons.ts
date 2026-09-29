@@ -1,6 +1,5 @@
-
-
 namespace pxsim.visuals {
+
     enum InfraredRemoteButton {
         CenterBeacon = 0x01,
         TopLeft = 0x02,
@@ -10,6 +9,7 @@ namespace pxsim.visuals {
     }
 
     export class RemoteBeaconButtonsControl extends ControlView<InfraredSensorNode> {
+        
         private group: SVGGElement;
         private id = Math.random().toString();
 

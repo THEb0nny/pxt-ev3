@@ -1,8 +1,7 @@
-
-
 namespace pxsim.visuals {
 
     export class ProximitySliderControl extends ControlView<InfraredSensorNode> {
+        
         private group: SVGGElement;
         private gradient: SVGLinearGradientElement;
         private slider: SVGGElement;

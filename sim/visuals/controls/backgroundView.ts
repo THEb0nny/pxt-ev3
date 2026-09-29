@@ -1,8 +1,7 @@
-
-
 namespace pxsim.visuals {
 
     export class BackgroundViewControl extends ControlView<PortNode> {
+
         private backgroundGroup: SVGGElement;
         private backgroundRect: SVGRectElement;
 

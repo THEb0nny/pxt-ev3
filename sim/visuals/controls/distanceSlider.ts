@@ -1,6 +1,7 @@
 namespace pxsim.visuals {
 
     export class DistanceSliderControl extends ControlView<UltrasonicSensorNode> {
+        
         private group: SVGGElement;
         private gradient: SVGLinearGradientElement;
         private slider: SVGGElement;

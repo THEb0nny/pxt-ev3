@@ -1,6 +1,7 @@
 namespace pxsim.visuals {
 
     export class ColorWheelControl extends ControlView<ColorSensorNode> {
+        
         private group: SVGGElement;
         private colorGradient: SVGLinearGradientElement;
         private reporter: SVGTextElement;

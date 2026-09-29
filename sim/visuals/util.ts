@@ -1,4 +1,5 @@
 namespace pxsim.visuals {
+    
     export interface LinearGradientDefinition {
         stops: LinearGradientStop[];
     }

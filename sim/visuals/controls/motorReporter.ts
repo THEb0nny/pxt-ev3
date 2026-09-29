@@ -1,8 +1,7 @@
-
-
 namespace pxsim.visuals {
 
     export class MotorReporterControl extends ControlView<MotorNode> {
+
         private group: SVGGElement;
 
         private circleBar: SVGCircleElement;

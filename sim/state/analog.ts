@@ -24,6 +24,7 @@ namespace pxsim {
     }
 
     export class EV3AnalogState {
+        
         constructor() {
             let data = new Uint8Array(5172);
             MMapMethods.register("/dev/lms_analog", {

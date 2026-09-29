@@ -75,6 +75,5 @@ namespace pxsim {
             this.color = color;
             this.setChangedState();
         }
-
     }
 }

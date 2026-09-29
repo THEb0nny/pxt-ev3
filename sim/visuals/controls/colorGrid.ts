@@ -1,8 +1,7 @@
-
-
 namespace pxsim.visuals {
 
     export class ColorGridControl extends ControlView<ColorSensorNode> {
+        
         private group: SVGGElement;
 
         private static colorIds = ['red', 'yellow', 'blue', 'green', 'black', 'brown', 'white', 'none'];

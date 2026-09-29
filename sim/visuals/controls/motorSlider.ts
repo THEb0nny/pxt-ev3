@@ -1,8 +1,7 @@
-
-
 namespace pxsim.visuals {
 
     export class MotorSliderControl extends ControlView<MotorNode> {
+        
         private group: SVGGElement;
         private gradient: SVGLinearGradientElement;
         private slider: SVGGElement;

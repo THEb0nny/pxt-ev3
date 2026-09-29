@@ -1,9 +1,9 @@
-
-
 namespace pxsim.visuals {
+
     const MAX_RATE = 40;
 
     export class RotationSliderControl extends ControlView<GyroSensorNode> {
+        
         private group: SVGGElement;
         private slider: SVGGElement;
         private rateText: SVGTextElement;
