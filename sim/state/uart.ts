@@ -38,7 +38,6 @@ namespace pxsim {
         TST_UART_WRITE = 0xc048740a,
     }
 
-
     export enum DevConOff {
         Connection = 0, // int8[4]
         Type = 4, // int8[4]

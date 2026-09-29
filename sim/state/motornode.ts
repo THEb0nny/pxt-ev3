@@ -1,7 +1,9 @@
 namespace pxsim {
+
     const MIN_RAMP_SPEED = 3;
 
     export class MotorNode extends BaseNode {
+
         isOutput = true;
         private rotationsPerMilliSecond: number;
 
@@ -245,6 +247,7 @@ namespace pxsim {
 }
 
 namespace pxsim {
+    
     // A re-implementation of Math.sign (since IE11 doesn't support it)
     export function sign(num: number) {
         return num ? num < 0 ? -1 : 1 : 0;

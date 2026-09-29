@@ -17,6 +17,7 @@ namespace pxsim.MMapMethods {
     import Buffer = pxsim.RefBuffer
 
     export class MMap extends pxsim.RefObject {
+
         constructor(public impl: MMapImpl, public len: number) {
             super()
             if (!impl.data) impl.data = new Uint8Array(this.len)
@@ -27,8 +28,11 @@ namespace pxsim.MMapMethods {
             if (!impl.ioctl) impl.ioctl = () => -1
             if (!impl.lseek) impl.lseek = (offset, whence) => -1
         }
+
         destroy() {
+            // Pass
         }
+
         buf(): Buffer {
             const b = pxsim.BufferMethods.createBuffer(this.impl.data.length);
             b.data.set(this.impl.data);
@@ -80,6 +84,7 @@ namespace pxsim.MMapMethods {
 }
 
 namespace pxsim.control {
+
     export function mmap(filename: string, size: number, offset: number): MMapMethods.MMap {
         let impl = MMapMethods.mmapRegistry[filename] || {};
         const m = new MMapMethods.MMap(impl, size);
@@ -88,6 +93,7 @@ namespace pxsim.control {
 }
 
 namespace pxsim.output {
+    
     export function createBuffer(size: number) {
         return BufferMethods.createBuffer(size)
     }

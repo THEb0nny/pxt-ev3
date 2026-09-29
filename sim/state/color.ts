@@ -19,6 +19,7 @@ namespace pxsim {
     }
 
     export class ColorSensorNode extends UartSensorNode {
+        
         id = NodeType.ColorSensor;
 
         private color: number = 0;

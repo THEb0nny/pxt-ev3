@@ -22,6 +22,7 @@ namespace pxsim {
     }
 
     export class BaseNode implements Node {
+
         public id: number;
         public port: number;
         public isOutput = false;
@@ -48,7 +49,7 @@ namespace pxsim {
          * @param elapsed
          */
         updateState(elapsed: number) {
-
+            // Pass
         }
     }
 }
