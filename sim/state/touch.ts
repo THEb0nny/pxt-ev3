@@ -3,6 +3,7 @@ namespace pxsim {
     const TOUCH_SENSOR_ANALOG_PRESSED = 2600;
 
     export class TouchSensorNode extends AnalogSensorNode {
+        
         id = NodeType.TouchSensor;
 
         private pressed: boolean[];
