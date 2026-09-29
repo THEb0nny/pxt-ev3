@@ -23,8 +23,16 @@ namespace pxsim {
             this.mode = -1;
         }
 
+        isNXT() {
+            return true;
+        }
+
         getDeviceType() {
             return DAL.DEVICE_TYPE_NXT_LIGHT;
+        }
+
+        getAnalogReadPin() {
+            return AnalogOff.InPin1;
         }
 
         setValue(value: number) {
@@ -43,14 +51,6 @@ namespace pxsim {
             else this.value = 2048;
             this.changed = true;
             this.modeChanged = true;
-        }
-
-        getAnalogReadPin() {
-            return AnalogOff.InPin1;
-        }
-
-        isNXT() {
-            return true;
         }
     }
 }
