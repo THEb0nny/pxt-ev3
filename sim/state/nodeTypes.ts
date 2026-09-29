@@ -9,8 +9,11 @@ namespace pxsim {
         ColorSensor = 6,
         UltrasonicSensor = 7,
         InfraredSensor = 8,
-        NXTLightSensor = 9,
-        NXTTouchSensor = 10
+        NXTTouchSensor = 9,
+        NXTLightSensor = 10,
+        NXTSoundSensor = 11,
+        NXTColorSensor = 12,
+        NXTUltrasonicSensor = 13
     }
 
     export interface Node {
