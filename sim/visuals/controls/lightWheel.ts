@@ -3,7 +3,7 @@ namespace pxsim.visuals {
     export class LightWheelControl extends ControlView<NXTLightSensorNode> {
 
         private group: SVGGElement;
-        private colorGradient: SVGLinearGradientElement;
+        private lightGradient: SVGLinearGradientElement;
         private reporter: SVGTextElement;
         private rect: SVGElement;
 
@@ -61,7 +61,7 @@ namespace pxsim.visuals {
             } else if (node.getMode() == NXTLightSensorMode.AmbientLight) {
                 inverseValue = this.mapValue(inverseValue, node.darkAmbientLight, node.brightAmbientLight, 0, 100);
             }
-            svg.setGradientValue(this.colorGradient, inverseValue + "%");
+            svg.setGradientValue(this.lightGradient, inverseValue + "%");
             if (node.getMode() == NXTLightSensorMode.ReflectedLightRaw || node.getMode() == NXTLightSensorMode.AmbientLightRaw) {
                 this.reporter.textContent = `${Math.floor(parseFloat(value.toString()))}`;
             } else {
@@ -69,7 +69,7 @@ namespace pxsim.visuals {
             }
         }
 
-        updateColorLevel(pt: SVGPoint, parent: SVGSVGElement, ev: MouseEvent) {
+        updateLightLevel(pt: SVGPoint, parent: SVGSVGElement, ev: MouseEvent) {
             const state = this.state;
             let cur = svg.cursorPoint(pt, parent, ev);
             const bBox = this.rect.getBoundingClientRect();
@@ -82,11 +82,11 @@ namespace pxsim.visuals {
         getInnerView(parent: SVGSVGElement, globalDefs: SVGDefsElement) {
             this.group = svg.elt("g") as SVGGElement;
 
-            let gc = "gradient-color-" + this.getPort();
-            const prevColorGradient = globalDefs.querySelector(`#${gc}`) as SVGLinearGradientElement;
-            this.colorGradient = prevColorGradient ? prevColorGradient : svg.linearGradient(globalDefs, gc, false);
-            svg.setGradientValue(this.colorGradient, "50%");
-            svg.setGradientColors(this.colorGradient, "black", "yellow");
+            let gc = "gradient-light-" + this.getPort();
+            const prevLightGradient = globalDefs.querySelector(`#${gc}`) as SVGLinearGradientElement;
+            this.lightGradient = prevLightGradient ? prevLightGradient : svg.linearGradient(globalDefs, gc, false);
+            svg.setGradientValue(this.lightGradient, "50%");
+            svg.setGradientColors(this.lightGradient, "black", "yellow");
 
             const reporterGroup = pxsim.svg.child(this.group, "g");
             reporterGroup.setAttribute("transform", `translate(${this.getWidth() / 2}, 20)`);
@@ -112,13 +112,13 @@ namespace pxsim.visuals {
             touchEvents(rect, ev => {
                 if (captured && (ev as MouseEvent).clientY) {
                     ev.preventDefault();
-                    this.updateColorLevel(pt, parent, ev as MouseEvent);
+                    this.updateLightLevel(pt, parent, ev as MouseEvent);
                 }
             }, ev => {
                 captured = true;
                 if ((ev as MouseEvent).clientY) {
                     rect.setAttribute('cursor', '-webkit-grabbing');
-                    this.updateColorLevel(pt, parent, ev as MouseEvent);
+                    this.updateLightLevel(pt, parent, ev as MouseEvent);
                 }
             }, () => {
                 captured = false;
