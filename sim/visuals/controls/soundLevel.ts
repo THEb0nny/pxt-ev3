@@ -3,7 +3,7 @@ namespace pxsim.visuals {
     export class SoundLevelControl extends ControlView<NXTSoundSensorNode> {
 
         private group: SVGGElement;
-        private colorGradient: SVGLinearGradientElement;
+        private soundGradient: SVGLinearGradientElement;
         private reporter: SVGTextElement;
         private rect: SVGElement;
 
@@ -41,7 +41,7 @@ namespace pxsim.visuals {
             const node = this.state;
             const value = Math.max(0, Math.min(100, node.getValue()));
 
-            svg.setGradientValue(this.colorGradient, (100 - value) + "%");
+            svg.setGradientValue(this.soundGradient, (100 - value) + "%");
             this.reporter.textContent = `${Math.floor(value)}%`;
         }
 
@@ -59,32 +59,26 @@ namespace pxsim.visuals {
             this.group = svg.elt("g") as SVGGElement;
 
             let gc = "gradient-sound-" + this.getPort();
-            const prevColorGradient = globalDefs.querySelector(`#${gc}`) as SVGLinearGradientElement;
-            this.colorGradient = prevColorGradient ? prevColorGradient : svg.linearGradient(globalDefs, gc, false);
-            svg.setGradientValue(this.colorGradient, "50%");
-            svg.setGradientColors(this.colorGradient, "#1e293b", "#06b6d4");
-
-            const midX = 55.5;
-            const sliderX = midX - this.getSliderWidth() / 2; // 55.5 - 31 = 24.5
+            const prevSoundGradient = globalDefs.querySelector(`#${gc}`) as SVGLinearGradientElement;
+            this.soundGradient = prevSoundGradient ? prevSoundGradient : svg.linearGradient(globalDefs, gc, false);
+            svg.setGradientValue(this.soundGradient, "50%");
+            svg.setGradientColors(this.soundGradient, "#1e293b", "#06b6d4");
 
             const reporterGroup = pxsim.svg.child(this.group, "g");
-            reporterGroup.setAttribute("transform", `translate(${midX}, 20)`);
+            reporterGroup.setAttribute("transform", `translate(${this.getWidth() / 2}, 20)`);
             this.reporter = pxsim.svg.child(reporterGroup, "text", {
                 'text-anchor': 'middle',
-                'dominant-baseline': 'central',
                 'x': 0,
                 'y': 0,
                 'class': 'sim-text number large inverted'
             }) as SVGTextElement;
 
             const sliderGroup = pxsim.svg.child(this.group, "g");
-            sliderGroup.setAttribute("transform", `translate(${sliderX}, ${this.getReporterHeight()})`);
+            sliderGroup.setAttribute("transform", `translate(${this.getWidth() / 2 - this.getSliderWidth() / 2}, ${this.getReporterHeight()})`);
 
             const rect = pxsim.svg.child(sliderGroup, "rect", {
                 "width": this.getSliderWidth(),
                 "height": this.getSliderHeight(),
-                "rx": 4,
-                "ry": 4,
                 "style": `fill: url(#${gc})`
             });
             this.rect = rect;
