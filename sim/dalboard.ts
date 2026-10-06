@@ -16,9 +16,9 @@ namespace pxsim {
         screenState: ScreenState;
         audioState: AudioState;
         remoteState: RemoteState;
-
-        inputNodes: SensorNode[] = [];
+        
         brickNode: BrickNode;
+        inputNodes: SensorNode[] = [];
         outputNodes: MotorNode[] = [];
 
         highcontrastMode?: boolean;
