@@ -29,8 +29,8 @@ namespace pxsim {
             return DAL.DEVICE_TYPE_NXT_LIGHT;
         }
 
-        isNXT() {
-            return true;
+        getFamily() {
+            return DeviceFamily.NXT;
         }
 
         getAnalogPin() {

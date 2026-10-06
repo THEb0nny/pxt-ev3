@@ -1,4 +1,5 @@
 namespace pxsim {
+
     export enum NodeType {
         Port = 0,
         Brick = 1,
@@ -14,6 +15,20 @@ namespace pxsim {
         NXTSoundSensor = 11,
         NXTColorSensor = 12,
         NXTUltrasonicSensor = 13
+    }
+
+    export enum DeviceFamily {
+        EV3,
+        NXT,
+        // HiTechnic,
+        // Mindsensors
+    }
+
+    export enum DeviceInterface {
+        Analog,
+        Uart,
+        I2C,
+        None
     }
 
     export interface Node {

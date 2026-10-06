@@ -20,12 +20,12 @@ namespace pxsim {
             super(port);
         }
 
-        isNXT() {
-            return true;
-        }
-
         getDeviceType() {
             return DAL.DEVICE_TYPE_NXT_SOUND;
+        }
+
+        getFamily() {
+            return DeviceFamily.NXT;
         }
 
         getAnalogPin() {

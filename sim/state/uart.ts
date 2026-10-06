@@ -87,7 +87,7 @@ namespace pxsim {
                     const inputNodes = ev3board().getInputNodes();
                     for (let port = 0; port < DAL.NUM_INPUTS; port++) {
                         const node = inputNodes[port];
-                        if (node && node.isUart()) {
+                        if (node && node.getInterface() === DeviceInterface.Uart) {
                             // Actual
                             const index = 0; //UartOff.Actual + port * 2;
                             if (!node.returnsArray()) {
@@ -106,8 +106,9 @@ namespace pxsim {
                 },
                 read: buf => {
                     let v = "vSIM";
-                    // for (let i = 0; i < buf.data.length; ++i)
+                    // for (let i = 0; i < buf.data.length; ++i) {
                     //     buf.data[i] = v.charCodeAt(i) || 0
+                    // }
                     return buf.data.length;
                 },
                 write: buf => {

@@ -16,8 +16,8 @@ namespace pxsim {
             return DAL.DEVICE_TYPE_NXT_TOUCH;
         }
 
-        isNXT() {
-            return true;
+        getFamily() {
+            return DeviceFamily.NXT;
         }
 
         getAnalogPin() {

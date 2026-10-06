@@ -15,20 +15,12 @@ namespace pxsim {
             return DAL.DEVICE_TYPE_NONE;
         }
 
-        public isUart() {
-            return true;
+        getFamily() {
+            return DeviceFamily.EV3;
         }
 
-        public isAnalog() {
-            return false;
-        }
-
-        public isNXT() {
-            return false;
-        }
-
-        public getAnalogPin() {
-            return AnalogOff.InPin6; // Deflault for EV3 sensor
+        getInterface() {
+            return DeviceInterface.None;
         }
 
         setMode(mode: number) {
@@ -42,31 +34,31 @@ namespace pxsim {
             return this.mode;
         }
 
-        public returnsArray() {
+        modeChange() {
+            const res = this.modeChanged;
+            this.modeChanged = false;
+            return res;
+        }
+
+        hasData() {
+            return true;
+        }
+
+        returnsArray() {
             return this.modeReturnsArray;
         }
 
-        public getValue() {
+        getValue() {
             return 0;
         }
 
-        public getValues() {
+        getValues() {
             return [this.getValue()];
-        }
-
-        public hasData() {
-            return true;
         }
 
         valueChange() {
             const res = this.valueChanged;
             this.valueChanged = false;
-            return res;
-        }
-
-        modeChange() {
-            const res = this.modeChanged;
-            this.modeChanged = false;
             return res;
         }
 
@@ -82,12 +74,12 @@ namespace pxsim {
             super(port);
         }
 
-        public isUart() {
-            return false;
+        getInterface() {
+            return DeviceInterface.Analog;
         }
 
-        public isAnalog() {
-            return true;
+        getAnalogPin() {
+            return AnalogOff.InPin6; // Default for EV3 sensor
         }
     }
 
@@ -97,8 +89,23 @@ namespace pxsim {
             super(port);
         }
 
+        getInterface() {
+            return DeviceInterface.Uart;
+        }
+
         hasChanged() {
             return this.changed;
+        }
+    }
+
+    export class I2CSensorNode extends SensorNode {
+
+        constructor(port: number) {
+            super(port);
+        }
+
+        getInterface() {
+            return DeviceInterface.I2C;
         }
     }
 }
