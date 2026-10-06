@@ -1,12 +1,11 @@
-
 namespace pxsim.music {
 
     export function fromWAV(buf: RefBuffer) {
-        return buf
+        return buf;
     }
 
     export function stopAllSounds() {
-        SoundMethods.stop()
+        SoundMethods.stop();
     }
 
     pxsim.music.setVolume = (volume: number): void => {
@@ -23,7 +22,7 @@ namespace pxsim.SoundMethods {
     let audio: HTMLAudioElement;
 
     export function buffer(buf: RefBuffer) {
-        return buf
+        return buf;
     }
 
     export function play(buf: RefBuffer) {
