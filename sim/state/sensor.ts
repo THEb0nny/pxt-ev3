@@ -104,6 +104,10 @@ namespace pxsim {
             super(port);
         }
 
+        getDeviceType() {
+            return DAL.DEVICE_TYPE_IIC_UNKNOWN;
+        }
+
         getInterface() {
             return DeviceInterface.I2C;
         }
