@@ -8,7 +8,8 @@ namespace pxsim.visuals {
         getInnerView() {
             this.backgroundGroup = svg.elt("g") as SVGGElement;
             this.backgroundRect = pxsim.svg.child(this.backgroundGroup, "rect", {
-                'x': 0, 'y': 0,
+                'x': 0, 
+                'y': 0,
                 'width': '100%',
                 'height': '100%',
                 'style': `fill: ${this.theme.backgroundViewColor}; stroke: #A8A9A8; stroke-width: 3px; stroke-opacity: 0.2`

@@ -43,7 +43,7 @@ namespace pxsim.visuals {
                     'class': `sim-color-grid-circle sim-color-grid-${item.id}`,
                     'cx': cx,
                     'cy': cy,
-                    'r': '2',
+                    'r': 2,
                     'style': style
                 });
                 this.colorDivs.push(circle);
@@ -52,7 +52,7 @@ namespace pxsim.visuals {
                     pxsim.svg.child(circleWrapper, "circle", {
                         'cx': cx,
                         'cy': cy,
-                        'r': '2',
+                        'r': 2,
                         'style': `fill: none; stroke: ${item.stroke}; stroke-width: 0.1px`
                     });
                 }
