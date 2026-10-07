@@ -4,15 +4,15 @@ namespace pxsim.visuals {
 
     export class MotorSliderControl extends ControlView<MotorNode> {
         
-        private group!: SVGGElement;
-        private gradient!: SVGLinearGradientElement;
-        private slider!: SVGGElement;
-        private reporter!: SVGTextElement;
-        private dial!: SVGGElement;
+        private group: SVGGElement;
+        private gradient: SVGLinearGradientElement;
+        private slider: SVGGElement;
+        private reporter: SVGTextElement;
+        private dial: SVGGElement;
         
         private internalAngle: number = 0;
-        private lastPosition!: number;
-        private prevVal!: number;
+        private lastPosition: number;
+        private prevVal: number;
 
         getInnerView(parent: SVGSVGElement, globalDefs: SVGDefsElement) {
             this.group = svg.elt("g") as SVGGElement;

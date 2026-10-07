@@ -2,10 +2,10 @@ namespace pxsim.visuals {
 
     export class SoundLevelControl extends ControlView<NXTSoundSensorNode> {
 
-        private group!: SVGGElement;
-        private soundGradient!: SVGLinearGradientElement;
-        private reporter!: SVGTextElement;
-        private rect!: SVGElement;
+        private group: SVGGElement;
+        private soundGradient: SVGLinearGradientElement;
+        private reporter: SVGTextElement;
+        private rect: SVGElement;
 
         getInnerWidth() {
             return 111;

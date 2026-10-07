@@ -2,9 +2,9 @@ namespace pxsim.visuals {
 
     export class MotorReporterControl extends ControlView<MotorNode> {
 
-        private group!: SVGGElement;
-        private circleBar!: SVGCircleElement;
-        private reporter!: SVGTextElement;
+        private group: SVGGElement;
+        private circleBar: SVGCircleElement;
+        private reporter: SVGTextElement;
 
         getInnerView() {
             this.group = svg.elt("g") as SVGGElement;

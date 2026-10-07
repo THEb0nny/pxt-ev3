@@ -2,10 +2,10 @@ namespace pxsim.visuals {
 
     export class LightWheelControl extends ControlView<NXTLightSensorNode> {
 
-        private group!: SVGGElement;
-        private lightGradient!: SVGLinearGradientElement;
-        private reporter!: SVGTextElement;
-        private rect!: SVGElement;
+        private group: SVGGElement;
+        private lightGradient: SVGLinearGradientElement;
+        private reporter: SVGTextElement;
+        private rect: SVGElement;
 
         getInnerWidth() {
             return 111;

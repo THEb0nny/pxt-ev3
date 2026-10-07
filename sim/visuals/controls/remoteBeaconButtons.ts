@@ -10,7 +10,7 @@ namespace pxsim.visuals {
 
     export class RemoteBeaconButtonsControl extends ControlView<InfraredSensorNode> {
         
-        private group!: SVGGElement;
+        private group: SVGGElement;
         private id = Math.random().toString();
 
         getInnerView() {

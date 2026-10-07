@@ -2,8 +2,8 @@ namespace pxsim.visuals {
 
     export class BackgroundViewControl extends ControlView<PortNode> {
 
-        private backgroundGroup!: SVGGElement;
-        private backgroundRect!: SVGRectElement;
+        private backgroundGroup: SVGGElement;
+        private backgroundRect: SVGRectElement;
 
         getInnerView() {
             this.backgroundGroup = svg.elt("g") as SVGGElement;

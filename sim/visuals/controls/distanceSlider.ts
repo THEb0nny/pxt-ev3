@@ -5,11 +5,11 @@ namespace pxsim.visuals {
 
     export class DistanceSliderControl extends ControlView<UltrasonicSensorNode> {
         
-        private group!: SVGGElement;
-        private gradient!: SVGLinearGradientElement;
-        private slider!: SVGGElement;
-        private reporter!: SVGTextElement;
-        private rect!: SVGRectElement;
+        private group: SVGGElement;
+        private gradient: SVGLinearGradientElement;
+        private slider: SVGGElement;
+        private reporter: SVGTextElement;
+        private rect: SVGRectElement;
 
         getInnerWidth() {
             return 111;

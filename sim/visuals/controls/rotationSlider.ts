@@ -7,9 +7,9 @@ namespace pxsim.visuals {
 
     export class RotationSliderControl extends ControlView<GyroSensorNode> {
         
-        private group!: SVGGElement;
-        private slider!: SVGGElement;
-        private rateText!: SVGTextElement;
+        private group: SVGGElement;
+        private slider: SVGGElement;
+        private rateText: SVGTextElement;
 
         getInnerView(parent: SVGSVGElement, globalDefs: SVGDefsElement) {
             this.group = svg.elt("g") as SVGGElement;

@@ -5,11 +5,11 @@ namespace pxsim.visuals {
 
     export class ProximitySliderControl extends ControlView<InfraredSensorNode> {
         
-        private group!: SVGGElement;
-        private gradient!: SVGLinearGradientElement;
-        private slider!: SVGGElement;
-        private rect!: SVGRectElement;
-        private reporter!: SVGTextElement;
+        private group: SVGGElement;
+        private gradient: SVGLinearGradientElement;
+        private slider: SVGGElement;
+        private rect: SVGRectElement;
+        private reporter: SVGTextElement;
 
         getInnerWidth() {
             return 111;

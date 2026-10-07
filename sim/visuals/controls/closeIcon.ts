@@ -2,7 +2,7 @@ namespace pxsim.visuals {
 
     export class CloseIconControl extends ControlView<PortNode> {
         
-        private closeGroup!: SVGGElement;
+        private closeGroup: SVGGElement;
 
         getInnerView() {
             this.closeGroup = svg.elt("g") as SVGGElement;
