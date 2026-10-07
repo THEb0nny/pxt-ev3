@@ -10,12 +10,12 @@ namespace pxsim.visuals {
 
     export class RemoteBeaconButtonsControl extends ControlView<InfraredSensorNode> {
         
-        private group: SVGGElement;
+        private group!: SVGGElement;
         private id = Math.random().toString();
 
         getInnerView() {
             this.group = svg.elt("g") as SVGGElement;
-            this.group.setAttribute("transform", `scale(0.9, 0.9)`)
+            this.group.setAttribute("transform", `scale(0.9, 0.9)`);
             
             const xml = pxsim.visuals.normalizeXml(this.id, pxsim.visuals.REMOVE_SVG);
             const content = svg.parseString(xml);

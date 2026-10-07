@@ -149,4 +149,8 @@ namespace pxsim.visuals {
     function offsetString(offset: string | number) {
         return (typeof offset === "number") ? offset + "%" : offset;
     }
+
+    export function mapValue(x: number, inMin: number, inMax: number, outMin: number, outMax: number) {
+        return (x - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+    }
 }

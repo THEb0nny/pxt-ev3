@@ -2,10 +2,10 @@ namespace pxsim.visuals {
 
     export class LightWheelControl extends ControlView<NXTLightSensorNode> {
 
-        private group: SVGGElement;
-        private lightGradient: SVGLinearGradientElement;
-        private reporter: SVGTextElement;
-        private rect: SVGElement;
+        private group!: SVGGElement;
+        private lightGradient!: SVGLinearGradientElement;
+        private reporter!: SVGTextElement;
+        private rect!: SVGElement;
 
         getInnerWidth() {
             return 111;
@@ -44,10 +44,6 @@ namespace pxsim.visuals {
             return 100;
         }
 
-        private mapValue(x: number, inMin: number, inMax: number, outMin: number, outMax: number) {
-            return (x - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
-        }
-
         updateState() {
             if (!this.visible) return;
 
@@ -55,17 +51,17 @@ namespace pxsim.visuals {
             const value = node.getValue();
             let inverseValue = this.getMaxValue(node) - value + this.getMinValue(node);
             if (node.getMode() == NXTLightSensorMode.ReflectedLightRaw || node.getMode() == NXTLightSensorMode.AmbientLightRaw) {
-                inverseValue = this.mapValue(inverseValue, 0, 4095, 0, 100);
+                inverseValue = mapValue(inverseValue, 0, 4095, 0, 100);
             } else if (node.getMode() == NXTLightSensorMode.ReflectedLight) {
-                inverseValue = this.mapValue(inverseValue, node.darkReflectedLight, node.brightReflectedLight, 0, 100);
+                inverseValue = mapValue(inverseValue, node.darkReflectedLight, node.brightReflectedLight, 0, 100);
             } else if (node.getMode() == NXTLightSensorMode.AmbientLight) {
-                inverseValue = this.mapValue(inverseValue, node.darkAmbientLight, node.brightAmbientLight, 0, 100);
+                inverseValue = mapValue(inverseValue, node.darkAmbientLight, node.brightAmbientLight, 0, 100);
             }
             svg.setGradientValue(this.lightGradient, inverseValue + "%");
             if (node.getMode() == NXTLightSensorMode.ReflectedLightRaw || node.getMode() == NXTLightSensorMode.AmbientLightRaw) {
                 this.reporter.textContent = `${Math.floor(parseFloat(value.toString()))}`;
             } else {
-                this.reporter.textContent = `${Math.floor(this.mapValue(parseFloat(value.toString()), this.getMaxValue(node), this.getMinValue(node), 0, 100))}%`;
+                this.reporter.textContent = `${Math.floor(mapValue(parseFloat(value.toString()), this.getMaxValue(node), this.getMinValue(node), 0, 100))}%`;
             }
         }
 
@@ -123,7 +119,7 @@ namespace pxsim.visuals {
             }, () => {
                 captured = false;
                 rect.setAttribute('cursor', '-webkit-grab');
-            })
+            });
 
             return this.group;
         }
