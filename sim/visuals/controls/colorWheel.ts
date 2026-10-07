@@ -37,10 +37,14 @@ namespace pxsim.visuals {
             const node = this.state;
             const value = node.getValue();
             let inverseValue = this.getMaxValue(node.getMode()) - value;
-            if (node.getMode() == ColorSensorMode.RefRaw) inverseValue = mapValue(inverseValue, 0, 1023, 0, 100);
+            if (node.getMode() == ColorSensorMode.RefRaw) {
+                inverseValue = pxsim.math.map(inverseValue, 0, 1023, 0, 100);
+            }
             svg.setGradientValue(this.colorGradient, inverseValue + "%");
             this.reporter.textContent = `${parseFloat((value).toString()).toFixed(0)}`;
-            if (node.getMode() != ColorSensorMode.RefRaw) this.reporter.textContent += `%`;
+            if (node.getMode() != ColorSensorMode.RefRaw) {
+                this.reporter.textContent += `%`;
+            }
         }
 
         updateColorLevel(pt: SVGPoint, parent: SVGSVGElement, ev: MouseEvent) {

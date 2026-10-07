@@ -46,7 +46,7 @@ namespace pxsim.visuals {
             let inverseValue: number[] = [];
             for (let i = 0; i < 3; i++) {
                 inverseValue[i] = this.getMaxValue() - values[i];
-                inverseValue[i] = mapValue(inverseValue[i], 0, this.getMaxValue(), 0, 100);
+                inverseValue[i] = pxsim.math.map(inverseValue[i], 0, this.getMaxValue(), 0, 100);
                 svg.setGradientValue(this.colorGradient[i], inverseValue[i] + "%");
                 this.reporter[i].textContent = RGB_LETTERS[i] + ": " + `${parseFloat((values[i]).toString()).toFixed(0)}`;
             }
