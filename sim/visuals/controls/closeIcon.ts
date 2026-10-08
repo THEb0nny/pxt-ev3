@@ -9,30 +9,30 @@ namespace pxsim.visuals {
             this.closeGroup.style.cursor = 'pointer';
             const circleCloseWrapper = pxsim.svg.child(this.closeGroup, "g");
             pxsim.svg.child(circleCloseWrapper, "circle", { 
-                'cx': "16", 
-                'cy': "16", 
-                'r': "16", 
+                'cx': 16, 
+                'cy': 16, 
+                'r': 16, 
                 'style': "fill: transparent;" 
             });
             pxsim.svg.child(circleCloseWrapper, "circle", { 
-                'cx': "16", 
-                'cy': "16", 
-                'r': "15", 
+                'cx': 16, 
+                'cy': 16, 
+                'r': 15, 
                 'style': "fill: none; stroke: #a8aaa8; stroke-width: 2px"
             });
             pxsim.svg.child(this.closeGroup, "rect", { 
-                'x': "10", 
-                'y': "16", 
-                'width': "18", 
-                'height': "2", 
+                'x': 10, 
+                'y': 16, 
+                'width': 18, 
+                'height': 2, 
                 'transform': "translate(-9.46 17.41) rotate(-45)", 
                 'style': "fill: #a8aaa8"
             });
             pxsim.svg.child(this.closeGroup, "rect", { 
-                'x': "18", 
-                'y': "8", 
-                'width': "2", 
-                'height': "18", 
+                'x': 18, 
+                'y': 8, 
+                'width': 2, 
+                'height': 18, 
                 'transform': "translate(-9.46 17.41) rotate(-45)", 
                 'style': "fill: #a8aaa8" 
             });
