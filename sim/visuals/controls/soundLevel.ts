@@ -27,11 +27,20 @@ namespace pxsim.visuals {
             return 131;
         }
 
-        private getMinValue() {
+        private getMinValue(state: NXTSoundSensorNode) {
+            if (state.getMode() == NXTSoundSensorMode.Db) return state.loudDb;
+            else if (state.getMode() == NXTSoundSensorMode.DbA) return state.loudDbA;
             return 0;
         }
 
-        private getMaxValue() {
+        private getMaxValue(state: NXTSoundSensorNode) {
+            if (state.getMode() == NXTSoundSensorMode.RawDb || state.getMode() == NXTSoundSensorMode.RawDbA) {
+                return 4095;
+            } else if (state.getMode() == NXTSoundSensorMode.Db) {
+                return state.silentDb;
+            } else if (state.getMode() == NXTSoundSensorMode.DbA) {
+                return state.silentDbA;
+            }
             return 100;
         }
 
@@ -39,10 +48,24 @@ namespace pxsim.visuals {
             if (!this.visible) return;
 
             const node = this.state;
-            const value = Math.max(0, Math.min(100, node.getValue()));
-
-            svg.setGradientValue(this.soundGradient, (100 - value) + "%");
-            this.reporter.textContent = `${Math.floor(value)}%`;
+            const value = node.getValue();
+            let inverseValue = this.getMaxValue(node) - value + this.getMinValue(node);
+            if (node.getMode() == NXTSoundSensorMode.RawDb || node.getMode() == NXTSoundSensorMode.RawDbA) {
+                inverseValue = pxsim.math.map(inverseValue, 0, 4095, 0, 100);
+                inverseValue = pxsim.math.clamp(0, 100, inverseValue);
+                svg.setGradientValue(this.soundGradient, inverseValue + "%");
+                this.reporter.textContent = `${Math.floor(parseFloat(value.toString()))}`;
+            } else if (node.getMode() == NXTSoundSensorMode.Db) {
+                inverseValue = pxsim.math.map(inverseValue, node.silentDb, node.loudDb, 0, 100);
+                inverseValue = pxsim.math.clamp(0, 100, inverseValue);
+                svg.setGradientValue(this.soundGradient, inverseValue + "%");
+                this.reporter.textContent = `${Math.floor(pxsim.math.map(parseFloat(value.toString()), this.getMaxValue(node), this.getMinValue(node), 0, 100))}%`;
+            } else if (node.getMode() == NXTSoundSensorMode.DbA) {
+                inverseValue = pxsim.math.map(inverseValue, node.silentDbA, node.loudDbA, 0, 100);
+                inverseValue = pxsim.math.clamp(0, 100, inverseValue);
+                svg.setGradientValue(this.soundGradient, inverseValue + "%");
+                this.reporter.textContent = `${Math.floor(pxsim.math.map(parseFloat(value.toString()), this.getMaxValue(node), this.getMinValue(node), 0, 100))}%`;
+            }
         }
 
         updateSoundLevel(pt: SVGPoint, parent: SVGSVGElement, ev: MouseEvent) {
@@ -50,9 +73,11 @@ namespace pxsim.visuals {
             let cur = svg.cursorPoint(pt, parent, ev);
             const bBox = this.rect.getBoundingClientRect();
             const height = bBox.height;
-
             let t = Math.max(0, Math.min(1, (height + bBox.top / this.scaleFactor - cur.y / this.scaleFactor) / height));
-            state.setValue(t * this.getMaxValue());
+            if (state.getMode() == NXTSoundSensorMode.Db || state.getMode() == NXTSoundSensorMode.DbA) {
+                t = 1 - t;
+            }
+            state.setValue(this.getMinValue(state) + t * (this.getMaxValue(state) - this.getMinValue(state)));
         }
 
         getInnerView(parent: SVGSVGElement, globalDefs: SVGDefsElement) {

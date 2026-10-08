@@ -14,11 +14,11 @@ namespace pxsim {
 
         id = NodeType.NXTSoundSensor;
 
-        private value: number = 3900;
-        public silentDb: number = 3900;
-        public loudDb: number = 385;
-        public silentDbA: number = 3900;
-        public loudDbA: number = 385;
+        private value: number = 4095;
+        public silentDb: number = 4095;
+        public loudDb: number = 0;
+        public silentDbA: number = 4095;
+        public loudDbA: number = 0;
 
         constructor(port: number) {
             super(port);
