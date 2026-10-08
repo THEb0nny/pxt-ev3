@@ -52,10 +52,13 @@ namespace pxsim.visuals {
             let inverseValue = this.getMaxValue(node) - value + this.getMinValue(node);
             if (node.getMode() == NXTLightSensorMode.ReflectedLightRaw || node.getMode() == NXTLightSensorMode.AmbientLightRaw) {
                 inverseValue = pxsim.math.map(inverseValue, 0, 4095, 0, 100);
+                inverseValue = pxsim.math.clamp(0, 100, inverseValue);
             } else if (node.getMode() == NXTLightSensorMode.ReflectedLight) {
                 inverseValue = pxsim.math.map(inverseValue, node.darkReflectedLight, node.brightReflectedLight, 0, 100);
+                inverseValue = pxsim.math.clamp(0, 100, inverseValue);
             } else if (node.getMode() == NXTLightSensorMode.AmbientLight) {
                 inverseValue = pxsim.math.map(inverseValue, node.darkAmbientLight, node.brightAmbientLight, 0, 100);
+                inverseValue = pxsim.math.clamp(0, 100, inverseValue);
             }
             svg.setGradientValue(this.lightGradient, inverseValue + "%");
             if (node.getMode() == NXTLightSensorMode.ReflectedLightRaw || node.getMode() == NXTLightSensorMode.AmbientLightRaw) {
