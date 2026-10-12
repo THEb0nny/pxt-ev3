@@ -88,7 +88,7 @@ namespace sensors {
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
-        //% weight=89 blockGap=8
+        //% weight="89" blockGap="8"
         //% subcategory="NXT"
         //% group="Sound Sensor"
         setDbRange(silent: number, loud: number) {
@@ -110,7 +110,7 @@ namespace sensors {
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
-        //% weight=88 blockGap=8
+        //% weight="88" blockGap="8"
         //% subcategory="NXT"
         //% group="Sound Sensor"
         setDbARange(silent: number, loud: number) {
@@ -138,7 +138,7 @@ namespace sensors {
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
-        //% weight=99 blockGap=8
+        //% weight="99" blockGap="8"
         //% subcategory="NXT"
         //% group="Sound Sensor"
         soundLevel(mode: NXTSoundSensorMode): number {
@@ -161,7 +161,7 @@ namespace sensors {
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
-        //% weight=89 blockGap=8
+        //% weight="89" blockGap="8"
         //% subcategory="NXT"
         //% group="Sound Sensor"
         soundLevelRaw(mode: NXTSoundSensorMode): number {
@@ -173,15 +173,15 @@ namespace sensors {
         }
     }
 
-    //% whenUsed block="1" weight=95 fixedInstance jres=icons.port1
+    //% whenUsed block="1" weight="95" fixedInstance jres=icons.port1
     export const nxtSound1 = new NXTSoundSensor(1);
 
-    //% whenUsed block="2" weight=95 fixedInstance jres=icons.port2
+    //% whenUsed block="2" weight="95" fixedInstance jres=icons.port2
     export const nxtSound2 = new NXTSoundSensor(2);
 
-    //% whenUsed block="3" weight=95 fixedInstance jres=icons.port3
+    //% whenUsed block="3" weight="95" fixedInstance jres=icons.port3
     export const nxtSound3 = new NXTSoundSensor(3);
 
-    //% whenUsed block="4" weight=95 fixedInstance jres=icons.port4
+    //% whenUsed block="4" weight="95" fixedInstance jres=icons.port4
     export const nxtSound4 = new NXTSoundSensor(4);
 }
