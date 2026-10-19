@@ -7,11 +7,11 @@ const enum PrintStyle {
 
 const enum FontSize {
     //% block="small"
-    FontSmall,
+    Small,
     //% block="medium"
-    FontMedium,
+    Medium,
     //% block="large"
-    FontLarge
+    Large
 }
 
 /**
@@ -19,23 +19,27 @@ const enum FontSize {
  */
 //% shim=@f4 helper=image::ofBuffer
 //% groups=["0.,","1#*"]
-function img(lits: any, ...args: any[]): Image { return null }
+function img(lits: any, ...args: any[]): Image { 
+    return null;
+}
 
-const screen = image.create(DAL.LCD_WIDTH, DAL.LCD_HEIGHT)
+const screen = image.create(DAL.LCD_WIDTH, DAL.LCD_HEIGHT);
 
 namespace _screen_internal {
+
     //% shim=pxt::updateScreen
     function updateScreen(img: Image): void { }
     //% shim=pxt::updateStats
     function updateStats(msg: string): void { }
 
-    control.__screen.setupUpdate(() => updateScreen(screen))
+    control.__screen.setupUpdate(() => updateScreen(screen));
     control.EventContext.onStats = function (msg: string) {
         updateStats(msg);
     }
 }
 
 namespace brick {
+
     const textOffset = 4;
     const lineOffset = 2;
 
@@ -65,7 +69,7 @@ namespace brick {
      */
     //%
     export function lineCount(): number {
-        return ((screen.height - textOffset) / lineHeight()) >> 0
+        return ((screen.height - textOffset) / lineHeight()) >> 0;
     }
 
     /**
@@ -73,16 +77,17 @@ namespace brick {
      */
     //%
     export function columnCount(): number {
-        return ((screen.width - textOffset) / font.charWidth) >> 0
+        return ((screen.width - textOffset) / font.charWidth) >> 0;
     }
 
     export function getFont(fontSize: FontSize): image.Font {
-        if (fontSize == FontSize.FontMedium)
+        if (fontSize == FontSize.Medium) {
             return font16;
-        else if (fontSize == FontSize.FontLarge)
+        } else if (fontSize == FontSize.Large) {
             return font32;
-        else
+        } else {
             return font;
+        }
     }
 
     /**
@@ -90,16 +95,19 @@ namespace brick {
      * @param text the text to print on the screen, eg: "Hello world"
      * @param line the line number to print the text at (starting at 1), eg: 1
      * @param column the column number to print the text at (starting at 1), eg: 1
-     * @param printStyle print style black on white or white on black
      * @param fontSize set size of text (2x or 4x font size)
+     * @param printStyle print style black on white or white on black
      */
-    //% blockId=screenPrintString block="show string $text|at line $line||column $column|style $printStyle|size $fontSize"
-    //% weight=98 group="Screen" inlineInputMode="inline" blockGap=8
-    //% expandableArgumentMode="enabled"
     //% help=brick/show-string
-    //% line.min=1 line.max=12
-    //% column.min=1 column.max=29
-    export function printString(text: string, line: number, column: number = 1, printStyle: PrintStyle = PrintStyle.BlackOnWhite, fontSize: FontSize = FontSize.FontSmall) {
+    //% blockId="screenPrintString"
+    //% block="show string $text|at line $line||column $column|size $fontSize|style $printStyle"
+    //% inlineInputMode="inline"
+    //% expandableArgumentMode="enabled"
+    //% weight="98" blockGap="8"
+    //% line.min="1" line.max="12"
+    //% column.min="1" column.max="29"
+    //% group="Screen"
+    export function printString(text: string, line: number, column: number = 1, fontSize: FontSize = FontSize.Small, printStyle: PrintStyle = PrintStyle.BlackOnWhite) {
         if (screenMode != ScreenMode.ShowLines) {
             screenMode = ScreenMode.ShowLines;
             screen.fill(0);
@@ -112,8 +120,7 @@ namespace brick {
         if (line < 0 || line > nlines) return; // out of screen by line
         if (column < 0 || column > nColumn) return; // out of screen by column
         
-        // Line and column coordinates match the native 8x8 font size, but
-        // clearing uses the selected font size.
+        // Line and column coordinates match the native 8x8 font size, but clearing uses the selected font size
         const selectedFont = getFont(fontSize);
         const x = textOffset + font.charWidth * column;
         const y = textOffset + lineHeight() * line;
@@ -127,18 +134,21 @@ namespace brick {
      * @param text the text to print on the screen, eg: "Hello world"
      * @param line the line number to print the text at (starting at 1), eg: 1
      */
-    //% blockId=screen_print block="show string %text|at line %line"
-    //% weight=98 group="Screen" inlineInputMode="inline" blockGap=8
     //% help=brick/show-string
-    //% line.min=1 line.max=12
-    //% deprecated=true
+    //% blockId="screen_print"
+    //% block="show string %text|at line %line"
+    //% inlineInputMode="inline"
+    //% weight="98" blockGap="8"
+    //% line.min="1" line.max="12"
+    //% group="Screen"
+    //% deprecated="true"
     export function showString(text: string, line: number) {
         if (screenMode != ScreenMode.ShowLines) {
             screenMode = ScreenMode.ShowLines;
             screen.fill(0);
         }
 
-        // line indexing starts at 1.
+        // line indexing starts at 1
         line = (line - 1) >> 0;
         const nlines = lineCount();
         if (line < 0 || line > nlines) return; // out of screen
@@ -154,17 +164,20 @@ namespace brick {
      * @param value the numeric value
      * @param line the line number to print the text at, eg: 1
      * @param column the column number to print the text at (starting at 1), eg: 1
-     * @param printStyle print style black on white or white on black
      * @param fontSize set size of text (2x or 4x font size)
+     * @param printStyle print style black on white or white on black
      */
-    //% blockId=screenPrintNumber block="show number $value|at line $line||column $column|style $printStyle|size $fontSize"
-    //% weight=97 group="Screen" inlineInputMode="inline" blockGap=8
-    //% expandableArgumentMode="enabled"
     //% help=brick/show-number
-    //% line.min=1 line.max=12
-    //% column.min=1 column.max=29
-    export function printNumber(value: number, line: number, column: number = 1, printStyle: PrintStyle = PrintStyle.BlackOnWhite, fontSize: FontSize = FontSize.FontSmall) {
-        printString("" + value, line, column, printStyle, fontSize);
+    //% blockId="screenPrintNumber"
+    //% block="show number $value|at line $line||column $column|size $fontSize|style $printStyle"
+    //% inlineInputMode="inline"
+    //% weight="97" blockGap="8"
+    //% expandableArgumentMode="enabled"
+    //% line.min="1" line.max="12"
+    //% column.min="1" column.max="29"
+    //% group="Screen"
+    export function printNumber(value: number, line: number, column: number = 1, fontSize: FontSize = FontSize.Small, printStyle: PrintStyle = PrintStyle.BlackOnWhite) {
+        printString("" + value, line, column, fontSize, printStyle);
     }
 
     /**
@@ -172,11 +185,14 @@ namespace brick {
      * @param value the numeric value
      * @param line the line number to print the text at, eg: 1
      */
-    //% blockId=screenShowNumber block="show number %name|at line %line"
-    //% weight=97 group="Screen" inlineInputMode="inline" blockGap=8
     //% help=brick/show-number
-    //% line.min=1 line.max=12
-    //% deprecated=true
+    //% blockId="screenShowNumber"
+    //% block="show number %name|at line %line"
+    //% inlineInputMode="inline"
+    //% weight="97" blockGap="8"
+    //% line.min="1" line.max="12"
+    //% deprecated="true"
+    //% group="Screen"
     export function showNumber(value: number, line: number) {
         showString("" + value, line);
     }
@@ -187,18 +203,21 @@ namespace brick {
      * @param value the numeric value
      * @param line the line number to print the text at, eg: 1
      * @param column the column number to print the text at (starting at 1), eg: 1
-     * @param printStyle print style black on white or white on black
      * @param fontSize set size of text (2x or 4x font size)
+     * @param printStyle print style black on white or white on black
      */
-    //% blockId=screenPrintValue block="show value $name|= $value|at line $line||column $column|style $printStyle|size $fontSize"
-    //% weight=96 group="Screen" inlineInputMode="inline" blockGap=8
-    //% expandableArgumentMode="enabled"
     //% help=brick/show-value
-    //% line.min=1 line.max=12
-    //% column.min=1 column.max=29
-    export function printValue(name: string, value: number, line: number, column: number = 1, printStyle: PrintStyle = PrintStyle.BlackOnWhite, fontSize: FontSize = FontSize.FontSmall) {
+    //% blockId="screenPrintValue"
+    //% block="show value $name|= $value|at line $line||column $column|size $fontSize|style $printStyle"
+    //% inlineInputMode="inline"
+    //% expandableArgumentMode="enabled"
+    //% weight="96" blockGap="8"
+    //% line.min="1" line.max="12"
+    //% column.min="1" column.max="29"
+    //% group="Screen"
+    export function printValue(name: string, value: number, line: number, column: number = 1, fontSize: FontSize = FontSize.Small, printStyle: PrintStyle = PrintStyle.BlackOnWhite) {
         value = Math.round(value * 1000) / 1000;
-        printString((name ? name + ": " : "") + value, line, column, printStyle, fontSize);
+        printString((name ? name + ": " : "") + value, line, column, fontSize, printStyle);
     }
 
     /**
@@ -206,11 +225,14 @@ namespace brick {
      * @param value the numeric value
      * @param line the line number to print the text at, eg: 1
      */
-    //% blockId=screenShowValue block="show value %name|= %text|at line %line"
-    //% weight=96 group="Screen" inlineInputMode="inline" blockGap=8
     //% help=brick/show-value
-    //% line.min=1 line.max=12
-    //% deprecated=true
+    //% blockId="screenShowValue"
+    //% block="show value %name|= %text|at line %line"
+    //% inlineInputMode="inline"
+    //% weight="96" blockGap="8"
+    //% line.min="1" line.max="12"
+    //% group="Screen"
+    //% deprecated="true"
     export function showValue(name: string, value: number, line: number) {
         value = Math.round(value * 1000) / 1000;
         showString((name ? name + ": " : "") + value, line);
@@ -221,24 +243,27 @@ namespace brick {
      * @param image image to draw
      * @param duration duration in milliseconds to display the image, eg: 400
      */
-    //% blockId=screen_show_image block="show image %image=screen_image_picker"
-    //% weight=100 group="Screen" blockGap=8
     //% help=brick/show-image
+    //% blockId="screen_show_image"
+    //% block="show image %image=screen_image_picker"
+    //% weight="100" blockGap="8"
+    //% group="Screen"
     export function showImage(image: Image, duration: number = 400) {
         if (!image) return;
         screenMode = ScreenMode.Image;
         screen.fill(0);
         screen.drawImage(image, 0, 0);
-        if (duration > 0)
-            pause(duration);
+        if (duration > 0) pause(duration);
     }
 
     /**
     * Display the status of the sensors and motors attached to ports   
     */
-    //% blockId=brickShowPorts block="show ports"
-    //% help=brick/show-ports blockGap=8
-    //% weight=95 group="Screen"
+    //% help=brick/show-ports
+    //% blockId="brickShowPorts"
+    //% block="show ports"
+    //% weight="95" blockGap="8"
+    //% group="Screen"
     export function showPorts() {
         if (screenMode == ScreenMode.Ports) return;
         screenMode = ScreenMode.Ports;
@@ -249,7 +274,7 @@ namespace brick {
                 renderPorts();
                 pause(50);
             }
-        })
+        });
     }
 
     function renderPorts() {
@@ -274,7 +299,7 @@ namespace brick {
             if (Math.abs(x) >= 5000) {
                 const k = Math.floor(x / 1000);
                 const r = Math.round((x - 1000 * k) / 100);
-                return `${k}.${r}k`
+                return `${k}.${r}k`;
             }
             return ("" + (x || 0));
         }
@@ -309,15 +334,13 @@ namespace brick {
     }
 
     export function showBoot() {
-        // pulse green, play startup sound, turn off light
-        brick.setStatusLight(StatusLight.GreenPulse);
+        brick.setStatusLight(StatusLight.GreenPulse); // Pulse green, play startup sound, turn off light
         // We pause to give time to read sensor values, so they work in on_start block
-        pause(400); // It turns out that this time is not enough for the simulator to display the LED change
-        // and we're ready
+        pause(400); // It turns out that this time is not enough for the simulator to display the LED change and we're ready
         brick.setStatusLight(StatusLight.Off);
-        // always show port by default if no UI is set
+        // Always show port by default if no UI is set
         control.runInParallel(function () {
-            // show ports if nothing is has been shown
+            // Show ports if nothing is has been shown
             if (screenMode != ScreenMode.None) return;
             showPorts();
         })
@@ -327,11 +350,15 @@ namespace brick {
      * An image
      * @param image the image
      */
-    //% blockId=screen_image_picker block="%image" shim=TD_ID
+    //% blockId="screen_image_picker"
+    //% block="%image"
+    //% shim=TD_ID
     //% image.fieldEditor="images"
-    //% image.fieldOptions.columns=6
-    //% image.fieldOptions.width=600
-    //% group="Screen" weight=0 blockHidden=1
+    //% image.fieldOptions.columns="6"
+    //% image.fieldOptions.width="600"
+    //% weight="0"
+    //% group="Screen"
+    //% blockHidden="1"
     export function __imagePicker(image: Image): Image {
         return image;
     }
@@ -340,8 +367,11 @@ namespace brick {
      * Clear on the screen at a specific lines (1..12).
      * @param lines list of lines to clear (starting at 1 and ends with 12)
      */
-    //% blockId=clearLines block="clear lines $lines"
-    //% weight=94 group="Screen" inlineInputMode="inline" blockGap=8
+    //% blockId="clearLines"
+    //% block="clear lines $lines"
+    //% inlineInputMode="inline"
+    //% weight="94" blockGap="8"
+    //% group="Screen"
     export function clearLines(lines: number[]) {
         if (screenMode != ScreenMode.ShowLines) {
             screenMode = ScreenMode.ShowLines;
@@ -357,9 +387,12 @@ namespace brick {
      * Clear on the screen at a specific line.
      * @param line the line number to clear at (starting at 1), eg: 1
      */
-    //% blockId=clearLine block="clear line $line"
-    //% weight=93 group="Screen" inlineInputMode="inline" blockGap=8
-    //% line.min=1 line.max=12
+    //% blockId="clearLine"
+    //% block="clear line $line"
+    //% inlineInputMode="inline"
+    //% weight="93" blockGap="8"
+    //% line.min="1" line.max="12"
+    //% group="Screen"
     export function clearLine(line: number) {
         if (screenMode != ScreenMode.ShowLines) {
             screenMode = ScreenMode.ShowLines;
@@ -378,10 +411,12 @@ namespace brick {
     /**
      * Clear the screen
      */
-    //% blockId=screen_clear_screen block="clear screen"
-    //% weight=92 group="Screen"
-    //% help=brick/clear-screen weight=1
+    //% help=brick/clear-screen
+    //% blockId="screen_clear_screen"
+    //% block="clear screen"
+    //% weight="92"
+    //% group="Screen"
     export function clearScreen() {
-        screen.fill(0)
+        screen.fill(0);
     }
 }
