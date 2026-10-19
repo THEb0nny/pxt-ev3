@@ -1,0 +1,19 @@
+{
+    "name": "bluetooth",
+    "description": "Bluetooth brick-to-brick communication for EV3, similar to EV3-G messaging",
+    "files": [
+        "README.md",
+        "enums.d.ts",
+        "bluetooth.cpp",
+        "bluetooth.ts"
+    ],
+    "testFiles": [
+        "test.ts"
+    ],
+    "weight": 85,
+    "searchOnly": false,
+    "public": true,
+    "dependencies": {
+        "core": "file:../core"
+    }
+}
