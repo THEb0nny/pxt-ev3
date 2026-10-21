@@ -77,7 +77,7 @@ namespace pxsim.visuals {
             if (state.getMode() == NXTLightSensorMode.ReflectedLight || state.getMode() == NXTLightSensorMode.AmbientLight) {
                 t = 1 - t;
             }
-            state.setValue(this.getMinValue(state) + t * (this.getMaxValue(state) - this.getMinValue(state)));
+            state.setLight(this.getMinValue(state) + t * (this.getMaxValue(state) - this.getMinValue(state)));
         }
 
         getInnerView(parent: SVGSVGElement, globalDefs: SVGDefsElement) {
