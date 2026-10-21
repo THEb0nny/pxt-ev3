@@ -37,8 +37,10 @@ namespace pxsim {
             return AnalogOff.InPin1;
         }
 
-        setMode(m: number) {
-            super.setMode(m);
+        setMode(mode: number) {
+            this.mode = mode;
+            this.changed = true;
+            this.modeChanged = true;
         }
 
         setSound(sound: number) {

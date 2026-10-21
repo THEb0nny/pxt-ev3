@@ -29,7 +29,13 @@ namespace sensors {
 
         constructor(port: number) {
             super(port);
-            this.setMode(InternalSoundMode.DbA);
+            this.mode = InternalSoundMode.DbA;
+        }
+
+        _activated() {
+            super._activated();
+            const useDbA = (this.mode === InternalSoundMode.DbA || this.mode === InternalSoundMode.RawDbA);
+            this._writeDcm(useDbA ? dcmModeDbA : dcmModeDb);
         }
 
         _query() {
@@ -143,7 +149,6 @@ namespace sensors {
         //% subcategory="NXT"
         //% group="Sound Sensor"
         soundLevel(mode: NXTSoundSensorMode): number {
-            if (!this.isActive()) return 0;
             const internalMode = mode === NXTSoundSensorMode.DbA ? InternalSoundMode.DbA : InternalSoundMode.Db;
             this.setMode(internalMode);
             this.poke();
@@ -167,7 +172,6 @@ namespace sensors {
         //% subcategory="NXT"
         //% group="Sound Sensor"
         soundLevelRaw(mode: NXTSoundSensorMode): number {
-            if (!this.isActive()) return 0;
             const internalMode = mode === NXTSoundSensorMode.DbA ? InternalSoundMode.RawDbA : InternalSoundMode.RawDb;
             this.setMode(internalMode);
             this.poke();
