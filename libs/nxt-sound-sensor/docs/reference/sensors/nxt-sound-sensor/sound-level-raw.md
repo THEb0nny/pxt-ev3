@@ -1,9 +1,9 @@
-# raw value
+# sound level (raw)
 
 Gets the raw 12-bit ADC value from the NXT sound sensor. 
 
 ```sig
-sensors.nxtSound1.rawValue(NXTSoundSensorMode.Db)
+sensors.nxtSound1.soundLevelRaw(NXTSoundSensorMode.Db)
 ```
 
 This block is useful for advanced calibration and filtering where the mapped `0-100%` scale lacks precision. 
@@ -23,11 +23,13 @@ Continuously read the raw unweighted sound data (`dB`) and display it on the EV3
 
 ```blocks
 forever(function () {
-    let raw = sensors.nxtSound1.rawValue(NXTSoundSensorMode.Db)
+    let raw = sensors.nxtSound1.soundLevelRaw(NXTSoundSensorMode.Db)
     brick.printValue("Raw Audio:", raw, 1)
 })
 ```
 
 ## See Also
 
-[sound level](/reference/sensors/nxt-sound-sensor/sound-level)
+[sound level](/reference/sensors/nxt-sound-sensor/sound-level),
+[set dB range](/reference/sensors/nxt-sound-sensor/set-db-range),
+[set dBA range](/reference/sensors/nxt-sound-sensor/set-dba-range)

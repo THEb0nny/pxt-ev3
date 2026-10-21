@@ -131,6 +131,7 @@ namespace sensors {
          * Returns a number between 0 and 100 representing the sound volume.
          * @param mode mode dB (raw volume, all frequencies) or dBA (human ear sensitivity), eg: NXTSoundSensorMode.dBA
          */
+        //% help=sensors/nxt-sound-sensor/sound-level
         //% block="**nxt sound sensor** %this|sound level $mode"
         //% blockId="nxtSoundSensorLevel"
         //% parts="nxt-sound-sensor"
@@ -154,6 +155,7 @@ namespace sensors {
          * Returns a number between 0 and 4095 (Note: 4095 = silence, 0 = very loud).
          * @param mode mode dB (raw volume, all frequencies) or dBA (human ear sensitivity), eg: NXTSoundSensorMode.dBA
          */
+        //% help=sensors/nxt-sound-sensor/sound-level-raw
         //% block="**nxt sound sensor** %this|sound level (raw) $mode"
         //% blockId="nxtSoundSensorSoundLevelRaw"
         //% parts="nxt-sound-sensor"

@@ -8,10 +8,12 @@ The sensor can measure sound using two different hardware profiles:
 
 ```cards
 sensors.nxtSound1.soundLevel(NXTSoundSensorMode.DbA)
-sensors.nxtSound1.rawValue(NXTSoundSensorMode.DbA)
+sensors.nxtSound1.soundLevelRaw(NXTSoundSensorMode.Db)
 ```
 
 ## See Also
 
 [sound level](/reference/sensors/nxt-sound-sensor/sound-level),
-[raw value](/reference/sensors/nxt-sound-sensor/raw-value)
+[sound level (raw)](/reference/sensors/nxt-sound-sensor/sound-level-raw),
+[set dB range](/reference/sensors/nxt-sound-sensor/set-db-range),
+[set dBA range](/reference/sensors/nxt-sound-sensor/set-dba-range)

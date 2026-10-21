@@ -14,7 +14,7 @@ namespace pxsim {
 
         id = NodeType.NXTSoundSensor;
 
-        private value: number = 4095;
+        private sound: number = 4095;
         public silentDb: number = 4095;
         public loudDb: number = 0;
         public silentDbA: number = 4095;
@@ -22,6 +22,7 @@ namespace pxsim {
 
         constructor(port: number) {
             super(port);
+            this.mode = -1;
         }
 
         getDeviceType() {
@@ -40,16 +41,15 @@ namespace pxsim {
             super.setMode(m);
         }
 
-        setValue(val: number) {
-            if (this.value !== val) {
-                this.value = val;
-                this.changed = true;
-                this.valueChanged = true;
+        setSound(sound: number) {
+            if (this.sound !== sound) {
+                this.sound = sound;
+                this.setChangedState();
             }
         }
 
         getValue() {
-            return this.value;
+            return this.sound;
         }
     }
 }

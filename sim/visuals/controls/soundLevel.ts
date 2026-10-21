@@ -77,7 +77,7 @@ namespace pxsim.visuals {
             if (state.getMode() == NXTSoundSensorMode.Db || state.getMode() == NXTSoundSensorMode.DbA) {
                 t = 1 - t;
             }
-            state.setValue(this.getMinValue(state) + t * (this.getMaxValue(state) - this.getMinValue(state)));
+            state.setSound(this.getMinValue(state) + t * (this.getMaxValue(state) - this.getMinValue(state)));
         }
 
         getInnerView(parent: SVGSVGElement, globalDefs: SVGDefsElement) {
