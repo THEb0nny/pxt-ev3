@@ -39,6 +39,12 @@ namespace sensors {
             super(port);
         }
 
+        _activated() {
+            super._activated();
+            const isReflected = (this.mode === NXTLightSensorMode.ReflectedLight || this.mode === NXTLightSensorMode.ReflectedLightRaw);
+            this._setLedState(isReflected);
+        }
+
         _query() {
             const rawValue = this._readPin1();
             switch (this.mode) {
@@ -75,20 +81,11 @@ namespace sensors {
         }
 
         setMode(m: number) {
-            if (m != this.mode) {
-                this._setMode(m);
-                switch (m) {
-                    case NXTLightSensorMode.ReflectedLight:
-                    case NXTLightSensorMode.ReflectedLightRaw:
-                        this._setLedState(true);
-                        break;
-                    case NXTLightSensorMode.AmbientLight:
-                    case NXTLightSensorMode.AmbientLightRaw:
-                        this._setLedState(false);
-                        break;
-                }
-            } else {
-                this._setMode(m);
+            const modeChanged = this.isActive() && this.mode != m;
+            this._setMode(m);
+            if (modeChanged) {
+                const isReflected = (m === NXTLightSensorMode.ReflectedLight || m === NXTLightSensorMode.ReflectedLightRaw);
+                this._setLedState(isReflected);
             }
         }
 
