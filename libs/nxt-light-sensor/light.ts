@@ -110,7 +110,7 @@ namespace sensors {
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
-        //% weight=89 blockGap=8
+        //% weight="89" blockGap="8"
         //% subcategory="NXT"
         //% group="Light Sensor"
         setReflectedLightRange(dark: number, bright: number) {
@@ -133,7 +133,7 @@ namespace sensors {
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
-        //% weight=88 blockGap=8
+        //% weight="88" blockGap="8"
         //% subcategory="NXT"
         //% group="Light Sensor"
         setAmbientLightRange(dark: number, bright: number) {
@@ -167,7 +167,7 @@ namespace sensors {
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
-        //% weight=99 blockGap=8
+        //% weight="99" blockGap="8"
         //% subcategory="NXT"
         //% group="Light Sensor"
         light(mode: NXTLightIntensityMode) {
@@ -210,15 +210,15 @@ namespace sensors {
 
     }
 
-    //% whenUsed block="1" weight=95 fixedInstance jres=icons.port1
+    //% whenUsed block="1" weight="95" fixedInstance jres=icons.port1
     export const nxtLight1: NXTLightSensor = new NXTLightSensor(1);
 
-    //% whenUsed block="2" weight=90 fixedInstance jres=icons.port2
+    //% whenUsed block="2" weight="90" fixedInstance jres=icons.port2
     export const nxtLight2: NXTLightSensor = new NXTLightSensor(2);
 
-    //% whenUsed block="3" weight=90 fixedInstance jres=icons.port3
+    //% whenUsed block="3" weight="90" fixedInstance jres=icons.port3
     export const nxtLight3: NXTLightSensor = new NXTLightSensor(3);
     
-    //% whenUsed block="4" weight=90 fixedInstance jres=icons.port4
+    //% whenUsed block="4" weight="90" fixedInstance jres=icons.port4
     export const nxtLight4: NXTLightSensor = new NXTLightSensor(4);
 }
