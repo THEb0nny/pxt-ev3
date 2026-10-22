@@ -400,7 +400,7 @@ namespace sensors.internal {
         }
 
         protected _writeDcm(value: DcmMode) {
-            writeDcm(this._port, value.charCodeAt(0));
+            writeDcm(this._port, value);
         }
 
         _deviceType() {
@@ -636,7 +636,7 @@ namespace sensors.internal {
         const buf = control.createBuffer(DAL.NUM_INPUTS);
         // '-' keeps the current DCM state for the port
         for (let i = 0; i < DAL.NUM_INPUTS; i++) {
-            buf[i] = "-".charCodeAt(0);
+            buf[i] = DcmMode.Keep;
         }
         // '0'..'7' select predefined DCM output configurations
         // 'f' releases (floats) all DCM-controlled output pins
@@ -699,12 +699,12 @@ namespace sensors.internal {
     }
 
     export const enum DcmMode {
-        Keep = "-", // Keep current state of the pins (no change)
-        Float = "f", // Float / high-impedance mode (all output pins released)
-        AllLow = "0", // Pin 5 LOW, Pin 6 LOW (neither pin driven)
-        Pin6High = "1", // Pin 5 LOW, Pin 6 HIGH (signal on Pin 6)
-        Pin5High = "2", // Pin 5 HIGH, Pin 6 LOW (signal on Pin 5; powers NXT Light LED & Sound dBA filter)
-        BothHigh = "3" // Pin 5 HIGH, Pin 6 HIGH (signal on both pins)
+        Keep = 0x2D, // ASCII '-': Keep current state of the pins (no change)
+        Float = 0x66, // ASCII 'f': Float / high-impedance mode (all output pins released)
+        AllLow = 0x30, // ASCII '0': Pin 5 LOW, Pin 6 LOW (neither pin driven)
+        Pin6High = 0x31, // ASCII '1': Pin 5 LOW, Pin 6 HIGH (signal on Pin 6)
+        Pin5High = 0x32, // ASCII '2': Pin 5 HIGH, Pin 6 LOW (signal on Pin 5; powers NXT Light LED & Sound dBA filter)
+        BothHigh = 0x33 // ASCII '3': Pin 5 HIGH, Pin 6 HIGH (signal on both pins)
     }
 
     const enum NxtColOff {
