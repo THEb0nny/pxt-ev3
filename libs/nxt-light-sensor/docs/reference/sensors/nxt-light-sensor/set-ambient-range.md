@@ -28,3 +28,8 @@ forever(function () {
     pause(100)
 })
 ```
+
+## See Also
+
+[light](/reference/sensors/nxt-light-sensor/light),
+[set reflected range](/reference/sensors/nxt-light-sensor/set-reflected-range)

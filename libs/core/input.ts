@@ -333,7 +333,9 @@ namespace sensors.internal {
             sensors.__sensorUsed(this._port, this._deviceType());
         }
 
-        _activated() { }
+        _activated() {
+            // Pass
+        }
 
         // 1-based
         port() {
@@ -397,7 +399,7 @@ namespace sensors.internal {
             return analogMM.getNumber(NumberFormat.Int16LE, AnalogOff.InPin6 + 2 * this._port);
         }
 
-        protected _writeDcm(value: string) {
+        protected _writeDcm(value: DcmMode) {
             writeDcm(this._port, value.charCodeAt(0));
         }
 
@@ -694,6 +696,15 @@ namespace sensors.internal {
 
     function getI2cNumber(length: number, format: NumberFormat, off: number, port: number) {
         return getI2cBytes(port, length).getNumber(format, off);
+    }
+
+    export const enum DcmMode {
+        Keep = "-", // Keep current state of the pins (no change)
+        Float = "f", // Float / high-impedance mode (all output pins released)
+        AllLow = "0", // Pin 5 LOW, Pin 6 LOW (neither pin driven)
+        Pin6High = "1", // Pin 5 LOW, Pin 6 HIGH (signal on Pin 6)
+        Pin5High = "2", // Pin 5 HIGH, Pin 6 LOW (signal on Pin 5; powers NXT Light LED & Sound dBA filter)
+        BothHigh = "3" // Pin 5 HIGH, Pin 6 HIGH (signal on both pins)
     }
 
     const enum NxtColOff {

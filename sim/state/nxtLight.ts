@@ -11,9 +11,10 @@ namespace pxsim {
     }
 
     export class NXTLightSensorNode extends AnalogSensorNode {
+        
         id = NodeType.NXTLightSensor;
 
-        private value: number = 0;
+        private light: number = 0;
         public darkReflectedLight: number = 3372;
         public brightReflectedLight: number = 445;
         public darkAmbientLight: number = 3411;
@@ -28,30 +29,32 @@ namespace pxsim {
             return DAL.DEVICE_TYPE_NXT_LIGHT;
         }
 
-        setValue(value: number) {
-            this.value = value;
-            this.setChangedState();
+        getFamily() {
+            return DeviceFamily.NXT;
         }
 
-        getValue() {
-            return this.value;
+        getAnalogPin() {
+            return AnalogOff.InPin1;
         }
 
         setMode(mode: number) {
             this.mode = mode;
-            if (this.mode == NXTLightSensorMode.ReflectedLight) this.value = 1908;
-            else if (this.mode == NXTLightSensorMode.AmbientLight) this.value = 2022;
-            else this.value = 2048;
+            if (this.mode == NXTLightSensorMode.ReflectedLight) this.light = 1908;
+            else if (this.mode == NXTLightSensorMode.AmbientLight) this.light = 2022;
+            else this.light = 2048;
             this.changed = true;
             this.modeChanged = true;
         }
 
-        getAnalogReadPin() {
-            return AnalogOff.InPin1;
+        setLight(light: number) {
+            if (this.light !== light) {
+                this.light = light;
+                this.setChangedState();
+            }
         }
 
-        isNXT() {
-            return true;
+        getValue() {
+            return this.light;
         }
     }
 }

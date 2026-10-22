@@ -38,3 +38,8 @@ forever(function () {
     }
 })
 ```
+
+## See Also
+
+[set reflected range](/reference/sensors/nxt-light-sensor/set-reflected-range),
+[set ambient range](/reference/sensors/nxt-light-sensor/set-ambient-range)

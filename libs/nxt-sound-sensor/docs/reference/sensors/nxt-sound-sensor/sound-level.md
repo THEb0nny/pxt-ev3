@@ -32,4 +32,6 @@ forever(function () {
 
 ## See Also
 
-[raw value](/reference/sensors/nxt-sound-sensor/raw-value)
+[sound level (raw)](/reference/sensors/nxt-sound-sensor/sound-level-raw),
+[set dB range](/reference/sensors/nxt-sound-sensor/set-db-range),
+[set dBA range](/reference/sensors/nxt-sound-sensor/set-dba-range)

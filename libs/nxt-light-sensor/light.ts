@@ -22,8 +22,8 @@ enum NXTLightIntensityMode {
 
 namespace sensors {
 
-    const dcmLedOff = "0";
-    const dcmLedOn = "2";
+    const dcmLedOff = internal.DcmMode.AllLow;
+    const dcmLedOn = internal.DcmMode.Pin5High;
 
     //% fixedInstances
     export class NXTLightSensor extends internal.AnalogSensor {
@@ -39,8 +39,14 @@ namespace sensors {
             super(port);
         }
 
+        _activated() {
+            super._activated();
+            const isReflected = (this.mode === NXTLightSensorMode.ReflectedLight || this.mode === NXTLightSensorMode.ReflectedLightRaw);
+            this._setLedState(isReflected);
+        }
+
         _query() {
-            const rawValue = this._readRaw();
+            const rawValue = this._readPin1();
             switch (this.mode) {
                 case NXTLightSensorMode.ReflectedLight:
                     return [this._normalize(rawValue, this.darkReflectedLight, this.brightReflectedLight)];
@@ -75,20 +81,11 @@ namespace sensors {
         }
 
         setMode(m: number) {
-            if (m != this.mode) {
-                this._setMode(m);
-                switch (m) {
-                    case NXTLightSensorMode.ReflectedLight:
-                    case NXTLightSensorMode.ReflectedLightRaw:
-                        this._setLedState(true);
-                        break;
-                    case NXTLightSensorMode.AmbientLight:
-                    case NXTLightSensorMode.AmbientLightRaw:
-                        this._setLedState(false);
-                        break;
-                }
-            } else {
-                this._setMode(m);
+            const modeChanged = this.isActive() && this.mode != m;
+            this._setMode(m);
+            if (modeChanged) {
+                const isReflected = (m === NXTLightSensorMode.ReflectedLight || m === NXTLightSensorMode.ReflectedLightRaw);
+                this._setLedState(isReflected);
             }
         }
 
@@ -113,7 +110,7 @@ namespace sensors {
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
-        //% weight=89 blockGap=8
+        //% weight="89" blockGap="8"
         //% subcategory="NXT"
         //% group="Light Sensor"
         setReflectedLightRange(dark: number, bright: number) {
@@ -136,7 +133,7 @@ namespace sensors {
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
-        //% weight=88 blockGap=8
+        //% weight="88" blockGap="8"
         //% subcategory="NXT"
         //% group="Light Sensor"
         setAmbientLightRange(dark: number, bright: number) {
@@ -148,11 +145,6 @@ namespace sensors {
         // Enables or disables the built-in illumination LED
         private _setLedState(enable: boolean) {
             this._writeDcm(enable ? dcmLedOn : dcmLedOff);
-        }
-
-        // Gets the raw light value
-        private _readRaw() {
-            return this._readPin1();
         }
         
         // Normalizes the raw light value to a percentage based on the dark and bright reference values
@@ -175,7 +167,7 @@ namespace sensors {
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
-        //% weight=99 blockGap=8
+        //% weight="99" blockGap="8"
         //% subcategory="NXT"
         //% group="Light Sensor"
         light(mode: NXTLightIntensityMode) {
@@ -218,15 +210,15 @@ namespace sensors {
 
     }
 
-    //% whenUsed block="1" weight=95 fixedInstance jres=icons.port1
+    //% whenUsed block="1" weight="95" fixedInstance jres=icons.port1
     export const nxtLight1: NXTLightSensor = new NXTLightSensor(1);
 
-    //% whenUsed block="2" weight=90 fixedInstance jres=icons.port2
+    //% whenUsed block="2" weight="90" fixedInstance jres=icons.port2
     export const nxtLight2: NXTLightSensor = new NXTLightSensor(2);
 
-    //% whenUsed block="3" weight=90 fixedInstance jres=icons.port3
+    //% whenUsed block="3" weight="90" fixedInstance jres=icons.port3
     export const nxtLight3: NXTLightSensor = new NXTLightSensor(3);
     
-    //% whenUsed block="4" weight=90 fixedInstance jres=icons.port4
+    //% whenUsed block="4" weight="90" fixedInstance jres=icons.port4
     export const nxtLight4: NXTLightSensor = new NXTLightSensor(4);
 }

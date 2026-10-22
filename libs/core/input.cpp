@@ -7,5 +7,6 @@ namespace sensors {
  */
 //%
 void __sensorUsed(int port, int type) {
+    // Pass
 }
 }

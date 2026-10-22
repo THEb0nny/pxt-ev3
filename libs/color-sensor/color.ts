@@ -439,7 +439,6 @@ namespace sensors {
 
             this.calibrating = false;
         }
-
     }
 
     /**

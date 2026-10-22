@@ -32,13 +32,13 @@ namespace sensors {
          */
         //% help=sensors/nxt-touch-sensor/on-event
         //% block="on **nxt touch sensor** %this|%event"
-        //% blockId=nxtTouchSensorOnEvent
+        //% blockId="nxtTouchSensorOnEvent"
         //% parts="nxt-touch-sensor"
-        //% blockNamespace=sensors
+        //% blockNamespace="sensors"
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
-        //% weight=99 blockGap=8
+        //% weight="99" blockGap="8"
         //% subcategory="NXT"
         //% group="Touch Sensor"
         onEvent(ev: ButtonEvent, body: () => void) {
@@ -52,13 +52,13 @@ namespace sensors {
          */
         //% help=sensors/nxt-touch-sensor/pause-until
         //% block="pause until **nxt touch sensor** %this|%event"
-        //% blockId=nxtTouchSensorPauseUntil
+        //% blockId="nxtTouchSensorPauseUntil"
         //% parts="nxt-touch-sensor"
-        //% blockNamespace=sensors
+        //% blockNamespace="sensors"
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
-        //% weight=98 blockGap=8
+        //% weight="98" blockGap="8"
         //% subcategory="NXT"
         //% group="Touch Sensor"
         pauseUntil(ev: ButtonEvent) {
@@ -71,13 +71,13 @@ namespace sensors {
          */
         //% help=sensors/nxt-touch-sensor/is-pressed
         //% block="**nxt touch sensor** %this|is pressed"
-        //% blockId=nxtTouchSensorIsPressed
+        //% blockId="nxtTouchSensorIsPressed"
         //% parts="nxt-touch-sensor"
-        //% blockNamespace=sensors
+        //% blockNamespace="sensors"
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
-        //% weight=81 blockGap=8
+        //% weight="81" blockGap="8"
         //% subcategory="NXT"
         //% group="Touch Sensor"
         isPressed(): boolean {
@@ -91,31 +91,31 @@ namespace sensors {
          */
         //% help=sensors/nxt-touch-sensor/was-pressed
         //% block="**nxt touch sensor** %this|was pressed"
-        //% blockId=nxtTouchSensorWasPressed
-        //% blockHidden=true
+        //% blockId="nxtTouchSensorWasPressed"
         //% parts="nxt-touch-sensor"
-        //% blockNamespace=sensors
+        //% blockNamespace="sensors"
         //% this.fieldEditor="images"
         //% this.fieldOptions.columns="4"
         //% this.fieldOptions.width="300"
-        //% weight=80
+        //% weight="80"
         //% subcategory="NXT"
         //% group="Touch Sensor"
+        //% blockHidden=true
         wasPressed() {
             this.poke();
             return this.button.wasPressed();
         }
     }
 
-    //% whenUsed block="1" weight=95 fixedInstance jres=icons.port1
+    //% whenUsed block="1" weight="95" fixedInstance jres=icons.port1
     export const nxtTouch1: NXTTouchSensor = new NXTTouchSensor(1);
 
-    //% whenUsed block="2" weight=95 fixedInstance jres=icons.port2
+    //% whenUsed block="2" weight="95" fixedInstance jres=icons.port2
     export const nxtTouch2: NXTTouchSensor = new NXTTouchSensor(2);
 
-    //% whenUsed block="3" weight=95 fixedInstance jres=icons.port3
+    //% whenUsed block="3" weight="95" fixedInstance jres=icons.port3
     export const nxtTouch3: NXTTouchSensor = new NXTTouchSensor(3);
 
-    //% whenUsed block="4" weight=95 fixedInstance jres=icons.port4
+    //% whenUsed block="4" weight="95" fixedInstance jres=icons.port4
     export const nxtTouch4: NXTTouchSensor = new NXTTouchSensor(4);
 }
