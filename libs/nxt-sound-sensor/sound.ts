@@ -14,8 +14,8 @@ namespace sensors {
         RawDbA = 3
     }
 
-    const dcmModeDb = internal.DcmMode.Mode0;
-    const dcmModeDbA = internal.DcmMode.Mode2;
+    const dcmModeDb = internal.DcmMode.AllLow;
+    const dcmModeDbA = internal.DcmMode.Pin5High;
 
     //% fixedInstances
     export class NXTSoundSensor extends internal.AnalogSensor {

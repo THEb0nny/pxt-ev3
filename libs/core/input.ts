@@ -699,16 +699,12 @@ namespace sensors.internal {
     }
 
     export const enum DcmMode {
-        Keep = "-",
-        Float = "f",
-        Mode0 = "0",
-        Mode1 = "1",
-        Mode2 = "2",
-        Mode3 = "3",
-        Mode4 = "4",
-        Mode5 = "5",
-        Mode6 = "6",
-        Mode7 = "7"
+        Keep = "-", // Keep current state of the pins (no change)
+        Float = "f", // Float / high-impedance mode (all output pins released)
+        AllLow = "0", // Pin 5 LOW, Pin 6 LOW (neither pin driven)
+        Pin6High = "1", // Pin 5 LOW, Pin 6 HIGH (signal on Pin 6)
+        Pin5High = "2", // Pin 5 HIGH, Pin 6 LOW (signal on Pin 5; powers NXT Light LED & Sound dBA filter)
+        BothHigh = "3" // Pin 5 HIGH, Pin 6 HIGH (signal on both pins)
     }
 
     const enum NxtColOff {
