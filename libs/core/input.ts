@@ -333,7 +333,9 @@ namespace sensors.internal {
             sensors.__sensorUsed(this._port, this._deviceType());
         }
 
-        _activated() { }
+        _activated() {
+            // Pass
+        }
 
         // 1-based
         port() {
