@@ -14,8 +14,8 @@ namespace sensors {
         RawDbA = 3
     }
 
-    const dcmModeDb = "0";
-    const dcmModeDbA = "2";
+    const dcmModeDb = internal.DcmMode.Mode0;
+    const dcmModeDbA = internal.DcmMode.Mode2;
 
     //% fixedInstances
     export class NXTSoundSensor extends internal.AnalogSensor {
@@ -34,7 +34,7 @@ namespace sensors {
         _activated() {
             super._activated();
             const useDbA = (this.mode === InternalSoundMode.DbA || this.mode === InternalSoundMode.RawDbA);
-            this._writeDcm(useDbA ? dcmModeDbA : dcmModeDb);
+            this._setFilterState(useDbA);
         }
 
         _query() {
@@ -75,7 +75,7 @@ namespace sensors {
             this._setMode(m);
             if (modeChanged) {
                 const useDbA = (m === InternalSoundMode.DbA || m === InternalSoundMode.RawDbA);
-                this._writeDcm(useDbA ? dcmModeDbA : dcmModeDb);
+                this._setFilterState(useDbA);
             }
         }
 
@@ -123,6 +123,11 @@ namespace sensors {
             this.loudDbA = Math.clamp(0, 4095, loud);
         }
         
+        // Enables (dBA) or disables (dB) the built-in A-weighting frequency filter
+        private _setFilterState(enable: boolean) {
+            this._writeDcm(enable ? dcmModeDbA : dcmModeDb);
+        }
+
         // Normalizes the raw sound value to a percentage based on silence and loud reference values
         private _normalize(value: number, silent: number, loud: number) {
             let normalized = Math.map(value, silent, loud, 0, 100);

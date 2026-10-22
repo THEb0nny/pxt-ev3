@@ -22,8 +22,8 @@ enum NXTLightIntensityMode {
 
 namespace sensors {
 
-    const dcmLedOff = "0";
-    const dcmLedOn = "2";
+    const dcmLedOff = internal.DcmMode.Mode0;
+    const dcmLedOn = internal.DcmMode.Mode2;
 
     //% fixedInstances
     export class NXTLightSensor extends internal.AnalogSensor {

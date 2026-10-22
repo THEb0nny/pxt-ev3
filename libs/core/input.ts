@@ -399,7 +399,7 @@ namespace sensors.internal {
             return analogMM.getNumber(NumberFormat.Int16LE, AnalogOff.InPin6 + 2 * this._port);
         }
 
-        protected _writeDcm(value: string) {
+        protected _writeDcm(value: DcmMode) {
             writeDcm(this._port, value.charCodeAt(0));
         }
 
@@ -696,6 +696,19 @@ namespace sensors.internal {
 
     function getI2cNumber(length: number, format: NumberFormat, off: number, port: number) {
         return getI2cBytes(port, length).getNumber(format, off);
+    }
+
+    export const enum DcmMode {
+        Keep = "-",
+        Float = "f",
+        Mode0 = "0",
+        Mode1 = "1",
+        Mode2 = "2",
+        Mode3 = "3",
+        Mode4 = "4",
+        Mode5 = "5",
+        Mode6 = "6",
+        Mode7 = "7"
     }
 
     const enum NxtColOff {
