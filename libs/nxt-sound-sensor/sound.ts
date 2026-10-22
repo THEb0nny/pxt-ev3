@@ -29,7 +29,6 @@ namespace sensors {
 
         constructor(port: number) {
             super(port);
-            this.mode = InternalSoundMode.DbA;
         }
 
         _activated() {
@@ -40,7 +39,6 @@ namespace sensors {
 
         _query() {
             const rawValue = this._readPin1(); // Read the raw 12-bit ADC value (0-4095) from Pin 1
-
             switch (this.mode) {
                 case InternalSoundMode.Db:
                     return [this._normalize(rawValue, this.silentDb, this.loudDb)];
@@ -182,12 +180,12 @@ namespace sensors {
     //% whenUsed block="1" weight="95" fixedInstance jres=icons.port1
     export const nxtSound1 = new NXTSoundSensor(1);
 
-    //% whenUsed block="2" weight="95" fixedInstance jres=icons.port2
+    //% whenUsed block="2" weight="90" fixedInstance jres=icons.port2
     export const nxtSound2 = new NXTSoundSensor(2);
 
-    //% whenUsed block="3" weight="95" fixedInstance jres=icons.port3
+    //% whenUsed block="3" weight="90" fixedInstance jres=icons.port3
     export const nxtSound3 = new NXTSoundSensor(3);
 
-    //% whenUsed block="4" weight="95" fixedInstance jres=icons.port4
+    //% whenUsed block="4" weight="90" fixedInstance jres=icons.port4
     export const nxtSound4 = new NXTSoundSensor(4);
 }
