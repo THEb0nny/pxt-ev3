@@ -14,7 +14,7 @@ namespace pxsim {
 
         id = NodeType.NXTSoundSensor;
 
-        private sound: number = 4095;
+        private sound: number = 3890;
         public silentDb: number = 4095;
         public loudDb: number = 0;
         public silentDbA: number = 4095;
@@ -39,6 +39,9 @@ namespace pxsim {
 
         setMode(mode: number) {
             this.mode = mode;
+            if (this.mode == NXTSoundSensorMode.Db) this.sound = 3890;
+            else if (this.mode == NXTSoundSensorMode.DbA) this.sound = 3890;
+            else this.sound = 3890;
             this.changed = true;
             this.modeChanged = true;
         }

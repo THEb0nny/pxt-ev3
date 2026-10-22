@@ -86,7 +86,7 @@ namespace pxsim.visuals {
             let gc = "gradient-sound-" + this.getPort();
             const prevSoundGradient = globalDefs.querySelector(`#${gc}`) as SVGLinearGradientElement;
             this.soundGradient = prevSoundGradient ? prevSoundGradient : svg.linearGradient(globalDefs, gc, false);
-            svg.setGradientValue(this.soundGradient, "50%");
+            svg.setGradientValue(this.soundGradient, "5%");
             svg.setGradientColors(this.soundGradient, "#1e293b", "#06b6d4");
 
             const reporterGroup = pxsim.svg.child(this.group, "g");
