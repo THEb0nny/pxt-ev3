@@ -48,6 +48,17 @@ namespace bluetooth {
         return;
     }
 
+    /**
+     * Returns the status of the Bluetooth connection.
+     */
+    //% blockId=bt_last_status
+    //% block="bluetooth status"
+    //% weight=75 group="Connection"
+    //% shim=bluetooth::lastStatus
+    export function lastStatus(): string {
+        return "";
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // Send
     // ─────────────────────────────────────────────────────────────────────────
