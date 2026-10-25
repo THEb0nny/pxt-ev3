@@ -36,77 +36,72 @@
 //
 // EV3_AF_BLUETOOTH, EV3_BTPROTO_RFCOMM, VM_BRICK_NAME_SIZE from ev3const.h
 // ──────────────────────────────────────────────────────────────────────────────
-#define BT_RFCOMM_CHANNEL_1     1
-#define BT_RFCOMM_CHANNEL_2     2
-#define BT_MAX_CONNECTIONS      7       // BT piconet limit (matches EV3-G)
-#define BT_MAX_MAILBOX_NAME     248
-#define BT_MAX_MAILBOX_DATA     1024
+#define BT_RFCOMM_CHANNEL_1 1
+#define BT_RFCOMM_CHANNEL_2 2
+#define BT_MAX_CONNECTIONS 7 // BT piconet limit (matches EV3-G)
+#define BT_MAX_MAILBOX_NAME 248
+#define BT_MAX_MAILBOX_DATA 1024
 
 // EV3 System Command type bytes (Communication Developer Kit §3)
-#define SYSTEM_COMMAND_REPLY        0x01
-#define SYSTEM_COMMAND_NO_REPLY     0x81
-#define SYSTEM_REPLY                0x03
-#define SYSTEM_REPLY_ERROR          0x05
-#define WRITEMAILBOX                0x9E
+#define SYSTEM_COMMAND_REPLY 0x01
+#define SYSTEM_COMMAND_NO_REPLY 0x81
+#define SYSTEM_REPLY 0x03
+#define SYSTEM_REPLY_ERROR 0x05
+#define WRITEMAILBOX 0x9E
 
 // MailboxDataType values — must match enums.d.ts
-#define MBOX_TYPE_TEXT      0
-#define MBOX_TYPE_NUMERIC   1
-#define MBOX_TYPE_LOGIC     2
+#define MBOX_TYPE_TEXT 0
+#define MBOX_TYPE_NUMERIC 1
+#define MBOX_TYPE_LOGIC 2
 
-// ──────────────────────────────────────────────────────────────────────────────
 // sockaddr_rc — mirrors BlueZ struct sockaddr_rc
-// ──────────────────────────────────────────────────────────────────────────────
-struct BtBdAddr { uint8_t b[6]; };
+struct BtBdAddr { 
+    uint8_t b[6];
+};
 
 struct SockAddrRc {
     sa_family_t rc_family;
-    BtBdAddr    rc_bdaddr;
-    uint8_t     rc_channel;
+    BtBdAddr rc_bdaddr;
+    uint8_t rc_channel;
 };
 
-// ──────────────────────────────────────────────────────────────────────────────
 // Connection slot
-// ──────────────────────────────────────────────────────────────────────────────
 struct BtConnection {
-    int     fd;
-    char    brickName[VM_BRICK_NAME_SIZE];
-    bool    active;
+    int fd;
+    char brickName[VM_BRICK_NAME_SIZE];
+    bool active;
     uint8_t rxBuf[4096];
-    int     rxLen;
+    int rxLen;
 };
 
-// ──────────────────────────────────────────────────────────────────────────────
-// Mailbox receive slot
-// ──────────────────────────────────────────────────────────────────────────────
-#define MAX_MAILBOX_SLOTS 16
+#define MAX_MAILBOX_SLOTS 16 // Mailbox receive slot
 
 struct MailboxSlot {
-    char    name[BT_MAX_MAILBOX_NAME];
-    uint8_t dataType;                   // MBOX_TYPE_*
-    uint8_t data[BT_MAX_MAILBOX_DATA];  // last received raw value
-    int     dataLen;
-    int     eventSrc;                   // pxt event source id
-    int     eventVal;                   // pxt event value
+    char name[BT_MAX_MAILBOX_NAME];
+    uint8_t dataType; // MBOX_TYPE_*
+    uint8_t data[BT_MAX_MAILBOX_DATA]; // last received raw value
+    int dataLen;
+    int eventSrc; // pxt event source id
+    int eventVal; // pxt event value
 };
 
 namespace pxt {
 
-static BtConnection    btConns[BT_MAX_CONNECTIONS];
-static int             btConnCount     = 0;
-static pthread_mutex_t btMutex         = PTHREAD_MUTEX_INITIALIZER;
-static bool            btRxRunning     = false;
-static bool            btServerRunning = false;
-static int             serverFd1       = -1;
-static int             serverFd2       = -1;
-static pthread_mutex_t btInitMutex     = PTHREAD_MUTEX_INITIALIZER;
-static bool            btInitialized   = false;
+static BtConnection btConns[BT_MAX_CONNECTIONS];
+static int btConnCount = 0;
+static pthread_mutex_t btMutex = PTHREAD_MUTEX_INITIALIZER;
+static bool btRxRunning = false;
+static bool btServerRunning = false;
+static int serverFd1 = -1;
+static int serverFd2 = -1;
+static pthread_mutex_t btInitMutex = PTHREAD_MUTEX_INITIALIZER;
+static bool btInitialized = false;
 
 static pthread_mutex_t btStatusMutex = PTHREAD_MUTEX_INITIALIZER;
-static char            btLastStatus[256] = "ready";
+static char btLastStatus[256] = "ready";
 
-static MailboxSlot     mailboxSlots[MAX_MAILBOX_SLOTS];
-static int             mailboxSlotCount = 0;
+static MailboxSlot mailboxSlots[MAX_MAILBOX_SLOTS];
+static int mailboxSlotCount = 0;
 
 // Forward declarations
 static void ensureBtServer();
@@ -124,7 +119,7 @@ static void setBtStatus(const char *fmt, ...) {
     DMESG("BT STATUS: %s", btLastStatus);
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// Helpers
 
 static void packU16LE(uint8_t *dst, uint16_t v) {
     dst[0] = v & 0xFF;
@@ -146,10 +141,8 @@ static uint32_t unpackU32LE(const uint8_t *src) {
     return (uint32_t)(src[0] | (src[1] << 8) | (src[2] << 16) | (src[3] << 24));
 }
 
-// ── Send a WRITEMAILBOX System Command packet ────────────────────────────────
-static bool sendMailboxPacket(int fd, const char *mailbox,
-                              const uint8_t *payload, int payloadLen,
-                              uint16_t msgcount) {
+// Send a WRITEMAILBOX System Command packet
+static bool sendMailboxPacket(int fd, const char *mailbox, const uint8_t *payload, int payloadLen, uint16_t msgcount) {
     if (fd < 0 || !mailbox) return false;
     uint8_t buf[BT_MAX_MAILBOX_DATA + 64];
     int pos = 0;
@@ -157,7 +150,8 @@ static bool sendMailboxPacket(int fd, const char *mailbox,
     int nameChars = (int)strlen(mailbox); // length EXCLUDING null terminator
 
     // [0-1] placeholder for message length
-    buf[pos++] = 0; buf[pos++] = 0;
+    buf[pos++] = 0;
+    buf[pos++] = 0;
     // [2-3] message counter
     packU16LE(buf + pos, msgcount); pos += 2;
     // [4] SYSTEM_COMMAND_NO_REPLY
@@ -194,7 +188,7 @@ static bool sendMailboxPacket(int fd, const char *mailbox,
     return true;
 }
 
-// ── Parse an incoming packet and raise pxt events for matching mailboxes ──────
+// Parse an incoming packet and raise pxt events for matching mailboxes
 static void handleIncomingPacket(const uint8_t *pkt, int totalLen) {
     if (totalLen < 8) return;
 
@@ -257,7 +251,7 @@ static void handleIncomingPacket(const uint8_t *pkt, int totalLen) {
     }
 }
 
-// ── Receive thread: watches all active connections with select() ──────────────
+// Receive thread: watches all active connections with select()
 static void *btReceiveThread(void *) {
     DMESG("BT: receive thread starting");
     uint8_t pktBuf[4096];
@@ -348,16 +342,17 @@ static void ensureRxThread() {
     pthread_detach(tid);
 }
 
-// ── Parse "XX:XX:XX:XX:XX:XX" → 6-byte BtBdAddr (little-endian) ──────────────
+// Parse "XX:XX:XX:XX:XX:XX" → 6-byte BtBdAddr (little-endian)
 static bool parseBtAddr(const char *str, BtBdAddr &out) {
     unsigned int b[6];
-    if (sscanf(str, "%x:%x:%x:%x:%x:%x",
-               &b[5],&b[4],&b[3],&b[2],&b[1],&b[0]) != 6) return false;
-    for (int i = 0; i < 6; i++) out.b[i] = (uint8_t)b[i];
+    if (sscanf(str, "%x:%x:%x:%x:%x:%x", &b[5],&b[4],&b[3],&b[2],&b[1],&b[0]) != 6) return false;
+    for (int i = 0; i < 6; i++) {
+        out.b[i] = (uint8_t)b[i];
+    }
     return true;
 }
 
-// ── Search a specific file for a MAC / Brick Name mapping ─────────────────────
+// Search a specific file for a MAC / Brick Name mapping
 static bool searchFileForBrick(const char *path, const char *brickName, char addrOut[18]) {
     FILE *f = fopen(path, "r");
     if (!f) return false;
@@ -366,8 +361,9 @@ static bool searchFileForBrick(const char *path, const char *brickName, char add
     bool found = false;
     while (fgets(line, sizeof(line), f) && !found) {
         int llen = (int)strlen(line);
-        while (llen > 0 && (line[llen - 1] == '\r' || line[llen - 1] == '\n' || line[llen - 1] == ' '))
+        while (llen > 0 && (line[llen - 1] == '\r' || line[llen - 1] == '\n' || line[llen - 1] == ' ')) {
             line[--llen] = 0;
+        }
         if (llen < 18) continue;
 
         BtBdAddr testBd;
@@ -376,12 +372,16 @@ static bool searchFileForBrick(const char *path, const char *brickName, char add
         macCandidate[17] = 0;
         if (parseBtAddr(macCandidate, testBd)) {
             char *p = line + 17;
-            while (*p == ' ' || *p == '\t' || *p == '"' || *p == '=') p++;
+            while (*p == ' ' || *p == '\t' || *p == '"' || *p == '=') {
+                p++;
+            }
             char nameCandidate[VM_BRICK_NAME_SIZE];
             strncpy(nameCandidate, p, sizeof(nameCandidate) - 1);
             nameCandidate[sizeof(nameCandidate) - 1] = 0;
             int nlen = (int)strlen(nameCandidate);
-            if (nlen > 0 && nameCandidate[nlen - 1] == '"') nameCandidate[--nlen] = 0;
+            if (nlen > 0 && nameCandidate[nlen - 1] == '"') {
+                nameCandidate[--nlen] = 0;
+            }
 
             if (strcasecmp(nameCandidate, brickName) == 0) {
                 strncpy(addrOut, macCandidate, 17);
@@ -394,7 +394,7 @@ static bool searchFileForBrick(const char *path, const char *brickName, char add
     return found;
 }
 
-// ── Resolve remote MAC address to Brick Name ──────────────────────────────────
+// Resolve remote MAC address to Brick Name
 static bool findNameByAddr(const char *macStr, char nameOut[VM_BRICK_NAME_SIZE]) {
     nameOut[0] = 0;
 
@@ -413,7 +413,9 @@ static bool findNameByAddr(const char *macStr, char nameOut[VM_BRICK_NAME_SIZE])
             while (fgets(line, sizeof(line), f)) {
                 if (strlen(line) >= 18 && strncasecmp(line, macStr, 17) == 0) {
                     char *p = line + 17;
-                    while (*p == ' ' || *p == '\t' || *p == '"') p++;
+                    while (*p == ' ' || *p == '\t' || *p == '"') {
+                        p++;
+                    }
                     int len = (int)strlen(p);
                     while (len > 0 && (p[len - 1] == '\r' || p[len - 1] == '\n' || p[len - 1] == ' ' || p[len - 1] == '"')) {
                         p[--len] = 0;
@@ -452,7 +454,7 @@ static bool findNameByAddr(const char *macStr, char nameOut[VM_BRICK_NAME_SIZE])
     return false;
 }
 
-// ── Find BT address for a brick name ──────────────────────────────────────────
+// Find BT address for a brick name
 static bool findAddrByName(const char *brickName, char addrOut[18]) {
     if (!brickName || !brickName[0]) return false;
 
@@ -545,7 +547,9 @@ static bool findAddrByName(const char *brickName, char addrOut[18]) {
                 char *start = tab - 2;
                 if (sscanf(start, "%17s", addr) == 1 && strlen(addr) == 17) {
                     char *name = start + 17;
-                    while (*name == ' ' || *name == '\t') name++;
+                    while (*name == ' ' || *name == '\t') {
+                        name++;
+                    }
                     int len = (int)strlen(name);
                     while (len > 0 && (name[len - 1] == '\r' || name[len - 1] == '\n' || name[len - 1] == ' ')) {
                         name[--len] = 0;
@@ -569,7 +573,7 @@ static bool findAddrByName(const char *brickName, char addrOut[18]) {
     return false;
 }
 
-// ── Check if LMS2012 already opened an RFCOMM socket ──────────────────────────
+// Check if LMS2012 already opened an RFCOMM socket
 static void checkInheritedSockets() {
     DIR *dir = opendir("/proc/self/fd");
     if (!dir) return;
@@ -592,9 +596,9 @@ static void checkInheritedSockets() {
 
         char macStr[18];
         snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
-                 peerAddr.rc_bdaddr.b[5], peerAddr.rc_bdaddr.b[4],
-                 peerAddr.rc_bdaddr.b[3], peerAddr.rc_bdaddr.b[2],
-                 peerAddr.rc_bdaddr.b[1], peerAddr.rc_bdaddr.b[0]);
+            peerAddr.rc_bdaddr.b[5], peerAddr.rc_bdaddr.b[4],
+            peerAddr.rc_bdaddr.b[3], peerAddr.rc_bdaddr.b[2],
+            peerAddr.rc_bdaddr.b[1], peerAddr.rc_bdaddr.b[0]);
 
         char remoteName[VM_BRICK_NAME_SIZE] = {};
         if (!findNameByAddr(macStr, remoteName) || remoteName[0] == 0) {
@@ -604,7 +608,10 @@ static void checkInheritedSockets() {
         pthread_mutex_lock(&btMutex);
         bool exists = false;
         for (int i = 0; i < btConnCount; i++) {
-            if (btConns[i].active && btConns[i].fd == fd) { exists = true; break; }
+            if (btConns[i].active && btConns[i].fd == fd) { 
+                exists = true;
+                break;
+            }
         }
         if (!exists && btConnCount < BT_MAX_CONNECTIONS) {
             struct timeval tv_sock = { 2, 0 };
@@ -624,7 +631,7 @@ static void checkInheritedSockets() {
     closedir(dir);
 }
 
-// ── RFCOMM Server Thread ───────────────────────────────────────────────────────
+// RFCOMM Server Thread
 static void *btServerThread(void *) {
     DMESG("BT: server thread starting");
 
@@ -664,7 +671,7 @@ static void *btServerThread(void *) {
         setsockopt(s2, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
         SockAddrRc addr2;
         memset(&addr2, 0, sizeof(addr2));
-        addr2.rc_family  = EV3_AF_BLUETOOTH;
+        addr2.rc_family = EV3_AF_BLUETOOTH;
         addr2.rc_channel = BT_RFCOMM_CHANNEL_2;
         if (bind(s2, (struct sockaddr *)&addr2, sizeof(addr2)) == 0) {
             if (listen(s2, 5) == 0) {
@@ -690,9 +697,7 @@ static void *btServerThread(void *) {
         btServerRunning = false;
         return NULL;
     } else {
-        setBtStatus("Srv ok S1:%s S2:%s",
-                    serverFd1 >= 0 ? "ok" : "err",
-                    serverFd2 >= 0 ? "ok" : "err");
+        setBtStatus("Srv ok S1:%s S2:%s", serverFd1 >= 0 ? "ok" : "err", serverFd2 >= 0 ? "ok" : "err");
     }
 
     while (btServerRunning) {
@@ -734,9 +739,9 @@ static void *btServerThread(void *) {
 
             char macStr[18];
             snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
-                     clientAddr.rc_bdaddr.b[5], clientAddr.rc_bdaddr.b[4],
-                     clientAddr.rc_bdaddr.b[3], clientAddr.rc_bdaddr.b[2],
-                     clientAddr.rc_bdaddr.b[1], clientAddr.rc_bdaddr.b[0]);
+                clientAddr.rc_bdaddr.b[5], clientAddr.rc_bdaddr.b[4],
+                clientAddr.rc_bdaddr.b[3], clientAddr.rc_bdaddr.b[2],
+                clientAddr.rc_bdaddr.b[1], clientAddr.rc_bdaddr.b[0]);
 
             char clientName[VM_BRICK_NAME_SIZE] = {};
             if (!findNameByAddr(macStr, clientName) || clientName[0] == 0) {
@@ -779,8 +784,14 @@ static void *btServerThread(void *) {
         }
     }
 
-    if (serverFd1 >= 0) { close(serverFd1); serverFd1 = -1; }
-    if (serverFd2 >= 0) { close(serverFd2); serverFd2 = -1; }
+    if (serverFd1 >= 0) { 
+        close(serverFd1);
+        serverFd1 = -1;
+    }
+    if (serverFd2 >= 0) { 
+        close(serverFd2);
+        serverFd2 = -1;
+    }
     return NULL;
 }
 
@@ -811,12 +822,11 @@ __attribute__((constructor)) static void btAutoInit() {
     initBluetooth();
 }
 
-// ── Internal: find or create a mailbox slot ───────────────────────────────────
+// Internal: find or create a mailbox slot
 static int getOrCreateSlot(const char *mailbox, uint8_t dataType) {
     pthread_mutex_lock(&btMutex);
     for (int i = 0; i < mailboxSlotCount; i++) {
-        if (strcmp(mailboxSlots[i].name, mailbox) == 0 &&
-            mailboxSlots[i].dataType == dataType) {
+        if (strcmp(mailboxSlots[i].name, mailbox) == 0 && mailboxSlots[i].dataType == dataType) {
             int idx = i;
             pthread_mutex_unlock(&btMutex);
             return idx;
@@ -830,20 +840,19 @@ static int getOrCreateSlot(const char *mailbox, uint8_t dataType) {
     MailboxSlot &s = mailboxSlots[idx];
     strncpy(s.name, mailbox, BT_MAX_MAILBOX_NAME - 1);
     s.name[BT_MAX_MAILBOX_NAME - 1] = 0;
-    s.dataType  = dataType;
-    s.dataLen   = 0;
+    s.dataType = dataType;
+    s.dataLen = 0;
     memset(s.data, 0, sizeof(s.data));
-    s.eventSrc  = pxt::allocateNotifyEvent();
-    s.eventVal  = 0;
+    s.eventSrc = pxt::allocateNotifyEvent();
+    s.eventVal = 0;
     pthread_mutex_unlock(&btMutex);
     return idx;
 }
 
-// ── Broadcast to all active connections ───────────────────────────────────────
+// Broadcast to all active connections
 static uint16_t msgCounter = 0;
 
-static void broadcastMailbox(const char *mailbox,
-                             const uint8_t *payload, int payloadLen) {
+static void broadcastMailbox(const char *mailbox, const uint8_t *payload, int payloadLen) {
     if (!mailbox) return;
     initBluetooth();
     uint16_t mc = ++msgCounter;
@@ -893,15 +902,14 @@ static void broadcastMailbox(const char *mailbox,
 
 } // namespace pxt
 
-// ──────────────────────────────────────────────────────────────────────────────
+
 // Public namespace exposed to TypeScript via shims
-// ──────────────────────────────────────────────────────────────────────────────
 namespace bluetooth {
 
 using namespace pxt;
 
 //%
-String lastStatus() {
+String status() {
     char tmp[256];
     pthread_mutex_lock(&btStatusMutex);
     strncpy(tmp, btLastStatus, sizeof(tmp) - 1);
@@ -962,18 +970,22 @@ void connectToBrick(String brickName) {
     int connectedFd = -1;
     int ch1Err = 0, ch2Err = 0;
 
-    for (size_t c = 0; c < sizeof(channels)/sizeof(channels[0]); c++) {
+    for (size_t c = 0; c < sizeof(channels) / sizeof(channels[0]); c++) {
         uint8_t ch = channels[c];
         int fd = socket(EV3_AF_BLUETOOTH, SOCK_STREAM, EV3_BTPROTO_RFCOMM);
         if (fd < 0) {
-            if (ch == BT_RFCOMM_CHANNEL_1) ch1Err = errno; else ch2Err = errno;
+            if (ch == BT_RFCOMM_CHANNEL_1) {
+                ch1Err = errno;
+            } else {
+                ch2Err = errno;
+            }
             DMESG("BT: socket() errno=%d", errno);
             continue;
         }
 
         SockAddrRc remote;
         memset(&remote, 0, sizeof(remote));
-        remote.rc_family  = EV3_AF_BLUETOOTH;
+        remote.rc_family = EV3_AF_BLUETOOTH;
         remote.rc_channel = ch;
         memcpy(&remote.rc_bdaddr, &remoteBd, sizeof(remoteBd));
 
@@ -1010,15 +1022,27 @@ void connectToBrick(String brickName) {
                     DMESG("BT: connected to '%s' on ch %d", name, ch);
                     break;
                 } else {
-                    if (ch == BT_RFCOMM_CHANNEL_1) ch1Err = so_error; else ch2Err = so_error;
+                    if (ch == BT_RFCOMM_CHANNEL_1) {
+                        ch1Err = so_error;
+                    } else {
+                        ch2Err = so_error;
+                    }
                     DMESG("BT: connect on ch %d failed so_error=%d", ch, so_error);
                 }
             } else {
-                if (ch == BT_RFCOMM_CHANNEL_1) ch1Err = ETIMEDOUT; else ch2Err = ETIMEDOUT;
+                if (ch == BT_RFCOMM_CHANNEL_1) {
+                    ch1Err = ETIMEDOUT;
+                } else {
+                    ch2Err = ETIMEDOUT;
+                }
                 DMESG("BT: connect on ch %d timed out (res=%d)", ch, res);
             }
         } else {
-            if (ch == BT_RFCOMM_CHANNEL_1) ch1Err = errno; else ch2Err = errno;
+            if (ch == BT_RFCOMM_CHANNEL_1) {
+                ch1Err = errno;
+            } else {
+                ch2Err = errno;
+            }
             DMESG("BT: connect on ch %d failed errno=%d", ch, errno);
         }
         close(fd);
@@ -1043,9 +1067,9 @@ void connectToBrick(String brickName) {
     }
 
     if (slot >= 0) {
-        btConns[slot].fd     = connectedFd;
+        btConns[slot].fd = connectedFd;
         btConns[slot].active = true;
-        btConns[slot].rxLen  = 0;
+        btConns[slot].rxLen = 0;
         strncpy(btConns[slot].brickName, name, VM_BRICK_NAME_SIZE - 1);
         btConns[slot].brickName[VM_BRICK_NAME_SIZE - 1] = 0;
         setBtStatus("OK: %s (fd %d)", name, connectedFd);
@@ -1065,12 +1089,14 @@ bool isConnected(String brickName) {
     pthread_mutex_lock(&btMutex);
     bool found = false;
     if (!brickName || brickName->getUTF8Size() == 0) {
-        for (int i = 0; i < btConnCount && !found; i++)
+        for (int i = 0; i < btConnCount && !found; i++) {
             found = btConns[i].active && btConns[i].fd >= 0;
+        }
     } else {
         const char *name = brickName->getUTF8Data();
-        for (int i = 0; i < btConnCount && !found; i++)
+        for (int i = 0; i < btConnCount && !found; i++) {
             found = btConns[i].active && btConns[i].fd >= 0 && strcasecmp(btConns[i].brickName, name) == 0;
+        }
     }
     pthread_mutex_unlock(&btMutex);
     return found;
@@ -1125,7 +1151,7 @@ int _registerMailboxHandler(String mailbox, int dataType) {
 }
 
 //%
-String lastTextMessage(String mailbox) {
+String readTextMessage(String mailbox) {
     if (!mailbox) return mkString("", 0);
     const char *mbox = mailbox->getUTF8Data();
     pthread_mutex_lock(&btMutex);
@@ -1142,14 +1168,15 @@ String lastTextMessage(String mailbox) {
 }
 
 //%
-TNumber lastNumberMessage(String mailbox) {
+TNumber readNumberMessage(String mailbox) {
     if (!mailbox) return fromDouble(0);
     const char *mbox = mailbox->getUTF8Data();
     pthread_mutex_lock(&btMutex);
     for (int i = 0; i < mailboxSlotCount; i++) {
         MailboxSlot &s = mailboxSlots[i];
         if (s.dataType == MBOX_TYPE_NUMERIC && s.dataLen >= 4 && strcmp(s.name, mbox) == 0) {
-            float fval; memcpy(&fval, s.data, 4);
+            float fval;
+            memcpy(&fval, s.data, 4);
             pthread_mutex_unlock(&btMutex);
             return fromDouble((double)fval);
         }
@@ -1159,7 +1186,7 @@ TNumber lastNumberMessage(String mailbox) {
 }
 
 //%
-bool lastLogicMessage(String mailbox) {
+bool readLogicMessage(String mailbox) {
     if (!mailbox) return false;
     const char *mbox = mailbox->getUTF8Data();
     pthread_mutex_lock(&btMutex);

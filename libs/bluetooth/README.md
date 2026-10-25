@@ -1,6 +1,6 @@
 # EV3 Bluetooth Brick-to-Brick Messaging
 
-Send and receive messages between two (or more) EV3 bricks over Bluetooth, just like the Bluetooth blocks in EV3-G.
+Send and receive messages between two (or more) EV3 bricks over Bluetooth using Mailboxes.
 
 ## Setup
 
@@ -9,10 +9,11 @@ Send and receive messages between two (or more) EV3 bricks over Bluetooth, just 
 
 ## Blocks
 
-### Connect
+### Connect & Status
 
 ```typescript
 bluetooth.connectToBrick("EV3")
+brick.printString(bluetooth.status(), 1, 1)
 ```
 
 ### Send a number
@@ -27,6 +28,12 @@ bluetooth.sendNumberMessage("speed", 75)
 bluetooth.onNumberReceived("speed", function (receivedNumber) {
     motors.largeAB.run(receivedNumber)
 })
+```
+
+### Read last received value
+
+```typescript
+let currentSpeed = bluetooth.readNumberMessage("speed")
 ```
 
 ## Mailbox types

@@ -1,5 +1,5 @@
 /**
- * Bluetooth brick-to-brick messaging, compatible with EV3-G.
+ * Bluetooth brick-to-brick messaging using Mailbox.
  */
 //% color="#0082DB" weight="85" icon="\uf293"
 //% groups='["Connection", "Send", "Receive", "Mailbox"]'
@@ -50,12 +50,12 @@ namespace bluetooth {
     /**
      * Returns the status of the Bluetooth connection.
      */
-    //% blockId="btLastStatus"
+    //% blockId="btStatus"
     //% block="bluetooth status"
     //% weight="75"
     //% group="Connection"
-    //% shim=bluetooth::lastStatus
-    export function lastStatus(): string {
+    //% shim=bluetooth::status
+    export function status(): string {
         return "";
     }
 
@@ -106,10 +106,6 @@ namespace bluetooth {
         return;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Receive — event handlers
-    // ─────────────────────────────────────────────────────────────────────────
-
     /**
      * Run code when a text message is received in the specified mailbox.
      * @param mailbox the mailbox name, eg: "mailbox1"
@@ -125,7 +121,7 @@ namespace bluetooth {
         const evSrc = _registerMailboxHandler(mailbox, MailboxDataType.Text);
         if (evSrc < 0) return;
         control.onEvent(evSrc, 0, () => {
-            const text = lastTextMessage(mailbox);
+            const text = readTextMessage(mailbox);
             handler(text);
         });
     }
@@ -145,7 +141,7 @@ namespace bluetooth {
         const evSrc = _registerMailboxHandler(mailbox, MailboxDataType.Number);
         if (evSrc < 0) return;
         control.onEvent(evSrc, 0, () => {
-            const num = lastNumberMessage(mailbox);
+            const num = readNumberMessage(mailbox);
             handler(num);
         });
     }
@@ -165,7 +161,7 @@ namespace bluetooth {
         const evSrc = _registerMailboxHandler(mailbox, MailboxDataType.Logic);
         if (evSrc < 0) return;
         control.onEvent(evSrc, 0, () => {
-            const logic = lastLogicMessage(mailbox);
+            const logic = readLogicMessage(mailbox);
             handler(logic);
         });
     }
@@ -174,13 +170,13 @@ namespace bluetooth {
      * Read the last text message received in the specified mailbox.
      * @param mailbox the mailbox name, eg: "mailbox1"
      */
-    //% blockId="btLastText"
+    //% blockId="btReadText"
     //% block="read text from mailbox $mailbox"
     //% mailbox.defl="mailbox1"
     //% weight="70"
     //% group="Mailbox"
-    //% shim=bluetooth::lastTextMessage
-    export function lastTextMessage(mailbox: string): string {
+    //% shim=bluetooth::readTextMessage
+    export function readTextMessage(mailbox: string): string {
         return "";
     }
 
@@ -188,13 +184,13 @@ namespace bluetooth {
      * Read the last number received in the specified mailbox.
      * @param mailbox the mailbox name, eg: "mailbox1"
      */
-    //% blockId="btLastNumber"
+    //% blockId="btReadNumber"
     //% block="read number from mailbox $mailbox"
     //% mailbox.defl="mailbox1"
     //% weight="60"
     //% group="Mailbox"
-    //% shim=bluetooth::lastNumberMessage
-    export function lastNumberMessage(mailbox: string): number {
+    //% shim=bluetooth::readNumberMessage
+    export function readNumberMessage(mailbox: string): number {
         return 0;
     }
 
@@ -202,13 +198,13 @@ namespace bluetooth {
      * Read the last logic (boolean) value received in the specified mailbox.
      * @param mailbox the mailbox name, eg: "mailbox1"
      */
-    //% blockId="btLastLogic"
+    //% blockId="btReadLogic"
     //% block="read logic from mailbox $mailbox"
     //% mailbox.defl="mailbox1"
     //% weight="50"
     //% group="Mailbox"
-    //% shim=bluetooth::lastLogicMessage
-    export function lastLogicMessage(mailbox: string): boolean {
+    //% shim=bluetooth::readLogicMessage
+    export function readLogicMessage(mailbox: string): boolean {
         return false;
     }
 

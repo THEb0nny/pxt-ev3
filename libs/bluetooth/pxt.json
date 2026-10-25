@@ -1,6 +1,6 @@
 {
     "name": "bluetooth",
-    "description": "Bluetooth brick-to-brick communication for EV3, similar to EV3-G messaging",
+    "description": "Bluetooth brick-to-brick messaging for EV3 using Mailbox --beta",
     "files": [
         "README.md",
         "enums.d.ts",
