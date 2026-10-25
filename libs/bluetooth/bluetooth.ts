@@ -1,7 +1,7 @@
 /**
  * Bluetooth brick-to-brick messaging using Mailbox.
  */
-//% color="#0082DB" weight="85" icon="\uf293"
+//% color="#0082DB" weight="75" icon="\uf293"
 //% groups='["Connection", "Send", "Receive", "Mailbox"]'
 namespace bluetooth {
 

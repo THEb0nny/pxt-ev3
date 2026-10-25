@@ -10,7 +10,7 @@
     "testFiles": [
         "test.ts"
     ],
-    "weight": 85,
+    "weight": 75,
     "searchOnly": false,
     "public": true,
     "dependencies": {
