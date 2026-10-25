@@ -13,6 +13,7 @@
 #include <pthread.h>
 #include <dirent.h>
 #include <stdarg.h>
+#include <signal.h>
 
 // ──────────────────────────────────────────────────────────────────────────────
 // EV3 Bluetooth brick-to-brick messaging
@@ -101,6 +102,7 @@ static int             serverFd2       = -1;
 static pthread_mutex_t btInitMutex     = PTHREAD_MUTEX_INITIALIZER;
 static bool            btInitialized   = false;
 
+static pthread_mutex_t btStatusMutex = PTHREAD_MUTEX_INITIALIZER;
 static char            btLastStatus[256] = "ready";
 
 static MailboxSlot     mailboxSlots[MAX_MAILBOX_SLOTS];
@@ -115,7 +117,9 @@ static bool findNameByAddr(const char *macStr, char nameOut[VM_BRICK_NAME_SIZE])
 static void setBtStatus(const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
+    pthread_mutex_lock(&btStatusMutex);
     vsnprintf(btLastStatus, sizeof(btLastStatus), fmt, args);
+    pthread_mutex_unlock(&btStatusMutex);
     va_end(args);
     DMESG("BT STATUS: %s", btLastStatus);
 }
@@ -146,6 +150,7 @@ static uint32_t unpackU32LE(const uint8_t *src) {
 static bool sendMailboxPacket(int fd, const char *mailbox,
                               const uint8_t *payload, int payloadLen,
                               uint16_t msgcount) {
+    if (fd < 0 || !mailbox) return false;
     uint8_t buf[BT_MAX_MAILBOX_DATA + 64];
     int pos = 0;
 
@@ -176,8 +181,17 @@ static bool sendMailboxPacket(int fd, const char *mailbox,
     // fill in message length = pos - 2
     packU16LE(buf, (uint16_t)(pos - 2));
 
-    int sent = write(fd, buf, pos);
-    return sent == pos;
+    int totalSent = 0;
+    while (totalSent < pos) {
+        int sent = send(fd, buf + totalSent, pos - totalSent, MSG_NOSIGNAL);
+        if (sent < 0) {
+            if (errno == EINTR) continue;
+            return false;
+        }
+        if (sent == 0) return false;
+        totalSent += sent;
+    }
+    return true;
 }
 
 // ── Parse an incoming packet and raise pxt events for matching mailboxes ──────
@@ -217,6 +231,9 @@ static void handleIncomingPacket(const uint8_t *pkt, int totalLen) {
     setBtStatus("Got: %s (%ub)", mailboxName, payloadSize);
     DMESG("BT: received mailbox '%s' size=%u", mailboxName, payloadSize);
 
+    int eventsToRaise[MAX_MAILBOX_SLOTS];
+    int numEvents = 0;
+
     pthread_mutex_lock(&btMutex);
     for (int i = 0; i < mailboxSlotCount; i++) {
         MailboxSlot &s = mailboxSlots[i];
@@ -228,9 +245,16 @@ static void handleIncomingPacket(const uint8_t *pkt, int totalLen) {
         s.data[safeLen] = 0;
         s.dataLen = safeLen;
 
-        pxt::raiseEvent(s.eventSrc, 0);
+        if (numEvents < MAX_MAILBOX_SLOTS) {
+            eventsToRaise[numEvents++] = s.eventSrc;
+        }
     }
     pthread_mutex_unlock(&btMutex);
+
+    // Raise events outside btMutex to avoid deadlocks when handler accesses Bluetooth
+    for (int i = 0; i < numEvents; i++) {
+        pxt::raiseEvent(eventsToRaise[i], 0);
+    }
 }
 
 // ── Receive thread: watches all active connections with select() ──────────────
@@ -254,7 +278,8 @@ static void *btReceiveThread(void *) {
         if (maxFd < 0) { usleep(50000); continue; }
 
         struct timeval tv = {0, 100000}; // 100ms
-        if (select(maxFd + 1, &fds, NULL, NULL, &tv) <= 0) continue;
+        int selRes = select(maxFd + 1, &fds, NULL, NULL, &tv);
+        if (selRes <= 0) continue;
 
         pthread_mutex_lock(&btMutex);
         for (int i = 0; i < btConnCount; i++) {
@@ -262,9 +287,24 @@ static void *btReceiveThread(void *) {
             int fd = btConns[i].fd;
             if (!FD_ISSET(fd, &fds)) continue;
 
+            if ((size_t)btConns[i].rxLen >= sizeof(btConns[i].rxBuf)) {
+                DMESG("BT: rxBuf full from '%s', resetting", btConns[i].brickName);
+                btConns[i].rxLen = 0;
+            }
+
             int len = read(fd, btConns[i].rxBuf + btConns[i].rxLen, sizeof(btConns[i].rxBuf) - btConns[i].rxLen);
-            if (len <= 0) {
-                DMESG("BT: conn %d ('%s') closed errno=%d", i, btConns[i].brickName, errno);
+            if (len < 0) {
+                if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) {
+                    continue; // Normal transient signal or non-blocking condition, do NOT close!
+                }
+                DMESG("BT: conn %d ('%s') read error errno=%d", i, btConns[i].brickName, errno);
+                close(fd);
+                btConns[i].fd = -1;
+                btConns[i].active = false;
+                btConns[i].rxLen = 0;
+                continue;
+            } else if (len == 0) {
+                DMESG("BT: conn %d ('%s') closed by peer", i, btConns[i].brickName);
                 close(fd);
                 btConns[i].fd = -1;
                 btConns[i].active = false;
@@ -291,6 +331,8 @@ static void *btReceiveThread(void *) {
                 pthread_mutex_unlock(&btMutex);
                 handleIncomingPacket(pktBuf, totalLen);
                 pthread_mutex_lock(&btMutex);
+
+                if (!btConns[i].active || btConns[i].fd != fd) break;
             }
         }
         pthread_mutex_unlock(&btMutex);
@@ -565,6 +607,9 @@ static void checkInheritedSockets() {
             if (btConns[i].active && btConns[i].fd == fd) { exists = true; break; }
         }
         if (!exists && btConnCount < BT_MAX_CONNECTIONS) {
+            struct timeval tv_sock = { 2, 0 };
+            setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &tv_sock, sizeof(tv_sock));
+            setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv_sock, sizeof(tv_sock));
             int slot = btConnCount++;
             btConns[slot].fd = fd;
             btConns[slot].active = true;
@@ -677,9 +722,15 @@ static void *btServerThread(void *) {
             socklen_t clientLen = sizeof(clientAddr);
             int cfd = accept(sfd, (struct sockaddr *)&clientAddr, &clientLen);
             if (cfd < 0) {
-                DMESG("BT: accept failed errno=%d", errno);
+                if (errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK) {
+                    DMESG("BT: accept failed errno=%d", errno);
+                }
                 continue;
             }
+
+            struct timeval tv_sock = { 2, 0 };
+            setsockopt(cfd, SOL_SOCKET, SO_SNDTIMEO, &tv_sock, sizeof(tv_sock));
+            setsockopt(cfd, SOL_SOCKET, SO_RCVTIMEO, &tv_sock, sizeof(tv_sock));
 
             char macStr[18];
             snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
@@ -745,6 +796,7 @@ static void initBluetooth() {
     pthread_mutex_lock(&btInitMutex);
     if (!btInitialized) {
         btInitialized = true;
+        signal(SIGPIPE, SIG_IGN);
         // Ensure local Bluetooth adapter is UP and connectable (Page Scan + Inquiry Scan)
         system("/usr/bin/hciconfig hci0 up 2>/dev/null; /usr/bin/hciconfig hci0 piscan 2>/dev/null");
         checkInheritedSockets();
@@ -792,19 +844,50 @@ static uint16_t msgCounter = 0;
 
 static void broadcastMailbox(const char *mailbox,
                              const uint8_t *payload, int payloadLen) {
+    if (!mailbox) return;
     initBluetooth();
     uint16_t mc = ++msgCounter;
+
+    int targets[BT_MAX_CONNECTIONS];
+    char targetNames[BT_MAX_CONNECTIONS][VM_BRICK_NAME_SIZE];
+    int numTargets = 0;
+
     pthread_mutex_lock(&btMutex);
-    int activeCount = 0;
     for (int i = 0; i < btConnCount; i++) {
-        if (!btConns[i].active || btConns[i].fd < 0) continue;
-        activeCount++;
-        if (!sendMailboxPacket(btConns[i].fd, mailbox, payload, payloadLen, mc))
-            DMESG("BT: send to '%s' failed errno=%d", btConns[i].brickName, errno);
+        if (btConns[i].active && btConns[i].fd >= 0) {
+            targets[numTargets] = btConns[i].fd;
+            strncpy(targetNames[numTargets], btConns[i].brickName, VM_BRICK_NAME_SIZE - 1);
+            targetNames[numTargets][VM_BRICK_NAME_SIZE - 1] = 0;
+            numTargets++;
+        }
     }
     pthread_mutex_unlock(&btMutex);
-    if (activeCount == 0) {
+
+    if (numTargets == 0) {
         DMESG("BT: broadcastMailbox '%s' - no active connections!", mailbox);
+        return;
+    }
+
+    for (int i = 0; i < numTargets; i++) {
+        int fd = targets[i];
+        if (!sendMailboxPacket(fd, mailbox, payload, payloadLen, mc)) {
+            int err = errno;
+            DMESG("BT: send to '%s' failed errno=%d", targetNames[i], err);
+            if (err == EPIPE || err == ECONNRESET || err == EBADF || err == ETIMEDOUT || err == ENOTCONN) {
+                pthread_mutex_lock(&btMutex);
+                for (int c = 0; c < btConnCount; c++) {
+                    if (btConns[c].fd == fd) {
+                        close(fd);
+                        btConns[c].fd = -1;
+                        btConns[c].active = false;
+                        btConns[c].rxLen = 0;
+                        DMESG("BT: deactivated broken conn slot %d ('%s')", c, targetNames[i]);
+                        break;
+                    }
+                }
+                pthread_mutex_unlock(&btMutex);
+            }
+        }
     }
 }
 
@@ -819,7 +902,12 @@ using namespace pxt;
 
 //%
 String lastStatus() {
-    return mkString(btLastStatus, -1);
+    char tmp[256];
+    pthread_mutex_lock(&btStatusMutex);
+    strncpy(tmp, btLastStatus, sizeof(tmp) - 1);
+    tmp[sizeof(tmp) - 1] = 0;
+    pthread_mutex_unlock(&btStatusMutex);
+    return mkString(tmp, -1);
 }
 
 //%
@@ -898,6 +986,9 @@ void connectToBrick(String brickName) {
         if (res == 0) {
             fcntl(fd, F_SETFL, flags);
             connectedFd = fd;
+            struct timeval tv_sock = { 2, 0 };
+            setsockopt(connectedFd, SOL_SOCKET, SO_SNDTIMEO, &tv_sock, sizeof(tv_sock));
+            setsockopt(connectedFd, SOL_SOCKET, SO_RCVTIMEO, &tv_sock, sizeof(tv_sock));
             DMESG("BT: connected to '%s' on ch %d", name, ch);
             break;
         } else if (errno == EINPROGRESS) {
@@ -913,6 +1004,9 @@ void connectToBrick(String brickName) {
                 if (so_error == 0) {
                     fcntl(fd, F_SETFL, flags);
                     connectedFd = fd;
+                    struct timeval tv_sock = { 2, 0 };
+                    setsockopt(connectedFd, SOL_SOCKET, SO_SNDTIMEO, &tv_sock, sizeof(tv_sock));
+                    setsockopt(connectedFd, SOL_SOCKET, SO_RCVTIMEO, &tv_sock, sizeof(tv_sock));
                     DMESG("BT: connected to '%s' on ch %d", name, ch);
                     break;
                 } else {
