@@ -36,6 +36,7 @@
 //
 // EV3_AF_BLUETOOTH, EV3_BTPROTO_RFCOMM, VM_BRICK_NAME_SIZE from ev3const.h
 // ──────────────────────────────────────────────────────────────────────────────
+
 #define BT_RFCOMM_CHANNEL_1 1
 #define BT_RFCOMM_CHANNEL_2 2
 #define BT_MAX_CONNECTIONS 7 // BT piconet limit (matches EV3-G)
@@ -119,7 +120,7 @@ static void setBtStatus(const char *fmt, ...) {
     DMESG("BT STATUS: %s", btLastStatus);
 }
 
-// Helpers
+//// Helpers
 
 static void packU16LE(uint8_t *dst, uint16_t v) {
     dst[0] = v & 0xFF;
