@@ -3,7 +3,6 @@
     "description": "Bluetooth brick-to-brick messaging for EV3 using Mailbox --beta",
     "files": [
         "README.md",
-        "enums.d.ts",
         "bluetooth.cpp",
         "bluetooth.ts"
     ],

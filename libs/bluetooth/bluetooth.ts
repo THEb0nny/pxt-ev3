@@ -1,4 +1,17 @@
 /**
+ * Data type for a mailbox message
+ */
+const enum MailboxDataType {
+    //% block="text"
+    Text = 0,
+    //% block="number"
+    Number = 1,
+    //% block="logic"
+    Logic = 2
+}
+
+
+/**
  * Bluetooth brick-to-brick messaging using Mailbox.
  */
 //% color="#0082DB"
