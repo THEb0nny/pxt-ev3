@@ -1,7 +1,9 @@
 /**
  * Bluetooth brick-to-brick messaging using Mailbox.
  */
-//% color="#0082DB" weight="75" icon="\uf293"
+//% color="#0082DB"
+//% icon="\uf293"
+//% weight=75
 //% groups='["Connection", "Send", "Receive", "Mailbox"]'
 namespace bluetooth {
 
@@ -9,12 +11,12 @@ namespace bluetooth {
      * Connect to another EV3 brick by its name over Bluetooth.
      * @param brickName name of the brick to connect to, eg: "EV3"
      */
-    //% blockId="btConnectToBrick"
+    //% blockId=btConnectToBrick
     //% block="connect to brick $brickName"
-    //% brickName.defl="EV3"
-    //% weight="100"
-    //% group="Connection"
     //% shim=bluetooth::connectToBrick
+    //% weight=100
+    //% group="Connection"
+    //% brickName.defl="EV3"
     export function connectToBrick(brickName: string): void {
         return;
     }
@@ -23,12 +25,12 @@ namespace bluetooth {
      * Returns true if connected to the specified brick.
      * @param brickName name of the brick to check, eg: "EV3"
      */
-    //% blockId="btIsConnected"
+    //% blockId=btIsConnected
     //% block="bluetooth connected to $brickName"
-    //% brickName.defl="EV3"
-    //% weight="90"
-    //% group="Connection"
     //% shim=bluetooth::isConnected
+    //% weight=90
+    //% group="Connection"
+    //% brickName.defl="EV3"
     export function isConnected(brickName: string): boolean {
         return false;
     }
@@ -37,12 +39,12 @@ namespace bluetooth {
      * Disconnect from a specific brick.
      * @param brickName name of the brick to disconnect, eg: "EV3"
      */
-    //% blockId="btDisconnect"
+    //% blockId=btDisconnect
     //% block="disconnect from brick $brickName"
-    //% brickName.defl="EV3"
-    //% weight="80"
-    //% group="Connection"
     //% shim=bluetooth::disconnectBrick
+    //% weight=80
+    //% group="Connection"
+    //% brickName.defl="EV3"
     export function disconnectBrick(brickName: string): void {
         return;
     }
@@ -50,11 +52,11 @@ namespace bluetooth {
     /**
      * Returns the status of the Bluetooth connection.
      */
-    //% blockId="btStatus"
+    //% blockId=btStatus
     //% block="bluetooth status"
-    //% weight="75"
-    //% group="Connection"
     //% shim=bluetooth::status
+    //% weight=75
+    //% group="Connection"
     export function status(): string {
         return "";
     }
@@ -64,13 +66,13 @@ namespace bluetooth {
      * @param mailbox the mailbox name, eg: "mailbox1"
      * @param value the text to send, eg: "hello"
      */
-    //% blockId="btSendText"
+    //% blockId=btSendText
     //% block="send text $value to mailbox $mailbox"
-    //% value.defl="hello"
-    //% mailbox.defl="mailbox1"
-    //% weight="100"
-    //% group="Send"
     //% shim=bluetooth::sendTextMessage
+    //% mailbox.defl="mailbox1"
+    //% weight=100
+    //% group="Send"
+    //% value.defl="hello"
     export function sendTextMessage(mailbox: string, value: string): void {
         return;
     }
@@ -80,13 +82,13 @@ namespace bluetooth {
      * @param mailbox the mailbox name, eg: "mailbox1"
      * @param value the number to send, eg: 0
      */
-    //% blockId="btSendNumber"
+    //% blockId=btSendNumber
     //% block="send number $value to mailbox $mailbox"
+    //% shim=bluetooth::sendNumberMessage
+    //% weight=90
+    //% group="Send"
     //% value.defl=0
     //% mailbox.defl="mailbox1"
-    //% weight="90"
-    //% group="Send"
-    //% shim=bluetooth::sendNumberMessage
     export function sendNumberMessage(mailbox: string, value: number): void {
         return;
     }
@@ -96,12 +98,12 @@ namespace bluetooth {
      * @param mailbox the mailbox name, eg: "mailbox1"
      * @param value the logic value to send
      */
-    //% blockId="btSendLogic"
+    //% blockId=btSendLogic
     //% block="send logic $value to mailbox $mailbox"
-    //% mailbox.defl="mailbox1"
-    //% weight="80"
-    //% group="Send"
     //% shim=bluetooth::sendLogicMessage
+    //% weight=80
+    //% group="Send"
+    //% mailbox.defl="mailbox1"
     export function sendLogicMessage(mailbox: string, value: boolean): void {
         return;
     }
@@ -111,12 +113,12 @@ namespace bluetooth {
      * @param mailbox the mailbox name, eg: "mailbox1"
      * @param handler code to run when a message arrives
      */
-    //% blockId="btOnTextReceived"
+    //% blockId=btOnTextReceived
     //% block="on text received $receivedText in mailbox $mailbox"
-    //% mailbox.defl="mailbox1"
-    //% draggableParameters="reporter"
-    //% weight="100"
+    //% weight=100
     //% group="Receive"
+    //% draggableParameters="reporter"
+    //% mailbox.defl="mailbox1"
     export function onTextReceived(mailbox: string, handler: (receivedText: string) => void): void {
         const evSrc = _registerMailboxHandler(mailbox, MailboxDataType.Text);
         if (evSrc < 0) return;
@@ -131,12 +133,12 @@ namespace bluetooth {
      * @param mailbox the mailbox name, eg: "mailbox1"
      * @param handler code to run when a number arrives
      */
-    //% blockId="btOnNumberReceived"
+    //% blockId=btOnNumberReceived
     //% block="on number received $receivedNumber in mailbox $mailbox"
-    //% mailbox.defl="mailbox1"
-    //% draggableParameters="reporter"
-    //% weight="90"
+    //% weight=90
     //% group="Receive"
+    //% draggableParameters="reporter"
+    //% mailbox.defl="mailbox1"
     export function onNumberReceived(mailbox: string, handler: (receivedNumber: number) => void): void {
         const evSrc = _registerMailboxHandler(mailbox, MailboxDataType.Number);
         if (evSrc < 0) return;
@@ -151,12 +153,12 @@ namespace bluetooth {
      * @param mailbox the mailbox name, eg: "mailbox1"
      * @param handler code to run when a logic value arrives
      */
-    //% blockId="btOnLogicReceived"
+    //% blockId=btOnLogicReceived
     //% block="on logic received $receivedLogic in mailbox $mailbox"
-    //% mailbox.defl="mailbox1"
-    //% draggableParameters="reporter"
-    //% weight="80"
+    //% weight=80
     //% group="Receive"
+    //% draggableParameters="reporter"
+    //% mailbox.defl="mailbox1"
     export function onLogicReceived(mailbox: string, handler: (receivedLogic: boolean) => void): void {
         const evSrc = _registerMailboxHandler(mailbox, MailboxDataType.Logic);
         if (evSrc < 0) return;
@@ -170,12 +172,12 @@ namespace bluetooth {
      * Read the last text message received in the specified mailbox.
      * @param mailbox the mailbox name, eg: "mailbox1"
      */
-    //% blockId="btReadText"
+    //% blockId=btReadText
     //% block="read text from mailbox $mailbox"
-    //% mailbox.defl="mailbox1"
-    //% weight="70"
-    //% group="Mailbox"
     //% shim=bluetooth::readTextMessage
+    //% weight=70
+    //% group="Mailbox"
+    //% mailbox.defl="mailbox1"
     export function readTextMessage(mailbox: string): string {
         return "";
     }
@@ -184,12 +186,12 @@ namespace bluetooth {
      * Read the last number received in the specified mailbox.
      * @param mailbox the mailbox name, eg: "mailbox1"
      */
-    //% blockId="btReadNumber"
+    //% blockId=btReadNumber
     //% block="read number from mailbox $mailbox"
-    //% mailbox.defl="mailbox1"
-    //% weight="60"
-    //% group="Mailbox"
     //% shim=bluetooth::readNumberMessage
+    //% weight=60
+    //% group="Mailbox"
+    //% mailbox.defl="mailbox1"
     export function readNumberMessage(mailbox: string): number {
         return 0;
     }
@@ -198,12 +200,12 @@ namespace bluetooth {
      * Read the last logic (boolean) value received in the specified mailbox.
      * @param mailbox the mailbox name, eg: "mailbox1"
      */
-    //% blockId="btReadLogic"
+    //% blockId=btReadLogic
     //% block="read logic from mailbox $mailbox"
-    //% mailbox.defl="mailbox1"
-    //% weight="50"
-    //% group="Mailbox"
     //% shim=bluetooth::readLogicMessage
+    //% weight=50
+    //% group="Mailbox"
+    //% mailbox.defl="mailbox1"
     export function readLogicMessage(mailbox: string): boolean {
         return false;
     }
@@ -211,8 +213,8 @@ namespace bluetooth {
     /**
      * Internal: register a mailbox receive handler; returns the pxt event source id.
      */
-    //% blockHidden=1
     //% shim=bluetooth::_registerMailboxHandler
+    //% blockHidden=1
     export function _registerMailboxHandler(mailbox: string, dataType: number): number {
         return -1;
     }
