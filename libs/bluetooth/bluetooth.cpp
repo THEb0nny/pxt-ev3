@@ -235,7 +235,9 @@ static void handleIncomingPacket(const uint8_t *pkt, int totalLen) {
         if (strcmp(s.name, mailboxName) != 0) continue;
 
         int safeLen = (int)payloadSize;
-        if (safeLen > (int)sizeof(s.data) - 1) safeLen = (int)sizeof(s.data) - 1;
+        if (safeLen > (int)sizeof(s.data) - 1) {
+            safeLen = (int)sizeof(s.data) - 1;
+        }
         memcpy(s.data, payloadData, safeLen);
         s.data[safeLen] = 0;
         s.dataLen = safeLen;
@@ -266,11 +268,16 @@ static void *btReceiveThread(void *) {
         for (int i = 0; i < btConnCount; i++) {
             if (!btConns[i].active || btConns[i].fd < 0) continue;
             FD_SET(btConns[i].fd, &fds);
-            if (btConns[i].fd > maxFd) maxFd = btConns[i].fd;
+            if (btConns[i].fd > maxFd) {
+                maxFd = btConns[i].fd;
+            }
         }
         pthread_mutex_unlock(&btMutex);
 
-        if (maxFd < 0) { usleep(50000); continue; }
+        if (maxFd < 0) { 
+            usleep(50000);
+            continue;
+        }
 
         struct timeval tv = {0, 100000}; // 100ms
         int selRes = select(maxFd + 1, &fds, NULL, NULL, &tv);
@@ -320,7 +327,9 @@ static void *btReceiveThread(void *) {
 
                 memcpy(pktBuf, btConns[i].rxBuf, totalLen);
                 int rem = btConns[i].rxLen - totalLen;
-                if (rem > 0) memmove(btConns[i].rxBuf, btConns[i].rxBuf + totalLen, rem);
+                if (rem > 0) {
+                    memmove(btConns[i].rxBuf, btConns[i].rxBuf + totalLen, rem);
+                }
                 btConns[i].rxLen = rem;
 
                 pthread_mutex_unlock(&btMutex);
