@@ -40,6 +40,12 @@ namespace pxsim {
                             // init
                             return 2;
                         }
+                        case DAL.opProgramStop: {
+                            // program stop
+                            const motors = ev3board().getMotors();
+                            motors.forEach(motor => motor.stop());
+                            return 2;
+                        }
                         case DAL.opOutputReset: {
                             // reset
                             const port = buf.data[1];
