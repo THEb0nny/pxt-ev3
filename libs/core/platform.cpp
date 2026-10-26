@@ -28,6 +28,8 @@ namespace pxt {
 #define VM_BRICK_NAME_SIZE 120
 
 int lmsPid;
+static pthread_t mainThreadId; // Main JavaScript user execution thread ID
+
 static int usbFD;
 static int rfcommFD = -1; // Connected RFCOMM socket shared with LMS2012
 
@@ -47,15 +49,21 @@ struct UsbPacket {
 void stopMotors() {
     uint8_t cmd[3] = {opOutputStop, 0x0F, 0};
     int fd = open("/dev/lms_pwm", O_RDWR);
-    write(fd, cmd, 3);
-    close(fd);
+    if (fd >= 0) {
+        write(fd, cmd, 3);
+        close(fd);
+    }
 }
 
 void stopProgram() {
-    uint8_t cmd[1] = {opOutputProgramStop};
+    // Note: opProgramStop (0x02) is the Linux kernel driver opcode for /dev/lms_pwm (d_pwm.c).
+    // Do not confuse with VM bytecode instruction opOutput_Prg_Stop (0xB4).
+    uint8_t cmd[1] = {opProgramStop};
     int fd = open("/dev/lms_pwm", O_RDWR);
-    write(fd, cmd, 1);
-    close(fd);
+    if (fd >= 0) {
+        write(fd, cmd, 1);
+        close(fd);
+    }
 }
 
 void stopLMS() {
@@ -86,7 +94,7 @@ void stopLMS() {
 
     closedir(dir);
 
-    lmsPid = 0; // disable SIGSTOP for now - rethink if problems with I2C (runs on a thread)
+    lmsPid = 0; // Disable SIGSTOP for now - rethink if problems with I2C (runs on a thread)
 
     if (lmsPid) {
         DMESG("SIGSTOP to lmsPID=%d", lmsPid);
@@ -111,9 +119,28 @@ void runLMS() {
 }
 
 extern "C" void target_reset() {
+    // Prevent re-entering target_reset while it is already executing
+    static volatile bool resetting = false;
+    if (__sync_lock_test_and_set(&resetting, 1)) {
+        while (true) {
+            sleep_core_us(100000);
+        }
+    }
+
+    // Cancel main user thread if called from exitThread to prevent user loops (e.g. while(true))
+    // from queuing new motor commands while shutting down
+    if (mainThreadId && !pthread_equal(mainThreadId, pthread_self())) {
+        pthread_cancel(mainThreadId);
+        pthread_join(mainThreadId, NULL);
+    }
+
     tryLockUser();
     stopMotors();
     stopProgram();
+
+    // Give kernel PWM driver time to apply 0% duty cycle / H-bridge coast before process exit
+    sleep_core_us(50000); // 50 ms
+
     if (lmsPid) {
         runLMS();
     } else {
@@ -380,7 +407,7 @@ static void *rfcommThread(void *) {
             break;
         }
 
-        //// DMESG("RFCOMM THREAD read len=%d", len);
+        // DMESG("RFCOMM THREAD read len=%d", len);
 
         if (packetLen + len > (int)sizeof(packetBuf)) {
             DMESG("RFCOMM THREAD buffer overflow");
@@ -453,7 +480,7 @@ static void *exitThread(void *) {
     }
 
     while (true) {
-        if (data[5]) { // Cencel btn
+        if (data[5]) { // Cancel (back) btn
             target_reset();
         }
         sleep_core_us(50000);
@@ -467,6 +494,12 @@ static void startExitThread() {
 }
 
 void target_startup() {
+    // Record main thread ID and allow asynchronous cancellation so tight while(true) loops
+    // can be terminated cleanly when the BACK/Escape button is pressed
+    mainThreadId = pthread_self();
+    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+
     loadEv3BrickName();
     stopLMS();
     startUsb();

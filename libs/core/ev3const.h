@@ -55,6 +55,7 @@
 #define CONN_NONE 126
 #define CONN_ERROR 127
 
+#define opProgramStop 0x02
 #define opProgramStart 0x03
 #define opOutputGetType 0xA0
 #define opOutputSetType 0xA1
