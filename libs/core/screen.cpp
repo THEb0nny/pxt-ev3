@@ -26,14 +26,17 @@ static void bitBufferToFrameBufferSwap(uint8_t *bitBuffer, uint8_t *fb) {
         int n = 60;
         while (n--) {
             uint8_t v = 0;
-            if (*ptr & mask)
+            if (*ptr & mask) {
                 v |= 0xE0;
+            }
             ptr += LCD_HEIGHT / 8;
-            if (*ptr & mask)
+            if (*ptr & mask) {
                 v |= 0x1C;
+            }
             ptr += LCD_HEIGHT / 8;
-            if (*ptr & mask)
+            if (*ptr & mask) {
                 v |= 0x03;
+            }
             ptr += LCD_HEIGHT / 8;
             *fb++ = v;
         }
@@ -86,21 +89,22 @@ void updateScreen(Image_ img) {
     }
 
     if (lastImg && mappedFrameBuffer != MAP_FAILED) {
-        if (lastImg->bpp() != 1 || lastImg->width() != LCD_WIDTH || lastImg->height() != LCD_HEIGHT)
+        if (lastImg->bpp() != 1 || lastImg->width() != LCD_WIDTH || lastImg->height() != LCD_HEIGHT) {
             target_panic(906);
+        }
         bitBufferToFrameBufferSwap(lastImg->pix(), mappedFrameBuffer);
     }
 }
 
 //%
 void updateStats(String str) {
-
+    // Pass
 }
 
 void screen_init() {
     DMESG("init screen");
-    if (mappedFrameBuffer)
-        return;
+    if (mappedFrameBuffer) return;
+
     int fd = open("/dev/fb0", O_RDWR);
     DMESG("init screen %d", fd);
     mappedFrameBuffer = (uint8_t *)mmap(NULL, FB_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
@@ -115,7 +119,6 @@ static const uint8_t numbers[] = {
     0x01, 0x0f, 0x0f, 0x08, 0x04, 0x09, 0x06, 0x0c, 0x0a, 0x09, 0x1f, 0x08, 0x1f,
     0x01, 0x0f, 0x10, 0x0f, 0x08, 0x04, 0x0e, 0x11, 0x0e, 0x1f, 0x08, 0x04, 0x02,
     0x01, 0x0e, 0x11, 0x0e, 0x11, 0x0e, 0x0e, 0x11, 0x0e, 0x04, 0x02,
-
     0x1b, 0x1b, 0x00, 0x1f, 0x1b,
 };
 
@@ -125,8 +128,9 @@ static void drawNumber(uint8_t *dst, int idx) {
         uint8_t ch = *src++;
         for (int jj = 0; jj < 8; ++jj) {
             for (int j = 0; j < 5; j++) {
-                if (ch & (1 << j))
+                if (ch & (1 << j)) {
                     *dst = 0xff;
+                }
                 dst++;
             }
             dst += ROW_SIZE - 5;
