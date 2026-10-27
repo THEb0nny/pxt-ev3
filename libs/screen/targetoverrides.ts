@@ -17,7 +17,8 @@ const enum FontSize {
 /**
  * Tagged image literal converter
  */
-//% shim=@f4 helper=image::ofBuffer
+//% shim=@f4
+//% helper=image::ofBuffer
 //% groups=["0.,","1#*"]
 function img(lits: any, ...args: any[]): Image { 
     return null;
@@ -28,20 +29,23 @@ const screen = image.create(DAL.LCD_WIDTH, DAL.LCD_HEIGHT);
 namespace _screen_internal {
 
     //% shim=pxt::updateScreen
-    function updateScreen(img: Image): void { }
+    function updateScreen(img: Image): void {
+        // Pass
+    }
+
     //% shim=pxt::updateStats
-    function updateStats(msg: string): void { }
+    function updateStats(msg: string): void {
+        // Pass
+    }
 
     control.__screen.setupUpdate(() => updateScreen(screen));
+
     control.EventContext.onStats = function (msg: string) {
         updateStats(msg);
     }
 }
 
 namespace brick {
-
-    const textOffset = 4;
-    const lineOffset = 2;
 
     enum ScreenMode {
         None,
@@ -51,8 +55,11 @@ namespace brick {
         Custom
     }
 
+    const textOffset = 4;
+    const lineOffset = 2;
+
     let screenMode = ScreenMode.None;
-    export let font = image.font8;
+    export let font8 = image.font8;
     export let font16 = image.scaledFont(image.font8, 2);
     export let font32 = image.scaledFont(image.font8, 4);
 
@@ -61,7 +68,7 @@ namespace brick {
      */
     //%
     export function lineHeight(): number {
-        return font.charHeight + lineOffset;
+        return font8.charHeight + lineOffset;
     }
 
     /**
@@ -77,17 +84,13 @@ namespace brick {
      */
     //%
     export function columnCount(): number {
-        return ((screen.width - textOffset) / font.charWidth) >> 0;
+        return ((screen.width - textOffset) / font8.charWidth) >> 0;
     }
 
     export function getFont(fontSize: FontSize): image.Font {
-        if (fontSize == FontSize.Medium) {
-            return font16;
-        } else if (fontSize == FontSize.Large) {
-            return font32;
-        } else {
-            return font;
-        }
+        if (fontSize == FontSize.Medium) return font16;
+        else if (fontSize == FontSize.Large) return font32;
+        else return font8;
     }
 
     /**
@@ -101,8 +104,7 @@ namespace brick {
      *
      * By manually traversing the font glyph bitmask and calling `img.fillRect(..., 0)`
      * for active character pixels, C++ executes `*ptr &= ~mask`, which reliably clears
-     * the bits to 0 (white) inside the black highlight box on both real EV3 hardware
-     * and the web simulator.
+     * the bits to 0 (white) inside the black highlight box on both real EV3 hardware and the web simulator.
      */
     function printWhiteOnBlack(img: Image, text: string, x: number, y: number, font: image.Font) {
         let mult = font.multiplier ? font.multiplier : 1;
@@ -185,15 +187,16 @@ namespace brick {
      * @param fontSize set size of text (2x or 4x font size)
      * @param printStyle print style black on white or white on black
      */
-    //% help=brick/show-string
-    //% blockId="screenPrintString"
+    //% blockId=screenPrintString
     //% block="show string $text|at line $line||column $column|size $fontSize|style $printStyle"
-    //% inlineInputMode="inline"
-    //% expandableArgumentMode="enabled"
-    //% weight="98" blockGap="8"
-    //% line.min="1" line.max="12"
-    //% column.min="1" column.max="29"
+    //% weight=98
+    //% blockGap=18
     //% group="Screen"
+    //% help=brick/show-string
+    //% inlineInputMode=inline
+    //% expandableArgumentMode=enabled
+    //% line.min=1 line.max=12
+    //% column.min=1 column.max=29
     export function printString(text: string, line: number, column: number = 1, fontSize: FontSize = FontSize.Small, printStyle: PrintStyle = PrintStyle.BlackOnWhite) {
         if (screenMode != ScreenMode.ShowLines) {
             screenMode = ScreenMode.ShowLines;
@@ -209,22 +212,18 @@ namespace brick {
         
         // Line and column coordinates match the native 8x8 font size, but clearing uses the selected font size
         const selectedFont = getFont(fontSize);
-        const x = textOffset + font.charWidth * column;
+        const x = textOffset + font8.charWidth * column;
         const y = textOffset + lineHeight() * line;
         const mult = selectedFont.multiplier > 1 ? selectedFont.multiplier : 1;
         const width = text.length * selectedFont.charWidth;
         const height = lineHeight() * mult;
 
         if (printStyle == PrintStyle.WhiteOnBlack) {
-            // Draw solid black background box
-            screen.fillRect(x, y, width, height, 1);
-            // Carve glyph pixels to white (0)
-            printWhiteOnBlack(screen, text, x, y, selectedFont);
+            screen.fillRect(x, y, width, height, 1); // Draw solid black background box
+            printWhiteOnBlack(screen, text, x, y, selectedFont); // Carve glyph pixels to white (0)
         } else {
-            // Clear background to white
-            screen.fillRect(x, y, width, height, 0);
-            // Draw standard black text
-            screen.print(text, x, y, 1, selectedFont);
+            screen.fillRect(x, y, width, height, 0); // Clear background to white
+            screen.print(text, x, y, 1, selectedFont); // Draw standard black text
         }
     }
 
@@ -233,29 +232,29 @@ namespace brick {
      * @param text the text to print on the screen, eg: "Hello world"
      * @param line the line number to print the text at (starting at 1), eg: 1
      */
-    //% help=brick/show-string
-    //% blockId="screen_print"
-    //% block="show string %text|at line %line"
-    //% inlineInputMode="inline"
-    //% weight="98" blockGap="8"
-    //% line.min="1" line.max="12"
+    //% blockId=screen_print
+    //% block="show string $text|at line $line"
+    //% deprecated=true
+    //% weight=98
+    //% blockGap=8
     //% group="Screen"
-    //% deprecated="true"
+    //% help=brick/show-string
+    //% inlineInputMode=inline
+    //% line.min=1 line.max=12
     export function showString(text: string, line: number) {
         if (screenMode != ScreenMode.ShowLines) {
             screenMode = ScreenMode.ShowLines;
             screen.fill(0);
         }
-
-        // line indexing starts at 1
-        line = (line - 1) >> 0;
+        
+        line = (line - 1) >> 0; // line indexing starts at 1
         const nlines = lineCount();
         if (line < 0 || line > nlines) return; // out of screen
 
         const h = lineHeight();
         const y = textOffset + h * line;
         screen.fillRect(0, y, screen.width, h, 0); // clear background
-        screen.print(text, textOffset, y, 1, font);
+        screen.print(text, textOffset, y, 1, font8);
     }
 
     /**
@@ -266,15 +265,16 @@ namespace brick {
      * @param fontSize set size of text (2x or 4x font size)
      * @param printStyle print style black on white or white on black
      */
-    //% help=brick/show-number
-    //% blockId="screenPrintNumber"
+    //% blockId=screenPrintNumber
     //% block="show number $value|at line $line||column $column|size $fontSize|style $printStyle"
-    //% inlineInputMode="inline"
-    //% weight="97" blockGap="8"
-    //% expandableArgumentMode="enabled"
-    //% line.min="1" line.max="12"
-    //% column.min="1" column.max="29"
+    //% weight=97
+    //% blockGap=8
     //% group="Screen"
+    //% help=brick/show-number
+    //% inlineInputMode=inline
+    //% expandableArgumentMode=enabled
+    //% line.min=1 line.max=12
+    //% column.min=1 column.max=29
     export function printNumber(value: number, line: number, column: number = 1, fontSize: FontSize = FontSize.Small, printStyle: PrintStyle = PrintStyle.BlackOnWhite) {
         printString("" + value, line, column, fontSize, printStyle);
     }
@@ -284,14 +284,15 @@ namespace brick {
      * @param value the numeric value
      * @param line the line number to print the text at, eg: 1
      */
-    //% help=brick/show-number
-    //% blockId="screenShowNumber"
+    //% blockId=screenShowNumber
     //% block="show number %name|at line %line"
-    //% inlineInputMode="inline"
-    //% weight="97" blockGap="8"
-    //% line.min="1" line.max="12"
-    //% deprecated="true"
+    //% deprecated=true
+    //% weight=97
+    //% blockGap=8
     //% group="Screen"
+    //% help=brick/show-number
+    //% inlineInputMode=inline
+    //% line.min=1 line.max=12
     export function showNumber(value: number, line: number) {
         showString("" + value, line);
     }
@@ -305,15 +306,16 @@ namespace brick {
      * @param fontSize set size of text (2x or 4x font size)
      * @param printStyle print style black on white or white on black
      */
-    //% help=brick/show-value
-    //% blockId="screenPrintValue"
+    //% blockId=screenPrintValue
     //% block="show value $name|= $value|at line $line||column $column|size $fontSize|style $printStyle"
-    //% inlineInputMode="inline"
-    //% expandableArgumentMode="enabled"
-    //% weight="96" blockGap="8"
-    //% line.min="1" line.max="12"
-    //% column.min="1" column.max="29"
+    //% weight=96
+    //% blockGap=8
     //% group="Screen"
+    //% help=brick/show-value
+    //% inlineInputMode=inline
+    //% expandableArgumentMode=enabled
+    //% line.min=1 line.max=12
+    //% column.min=1 column.max=29
     export function printValue(name: string, value: number, line: number, column: number = 1, fontSize: FontSize = FontSize.Small, printStyle: PrintStyle = PrintStyle.BlackOnWhite) {
         value = Math.round(value * 1000) / 1000;
         printString((name ? name + ": " : "") + value, line, column, fontSize, printStyle);
@@ -324,14 +326,16 @@ namespace brick {
      * @param value the numeric value
      * @param line the line number to print the text at, eg: 1
      */
-    //% help=brick/show-value
-    //% blockId="screenShowValue"
+    
+    //% blockId=screenShowValue
     //% block="show value %name|= %text|at line %line"
-    //% inlineInputMode="inline"
-    //% weight="96" blockGap="8"
-    //% line.min="1" line.max="12"
+    //% deprecated=true
+    //% weight=96
+    //% blockGap=18
     //% group="Screen"
-    //% deprecated="true"
+    //% help=brick/show-value
+    //% inlineInputMode=inline
+    //% line.min=1 line.max=12
     export function showValue(name: string, value: number, line: number) {
         value = Math.round(value * 1000) / 1000;
         showString((name ? name + ": " : "") + value, line);
@@ -342,11 +346,13 @@ namespace brick {
      * @param image image to draw
      * @param duration duration in milliseconds to display the image, eg: 400
      */
-    //% help=brick/show-image
-    //% blockId="screen_show_image"
-    //% block="show image %image=screen_image_picker"
-    //% weight="100" blockGap="8"
+    //% blockId=screen_show_image
+    //% block="show image %image"
+    //% weight=100
+    //% blockGap=18
     //% group="Screen"
+    //% help=brick/show-image
+    //% image.shadow=screen_image_picker
     export function showImage(image: Image, duration: number = 400) {
         if (!image) return;
         screenMode = ScreenMode.Image;
@@ -358,11 +364,12 @@ namespace brick {
     /**
     * Display the status of the sensors and motors attached to ports   
     */
-    //% help=brick/show-ports
-    //% blockId="brickShowPorts"
+    //% blockId=brickShowPorts
     //% block="show ports"
-    //% weight="95" blockGap="8"
+    //% weight=95
+    //% blockGap=18
     //% group="Screen"
+    //% help=brick/show-ports
     export function showPorts() {
         if (screenMode == ScreenMode.Ports) return;
         screenMode = ScreenMode.Ports;
@@ -432,6 +439,65 @@ namespace brick {
         }
     }
 
+    /**
+     * Clear on the screen at a specific line.
+     * @param line the line number to clear at (starting at 1), eg: 1
+     */
+    //% blockId="clearLine"
+    //% block="clear line $line"
+    //% weight=94
+    //% blockGap=8
+    //% group="Screen"
+    //% inlineInputMode=inline
+    //% line.min=1 line.max=12
+    export function clearLine(line: number) {
+        if (screenMode != ScreenMode.ShowLines) {
+            screenMode = ScreenMode.ShowLines;
+            screen.fill(0);
+        }
+
+        line = (line - 1) >> 0; // line indexing starts at 1
+        const nlines = lineCount();
+        if (line < 0 || line > nlines) return; // out of screen by line
+
+        const h = lineHeight();
+        const y = textOffset + h * line;
+        screen.fillRect(0, y, screen.width, h, 0); // clear background
+    }
+
+    /**
+     * Clear on the screen at a specific lines (1..12).
+     * @param lines list of lines to clear (starting at 1 and ends with 12)
+     */
+    //% blockId="clearLines"
+    //% block="clear lines $lines"
+    //% weight=93
+    //% blockGap=18
+    //% group="Screen"
+    //% inlineInputMode=inline
+    export function clearLines(lines: number[]) {
+        if (screenMode != ScreenMode.ShowLines) {
+            screenMode = ScreenMode.ShowLines;
+            screen.fill(0);
+        }
+
+        for (let i = 0; i < lines.length; i++) {
+            clearLine(lines[i]);
+        }
+    }
+
+    /**
+     * Clear the screen
+     */
+    //% blockId=screen_clear_screen
+    //% block="clear screen"
+    //% weight=92
+    //% group="Screen"
+    //% help=brick/clear-screen
+    export function clearScreen() {
+        screen.fill(0);
+    }
+
     export function showBoot() {
         brick.setStatusLight(StatusLight.GreenPulse); // Pulse green, play startup sound, turn off light
         // We pause to give time to read sensor values, so they work in on_start block
@@ -449,73 +515,16 @@ namespace brick {
      * An image
      * @param image the image
      */
-    //% blockId="screen_image_picker"
+    //% blockId=screen_image_picker
     //% block="%image"
     //% shim=TD_ID
-    //% image.fieldEditor="images"
-    //% image.fieldOptions.columns="6"
-    //% image.fieldOptions.width="600"
-    //% weight="0"
+    //% blockHidden=true
+    //% weight=0
     //% group="Screen"
-    //% blockHidden="1"
+    //% image.fieldEditor="images"
+    //% image.fieldOptions.columns=6
+    //% image.fieldOptions.width=600
     export function __imagePicker(image: Image): Image {
         return image;
-    }
-
-    /**
-     * Clear on the screen at a specific lines (1..12).
-     * @param lines list of lines to clear (starting at 1 and ends with 12)
-     */
-    //% blockId="clearLines"
-    //% block="clear lines $lines"
-    //% inlineInputMode="inline"
-    //% weight="94" blockGap="8"
-    //% group="Screen"
-    export function clearLines(lines: number[]) {
-        if (screenMode != ScreenMode.ShowLines) {
-            screenMode = ScreenMode.ShowLines;
-            screen.fill(0);
-        }
-
-        for (let i = 0; i < lines.length; i++) {
-            clearLine(lines[i]);
-        }
-    }
-
-    /**
-     * Clear on the screen at a specific line.
-     * @param line the line number to clear at (starting at 1), eg: 1
-     */
-    //% blockId="clearLine"
-    //% block="clear line $line"
-    //% inlineInputMode="inline"
-    //% weight="93" blockGap="8"
-    //% line.min="1" line.max="12"
-    //% group="Screen"
-    export function clearLine(line: number) {
-        if (screenMode != ScreenMode.ShowLines) {
-            screenMode = ScreenMode.ShowLines;
-            screen.fill(0);
-        }
-
-        line = (line - 1) >> 0; // line indexing starts at 1
-        const nlines = lineCount();
-        if (line < 0 || line > nlines) return; // out of screen by line
-
-        const h = lineHeight();
-        const y = textOffset + h * line;
-        screen.fillRect(0, y, screen.width, h, 0); // clear background
-    }
-
-    /**
-     * Clear the screen
-     */
-    //% help=brick/clear-screen
-    //% blockId="screen_clear_screen"
-    //% block="clear screen"
-    //% weight="92"
-    //% group="Screen"
-    export function clearScreen() {
-        screen.fill(0);
     }
 }
