@@ -1,5 +1,5 @@
-
 namespace image {
+
     /**
     * Get the screen image
     */

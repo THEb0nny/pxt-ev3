@@ -1,4 +1,5 @@
 declare namespace images {
+    
     //% blockHidden=1
     function _spriteImage(img: Image) : Image;
 
