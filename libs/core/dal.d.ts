@@ -347,6 +347,7 @@ declare const enum DAL {
     CONN_OUTPUT_TACHO = 125,
     CONN_NONE = 126,
     CONN_ERROR = 127,
+    opProgramStop = 2,
     opProgramStart = 3,
     opOutputGetType = 160,
     opOutputSetType = 161,

@@ -117,12 +117,14 @@ namespace motors {
     /**
      * Stops all motors
      */
-    //% blockId=motorStopAll block="stop all motors"
+    //% blockId=motorStopAll
+    //% block="stop all motors"
     //% weight=2
     //% group="Move"
     //% help=motors/stop-all
     export function stopAll() {
-        const b = mkCmd(Output.ALL, DAL.opOutputStop, 0)
+        const b = mkCmd(Output.ALL, DAL.opOutputStop, 1);
+        b.setNumber(NumberFormat.UInt8LE, 2, 0);
         writePWM(b);
         control.cooperate();
     }
