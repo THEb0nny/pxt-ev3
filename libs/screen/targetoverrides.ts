@@ -180,6 +180,74 @@ namespace brick {
     }
 
     /**
+     * Show text on the screen at a specific line.
+     * @param text the text to print on the screen, eg: "Hello world"
+     * @param line the line number to print the text at (starting at 1), eg: 1
+     */
+    //% blockId=screen_print
+    //% block="show string $text|at line $line"
+    //% deprecated=true
+    //% weight=98
+    //% blockGap=8
+    //% group="Screen"
+    //% help=brick/show-string
+    //% inlineInputMode=inline
+    //% line.min=1 line.max=12
+    export function showString(text: string, line: number) {
+        if (screenMode != ScreenMode.ShowLines) {
+            screenMode = ScreenMode.ShowLines;
+            screen.fill(0);
+        }
+        
+        line = (line - 1) >> 0; // line indexing starts at 1
+        const nlines = lineCount();
+        if (line < 0 || line > nlines) return; // out of screen
+
+        const h = lineHeight();
+        const y = textOffset + h * line;
+        screen.fillRect(0, y, screen.width, h, 0); // clear background
+        screen.print(text, textOffset, y, 1, font8);
+    }
+
+    /**
+     * Show a number on the screen
+     * @param value the numeric value
+     * @param line the line number to print the text at, eg: 1
+     */
+    //% blockId=screenShowNumber
+    //% block="show number %name|at line %line"
+    //% deprecated=true
+    //% weight=97
+    //% blockGap=8
+    //% group="Screen"
+    //% help=brick/show-number
+    //% inlineInputMode=inline
+    //% line.min=1 line.max=12
+    export function showNumber(value: number, line: number) {
+        showString("" + value, line);
+    }
+
+    /**
+     * Show a name, value pair on the screen
+     * @param value the numeric value
+     * @param line the line number to print the text at, eg: 1
+     */
+    
+    //% blockId=screenShowValue
+    //% block="show value %name|= %text|at line %line"
+    //% deprecated=true
+    //% weight=96
+    //% blockGap=18
+    //% group="Screen"
+    //% help=brick/show-value
+    //% inlineInputMode=inline
+    //% line.min=1 line.max=12
+    export function showValue(name: string, value: number, line: number) {
+        value = Math.round(value * 1000) / 1000;
+        showString((name ? name + ": " : "") + value, line);
+    }
+
+    /**
      * Show text on the screen on a specific line and starting at a column and the selected print style.
      * @param text the text to print on the screen, eg: "Hello world"
      * @param line the line number to print the text at (starting at 1), eg: 1
@@ -190,7 +258,7 @@ namespace brick {
     //% blockId=screenPrintString
     //% block="show string $text|at line $line||column $column|size $fontSize|style $printStyle"
     //% weight=98
-    //% blockGap=18
+    //% blockGap=8
     //% group="Screen"
     //% help=brick/show-string
     //% inlineInputMode=inline
@@ -228,36 +296,6 @@ namespace brick {
     }
 
     /**
-     * Show text on the screen at a specific line.
-     * @param text the text to print on the screen, eg: "Hello world"
-     * @param line the line number to print the text at (starting at 1), eg: 1
-     */
-    //% blockId=screen_print
-    //% block="show string $text|at line $line"
-    //% deprecated=true
-    //% weight=98
-    //% blockGap=8
-    //% group="Screen"
-    //% help=brick/show-string
-    //% inlineInputMode=inline
-    //% line.min=1 line.max=12
-    export function showString(text: string, line: number) {
-        if (screenMode != ScreenMode.ShowLines) {
-            screenMode = ScreenMode.ShowLines;
-            screen.fill(0);
-        }
-        
-        line = (line - 1) >> 0; // line indexing starts at 1
-        const nlines = lineCount();
-        if (line < 0 || line > nlines) return; // out of screen
-
-        const h = lineHeight();
-        const y = textOffset + h * line;
-        screen.fillRect(0, y, screen.width, h, 0); // clear background
-        screen.print(text, textOffset, y, 1, font8);
-    }
-
-    /**
      * Show a number on the screen on a specific line and starting at a column and the selected print style.
      * @param value the numeric value
      * @param line the line number to print the text at, eg: 1
@@ -280,24 +318,6 @@ namespace brick {
     }
 
     /**
-     * Show a number on the screen
-     * @param value the numeric value
-     * @param line the line number to print the text at, eg: 1
-     */
-    //% blockId=screenShowNumber
-    //% block="show number %name|at line %line"
-    //% deprecated=true
-    //% weight=97
-    //% blockGap=8
-    //% group="Screen"
-    //% help=brick/show-number
-    //% inlineInputMode=inline
-    //% line.min=1 line.max=12
-    export function showNumber(value: number, line: number) {
-        showString("" + value, line);
-    }
-
-    /**
      * Show a name, value pair on the screen on a specific line and starting at a column and the selected print style.
      * @param name the value name
      * @param value the numeric value
@@ -309,7 +329,7 @@ namespace brick {
     //% blockId=screenPrintValue
     //% block="show value $name|= $value|at line $line||column $column|size $fontSize|style $printStyle"
     //% weight=96
-    //% blockGap=8
+    //% blockGap=18
     //% group="Screen"
     //% help=brick/show-value
     //% inlineInputMode=inline
@@ -319,26 +339,6 @@ namespace brick {
     export function printValue(name: string, value: number, line: number, column: number = 1, fontSize: FontSize = FontSize.Small, printStyle: PrintStyle = PrintStyle.BlackOnWhite) {
         value = Math.round(value * 1000) / 1000;
         printString((name ? name + ": " : "") + value, line, column, fontSize, printStyle);
-    }
-
-    /**
-     * Show a name, value pair on the screen
-     * @param value the numeric value
-     * @param line the line number to print the text at, eg: 1
-     */
-    
-    //% blockId=screenShowValue
-    //% block="show value %name|= %text|at line %line"
-    //% deprecated=true
-    //% weight=96
-    //% blockGap=18
-    //% group="Screen"
-    //% help=brick/show-value
-    //% inlineInputMode=inline
-    //% line.min=1 line.max=12
-    export function showValue(name: string, value: number, line: number) {
-        value = Math.round(value * 1000) / 1000;
-        showString((name ? name + ": " : "") + value, line);
     }
 
     /**
