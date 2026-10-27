@@ -61,7 +61,9 @@ There's a bug in the firmware which prevents you from deleting the programs (``*
 
 We have prepared a special program that lets you delete UF2 files from the brick.
 Download [these PDF instructions](/file-manager.pdf) and drop the PDF on the brick drive.
-This will present you with an menu for deleting files.
+This will present you with a menu for deleting files.
+
+This updated version of File Manager (v2.0) can delete both programs and other files (`.rtf`, `.csv`, `.txt`, etc.), and can even delete itself from the brick (required for competitions when all extra programs must be removed).
 
 For other common questions, try the FAQ page https://makecode.mindstorms.com/faq.
 
