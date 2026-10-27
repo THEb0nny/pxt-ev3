@@ -90,6 +90,74 @@ namespace brick {
         }
     }
 
+    function printWhiteOnBlack(img: Image, text: string, x: number, y: number, font: image.Font) {
+        let mult = font.multiplier ? font.multiplier : 1;
+        let dataW = Math.idiv(font.charWidth, mult);
+        let dataH = Math.idiv(font.charHeight, mult);
+        let byteHeight = (dataH + 7) >> 3;
+        let charSize = byteHeight * dataW;
+        let dataSize = 2 + charSize;
+        let fontdata = font.data;
+        let lastchar = Math.idiv(fontdata.length, dataSize) - 1;
+        let x0 = x;
+
+        for (let cp = 0; cp < text.length; ++cp) {
+            let ch = text.charCodeAt(cp);
+            if (ch == 10) {
+                y += font.charHeight + 2;
+                x = x0;
+                continue;
+            }
+            if (ch < 32) continue;
+
+            let l = 0;
+            let r = lastchar;
+            let off = 0;
+            let guess = (ch - 32) * dataSize;
+            if (guess >= 0 && guess < fontdata.length && fontdata.getNumber(NumberFormat.UInt16LE, guess) == ch) {
+                off = guess;
+            } else {
+                while (l <= r) {
+                    let m = l + ((r - l) >> 1);
+                    let v = fontdata.getNumber(NumberFormat.UInt16LE, m * dataSize);
+                    if (v == ch) {
+                        off = m * dataSize;
+                        break;
+                    }
+                    if (v < ch) l = m + 1;
+                    else r = m - 1;
+                }
+            }
+
+            off += 2;
+            for (let i = 0; i < dataW; ++i) {
+                let j = 0;
+                let mask = 0x01;
+                let c = fontdata[off++];
+                while (j < dataH) {
+                    if (mask == 0x100) {
+                        c = fontdata[off++];
+                        mask = 0x01;
+                    }
+                    let n = 0;
+                    while (c & mask) {
+                        n++;
+                        mask <<= 1;
+                    }
+                    if (n) {
+                        // Clear pixel run to 0 (White) inside the black bounding box
+                        img.fillRect(x + i * mult, y + j * mult, mult, mult * n, 0);
+                        j += n;
+                    } else {
+                        mask <<= 1;
+                        j++;
+                    }
+                }
+            }
+            x += font.charWidth;
+        }
+    }
+
     /**
      * Show text on the screen on a specific line and starting at a column and the selected print style.
      * @param text the text to print on the screen, eg: "Hello world"
@@ -125,8 +193,20 @@ namespace brick {
         const x = textOffset + font.charWidth * column;
         const y = textOffset + lineHeight() * line;
         const mult = selectedFont.multiplier > 1 ? selectedFont.multiplier : 1;
-        screen.fillRect(x, y, text.length * selectedFont.charWidth, lineHeight() * mult, (printStyle == PrintStyle.BlackOnWhite ? 0 : 255)); // clear background
-        screen.print(text, x, y, (printStyle == PrintStyle.BlackOnWhite ? 1 : 2), selectedFont);
+        const width = text.length * selectedFont.charWidth;
+        const height = lineHeight() * mult;
+
+        if (printStyle == PrintStyle.WhiteOnBlack) {
+            // Draw solid black background box
+            screen.fillRect(x, y, width, height, 1);
+            // Carve glyph pixels to white (0)
+            printWhiteOnBlack(screen, text, x, y, selectedFont);
+        } else {
+            // Clear background to white
+            screen.fillRect(x, y, width, height, 0);
+            // Draw standard black text
+            screen.print(text, x, y, 1, selectedFont);
+        }
     }
 
     /**
