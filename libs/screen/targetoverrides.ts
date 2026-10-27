@@ -90,26 +90,42 @@ namespace brick {
         }
     }
 
+    /**
+     * Renders white text glyphs on top of an already filled black bounding box.
+     *
+     * Why this helper is required:
+     * On physical EV3 hardware (1 bpp monochrome LCD display), standard `screen.print()`
+     * delegates to C++ `_drawIcon` or scaled `fillRect`. In C++, `_drawIcon` uses bitwise OR
+     * (`*off |= v`) which can only set bits to 1 (black) and cannot clear them back to 0 (white).
+     * Scaled `fillRect(..., color)` treats any non-zero color as 1 (black).
+     *
+     * By manually traversing the font glyph bitmask and calling `img.fillRect(..., 0)`
+     * for active character pixels, C++ executes `*ptr &= ~mask`, which reliably clears
+     * the bits to 0 (white) inside the black highlight box on both real EV3 hardware
+     * and the web simulator.
+     */
     function printWhiteOnBlack(img: Image, text: string, x: number, y: number, font: image.Font) {
         let mult = font.multiplier ? font.multiplier : 1;
         let dataW = Math.idiv(font.charWidth, mult);
         let dataH = Math.idiv(font.charHeight, mult);
         let byteHeight = (dataH + 7) >> 3;
         let charSize = byteHeight * dataW;
-        let dataSize = 2 + charSize;
+        let dataSize = 2 + charSize; // 2 bytes for charcode (UInt16LE) + bitmap data
         let fontdata = font.data;
         let lastchar = Math.idiv(fontdata.length, dataSize) - 1;
         let x0 = x;
 
         for (let cp = 0; cp < text.length; ++cp) {
             let ch = text.charCodeAt(cp);
-            if (ch == 10) {
+            if (ch == 10) { // Newline '\n'
                 y += font.charHeight + 2;
                 x = x0;
                 continue;
             }
-            if (ch < 32) continue;
+            if (ch < 32) continue; // Skip non-printable control characters
 
+            // Locate character glyph in font buffer:
+            // Fast direct guess assuming ASCII range starts at char code 32 (space)
             let l = 0;
             let r = lastchar;
             let off = 0;
@@ -117,6 +133,7 @@ namespace brick {
             if (guess >= 0 && guess < fontdata.length && fontdata.getNumber(NumberFormat.UInt16LE, guess) == ch) {
                 off = guess;
             } else {
+                // Binary search fallback for characters outside consecutive ASCII range
                 while (l <= r) {
                     let m = l + ((r - l) >> 1);
                     let v = fontdata.getNumber(NumberFormat.UInt16LE, m * dataSize);
@@ -129,7 +146,8 @@ namespace brick {
                 }
             }
 
-            off += 2;
+            off += 2; // Skip 2-byte char code header to point to bitmap bytes
+            // Font data is column-major: decode bit columns and clear pixel runs to 0 (White)
             for (let i = 0; i < dataW; ++i) {
                 let j = 0;
                 let mask = 0x01;
@@ -140,12 +158,13 @@ namespace brick {
                         mask = 0x01;
                     }
                     let n = 0;
+                    // Count contiguous vertical runs of set bits
                     while (c & mask) {
                         n++;
                         mask <<= 1;
                     }
                     if (n) {
-                        // Clear pixel run to 0 (White) inside the black bounding box
+                        // Carve glyph pixels: clear run to 0 (White) inside the black bounding box
                         img.fillRect(x + i * mult, y + j * mult, mult, mult * n, 0);
                         j += n;
                     } else {
