@@ -190,7 +190,7 @@ namespace brick {
     //% blockId=screenPrintString
     //% block="show string $text|at line $line||column $column|size $fontSize|style $printStyle"
     //% weight=98
-    //% blockGap=18
+    //% blockGap=8
     //% group="Screen"
     //% help=brick/show-string
     //% inlineInputMode=inline
@@ -309,7 +309,7 @@ namespace brick {
     //% blockId=screenPrintValue
     //% block="show value $name|= $value|at line $line||column $column|size $fontSize|style $printStyle"
     //% weight=96
-    //% blockGap=8
+    //% blockGap=16
     //% group="Screen"
     //% help=brick/show-value
     //% inlineInputMode=inline
