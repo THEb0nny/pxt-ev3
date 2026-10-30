@@ -24,6 +24,31 @@ namespace motors {
     export function __turnRatioPicker(turnratio: number): number {
         return turnratio;
     }
+
+    /**
+     * A motor or motor pair picker
+     * @param motor the motor, eg: motors.largeA
+     */
+    //% blockId=motorPicker block="%motor" shim=TD_ID
+    //% decompilerShadowAlias="motorPairPicker"
+    //% group="Move" weight=88
+    //% motor.fieldEditor="motors"
+    //% motor.fieldOptions.decompileLiterals=1
+    export function __motorPicker(motor: MotorBase): MotorBase {
+        return motor;
+    }
+
+    /**
+     * A motor pair picker
+     * @param motors the motor pair, eg: motors.largeBC
+     */
+    //% blockId=motorPairPicker block="%motors" shim=TD_ID
+    //% group="Move" weight=87
+    //% motors.fieldEditor="motors"
+    //% motors.fieldOptions.decompileLiterals=1
+    export function __motorPairPicker(motors: SynchedMotorPair): SynchedMotorPair {
+        return motors;
+    }
 }
 
 //% color="#C8509B" weight=95 icon="\uf10f"
