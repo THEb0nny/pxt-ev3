@@ -197,7 +197,7 @@ namespace motors {
          * @param brake a value indicating if the motor should break when off
          */
         //% blockId=outputMotorSetBrakeMode block="set %motor|brake $brake"
-        //% motor.shadow="motorPicker"
+        //% motor.shadow="allMotorsPicker"
         //% motor.fieldOptions.decompileLiterals=1
         //% weight=60 blockGap=8
         //% brake.shadow="toggleOnOff"
@@ -213,7 +213,7 @@ namespace motors {
          * @param brake true to pause; false to continue the program execution
          */
         //% blockId=outputMotorSetPauseMode block="set %motor|pause on run $brake"
-        //% motor.shadow="motorPicker"
+        //% motor.shadow="allMotorsPicker"
         //% motor.fieldOptions.decompileLiterals=1
         //% brake.shadow="toggleOnOff"
         //% weight=60 blockGap=8
@@ -227,7 +227,7 @@ namespace motors {
          * Inverts the motor polarity
         */
         //% blockId=motorSetInverted block="set %motor|inverted $reversed"
-        //% motor.shadow="motorPicker"
+        //% motor.shadow="allMotorsPicker"
         //% motor.fieldOptions.decompileLiterals=1
         //% weight=59 blockGap=8
         //% reversed.shadow="toggleOnOff"
@@ -246,7 +246,7 @@ namespace motors {
          * Set the settle time after braking in milliseconds (default is 10ms).
         */
         //% blockId=motorSetBrakeSettleTime block="set %motor|brake settle time $millis|ms"
-        //% motor.shadow="motorPicker"
+        //% motor.shadow="allMotorsPicker"
         //% motor.fieldOptions.decompileLiterals=1
         //% weight=1 blockGap=8
         //% group="Properties"
@@ -265,7 +265,7 @@ namespace motors {
         //% group="Move"
         //% help=motors/motor/stop
         //% blockId=motorStop block="stop %motors|"
-        //% motors.shadow="motorPicker"
+        //% motors.shadow="allMotorsPicker"
         stop() {
             this.init();
             stop(this._port, this._brake);
@@ -300,7 +300,7 @@ namespace motors {
         //% group="Move"
         //% help=motors/motor/reset
         //% blockId=motorReset block="reset %motors|"
-        //% motors.shadow="motorPicker"
+        //% motors.shadow="allMotorsPicker"
         reset() {
             this.init();
             reset(this._port);
@@ -352,7 +352,7 @@ namespace motors {
         //% blockId=motorRun block="run %motor at $speed|\\%||for $value $unit"
         //% weight=100 blockGap=8
         //% group="Move"
-        //% motor.shadow="motorPicker"
+        //% motor.shadow="allMotorsPicker"
         //% motor.fieldOptions.decompileLiterals=1
         //% speed.shadow="motorSpeedPicker"
         //% expandableArgumentMode=toggle
@@ -403,7 +403,7 @@ namespace motors {
         //% blockId=motorSchedule block="ramp %motor at $speed|\\%|for $value|$unit||accelerate $acceleration|decelerate $deceleration"
         //% weight=99 blockGap=8
         //% group="Move"
-        //% motor.shadow="motorPicker"
+        //% motor.shadow="allMotorsPicker"
         //% motor.fieldOptions.decompileLiterals=1
         //% speed.shadow="motorSpeedPicker"
         //% help=motors/motor/ramp
@@ -434,7 +434,7 @@ namespace motors {
          * of run commands.
          */
         //% blockId=outputMotorsetRunRamp block="set %motor|run %ramp to $value||$unit"
-        //% motor.shadow="motorPicker"
+        //% motor.shadow="allMotorsPicker"
         //% motor.fieldOptions.decompileLiterals=1
         //% weight=21 blockGap=8
         //% group="Properties"
@@ -506,7 +506,7 @@ namespace motors {
          * @param value true for regulated motor
          */
         //% blockId=outputMotorSetRegulated block="set %motor|regulated $value"
-        //% motor.shadow="motorPicker"
+        //% motor.shadow="allMotorsPicker"
         //% motor.fieldOptions.decompileLiterals=1
         //% value.shadow="toggleOnOff"
         //% weight=58 blockGap=8
@@ -533,7 +533,7 @@ namespace motors {
          * @param timeOut optional maximum pausing time in milliseconds
          */
         //% blockId=motorPauseUntilRead block="pause until %motor|ready||timeout $timeOut"
-        //% motor.shadow="motorPicker"
+        //% motor.shadow="allMotorsPicker"
         //% motor.fieldOptions.decompileLiterals=1
         //% weight=90 blockGap=8
         //% group="Move"
@@ -839,16 +839,16 @@ namespace motors {
         }
     }
 
-    //% whenUsed fixedInstance blockIdentity=motors.__motorPicker block="large motors B+C" jres=icons.dualMotorLargePortBC
+    //% whenUsed fixedInstance blockIdentity=motors.__motorPairPicker block="large motors B+C" jres=icons.dualMotorLargePortBC
     export const largeBC = new SynchedMotorPair(Output.BC);
 
-    //% whenUsed fixedInstance blockIdentity=motors.__motorPicker block="large motors A+D" jres=icons.dualMotorLargePortAD
+    //% whenUsed fixedInstance blockIdentity=motors.__motorPairPicker block="large motors A+D" jres=icons.dualMotorLargePortAD
     export const largeAD = new SynchedMotorPair(Output.AD);
 
-    //% whenUsed fixedInstance blockIdentity=motors.__motorPicker block="large motors A+B" jres=icons.dualMotorLargePortAB
+    //% whenUsed fixedInstance blockIdentity=motors.__motorPairPicker block="large motors A+B" jres=icons.dualMotorLargePortAB
     export const largeAB = new SynchedMotorPair(Output.AB);
 
-    //% whenUsed fixedInstance blockIdentity=motors.__motorPicker block="large motors C+D" jres=icons.dualMotorLargePortCD
+    //% whenUsed fixedInstance blockIdentity=motors.__motorPairPicker block="large motors C+D" jres=icons.dualMotorLargePortCD
     export const largeCD = new SynchedMotorPair(Output.CD);
 
     function reset(out: Output) {

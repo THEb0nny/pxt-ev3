@@ -26,15 +26,27 @@ namespace motors {
     }
 
     /**
-     * A motor or motor pair picker
+     * An all-motors picker (shadow for universal motor blocks)
+     * @param motor the motor or pair, eg: motors.largeA
+     */
+    //% blockId=allMotorsPicker block="%motor" shim=TD_ID
+    //% blockHidden=1
+    //% motor.fieldEditor="motors"
+    //% motor.fieldOptions.decompileLiterals=1
+    export function __allMotorsPicker(motor: MotorBase): MotorBase {
+        return motor;
+    }
+
+    /**
+     * A single motor picker
      * @param motor the motor, eg: motors.largeA
      */
     //% blockId=motorPicker block="%motor" shim=TD_ID
-    //% decompilerShadowAlias="motorPairPicker"
+    //% decompilerShadowAlias="allMotorsPicker"
     //% group="Move" weight=88
     //% motor.fieldEditor="motors"
     //% motor.fieldOptions.decompileLiterals=1
-    export function __motorPicker(motor: MotorBase): MotorBase {
+    export function __motorPicker(motor: Motor): Motor {
         return motor;
     }
 
@@ -43,6 +55,7 @@ namespace motors {
      * @param motors the motor pair, eg: motors.largeBC
      */
     //% blockId=motorPairPicker block="%motors" shim=TD_ID
+    //% decompilerShadowAlias="allMotorsPicker"
     //% group="Move" weight=87
     //% motors.fieldEditor="motors"
     //% motors.fieldOptions.decompileLiterals=1
