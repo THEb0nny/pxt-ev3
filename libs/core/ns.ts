@@ -26,7 +26,7 @@ namespace motors {
     }
 
     /**
-     * An all-motors picker (shadow for universal motor blocks)
+     * An all-motors picker (shadow for universal motor blocks).
      * @param motor the motor or pair, eg: motors.largeA
      */
     //% blockId=allMotorsPicker block="%motor" shim=TD_ID
@@ -38,7 +38,7 @@ namespace motors {
     }
 
     /**
-     * A single motor picker
+     * A single motor picker.
      * @param motor the motor, eg: motors.largeA
      */
     //% blockId=motorPicker block="%motor" shim=TD_ID
@@ -51,7 +51,7 @@ namespace motors {
     }
 
     /**
-     * A motor pair picker
+     * A motor pair picker.
      * @param motors the motor pair, eg: motors.largeBC
      */
     //% blockId=motorPairPicker block="%motors" shim=TD_ID
